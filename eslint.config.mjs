@@ -2,7 +2,7 @@
 import withNuxt from "./.nuxt/eslint.config.mjs";
 
 export default withNuxt({
-  files: ["**/*.vue", "**/*.ts", "**.mjs"],
+  files: ["**/*.vue", "**/*.ts", "**.mjs", "auth.d.ts"],
   rules: {
     "@stylistic/semi": ["error", "always"],
     "@stylistic/quotes": ["error", "double"],
