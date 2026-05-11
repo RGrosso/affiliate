@@ -1,11 +1,24 @@
 {
   "editor.codeActionsOnSave": {
     "editor.tabSize": 2,
-    "editor.insertSpaces": true,
-    "editor.detectIndentation": false,
-    "files.insertFinalNewline": true,
+    "editor.insertSpaces": "explicit",
+    "editor.detectIndentation": "never",
+    "files.insertFinalNewline": "explicit",
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
-    }
+    },
+    "files.associations": {
+      "*.css": "tailwindcss"
+    },
+    "editor.quickSuggestions": {
+      "strings": "on"
+    },
+    "tailwindCSS.classAttributes": [
+      "class",
+      "ui"
+    ],
+    "tailwindCSS.classFunctions": [
+      "defineAppConfig"
+    ]
   }
 }
