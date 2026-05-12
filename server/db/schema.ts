@@ -4,7 +4,7 @@ export const roleEnum = pgEnum("role", ["admin", "editor", "user"]);
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
+  username: text("username").notNull(),
   password: text("password").notNull(),
   role: roleEnum("role").default("user").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

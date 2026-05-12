@@ -21,7 +21,8 @@
     "postgres": "^3.4.9",
     "tailwindcss": "^4.3.0",
     "vue": "^3.5.33",
-    "vue-router": "^5.0.6"
+    "vue-router": "^5.0.6",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@nuxthub/core": "^0.10.7",
