@@ -1,11 +1,9 @@
 <template>
   <UHeader>
     <template #title>
-      <Logo class="h-6 w-auto" />
+      Affiliate
     </template>
-
     <UNavigationMenu :items="items" />
-
     <template #right>
       <UColorModeButton />
     </template>
@@ -29,6 +27,11 @@ const items = computed<NavigationMenuItem[]>(() => [
     label: "Products",
     to: "/products",
     active: route.path.startsWith("/products"),
+  },
+  {
+    label: "Login",
+    to: "/login",
+    active: route.path.startsWith("/login"),
   },
 ]);
 </script>

@@ -1,15 +1,25 @@
 import { eq } from "drizzle-orm";
-import { users } from "../../db/schema";
-import { loginSchema } from "../../utils/auth.schema";
+import { users } from "@@/server/db/schema";
+import { loginSchema } from "@@/schemas/auth.schema";
+import type { LoginErrorData } from "@@/type/auth";
 
 export default defineEventHandler(async (event) => {
+  const createAuthError = (code: LoginErrorData["code"], message: string) => {
+    let statusCode = 401;
+    if (code === "USER_NOT_FOUND") statusCode = 404;
+    if (code === "INVALID_FORMAT") statusCode = 400;
+
+    return createError({
+      statusCode,
+      statusMessage: message,
+      data: { code, message } satisfies LoginErrorData,
+    });
+  };
+
   const body = await readValidatedBody(event, loginSchema.safeParse);
 
   if (!body.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Invalid username or password format",
-    });
+    throw createAuthError("INVALID_FORMAT", "Invalid username or password format");
   }
 
   const { username, password } = body.data;
@@ -19,12 +29,14 @@ export default defineEventHandler(async (event) => {
     .where(eq(users.username, username))
     .limit(1);
 
-  const isPasswordValid = user && await verifyPassword(user.password, password);
+  if (!user) {
+    throw createAuthError("USER_NOT_FOUND", "User not found");
+  }
+
+  const isPasswordValid = await verifyPassword(user.password, password);
+
   if (!isPasswordValid) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Invalid credentials",
-    });
+    throw createAuthError("INVALID_CREDENTIALS", "Invalid credentials");
   }
 
   await setUserSession(event, {
@@ -33,7 +45,7 @@ export default defineEventHandler(async (event) => {
       username: user.username,
       role: user.role
     },
-    loggedInAt: new Date()
+    loggedInAt: new Date(),
   });
 
   return { message: "Logged in successfully" };
