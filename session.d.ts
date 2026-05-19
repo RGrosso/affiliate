@@ -1,4 +1,4 @@
-import type { UserSessionComposable, User } from '#auth-utils';
+import type { UserSessionComposable, User } from "#auth-utils";
 /**
  * Composable to get back the user session and utils around it.
  * @see https://github.com/atinux/nuxt-auth-utils

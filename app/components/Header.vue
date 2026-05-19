@@ -17,7 +17,10 @@
               variant="ghost"
               trailing-icon="i-heroicons-chevron-down-20-solid"
             >
-              <UAvatar color="primary" :alt="user.username"/>
+              <UAvatar
+                color="primary"
+                :alt="user.username"
+              />
               <span class="font-medium">{{ user.username }}</span>
             </UButton>
           </UDropdownMenu>
@@ -34,7 +37,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute, useRouter } from "#app";
+import { useRoute } from "#app";
 import type { DropdownMenuItem, NavigationMenuItem } from "@nuxt/ui";
 
 const route = useRoute();
@@ -61,8 +64,8 @@ async function handleLogout() {
 }
 
 const dropdownItems = computed<DropdownMenuItem[][]>(() => [
-    [
-      {
+  [
+    {
       label: "Admin Dashboard",
       icon: "i-heroicons-squares-2x2",
       to: "/admin",

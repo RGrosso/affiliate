@@ -23,7 +23,7 @@
       class="flex items-center justify-center pt-20"
     >
       <div class="w-full max-w-md">
-        <h1 class="text-2xl font-bold mb-6">
+        <h1 class="mb-6">
           Login
         </h1>
         <UForm
