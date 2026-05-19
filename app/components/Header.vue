@@ -11,6 +11,7 @@
           <UDropdownMenu
             :items="dropdownItems"
             :popper="{ placement: 'bottom-end' }"
+            class="cursor-pointer"
           >
             <UButton
               color="neutral"
@@ -27,7 +28,7 @@
         </div>
         <div v-else>
           <NuxtLink to="/login">
-            <UButton>Log in</UButton>
+            <UButton class="cursor-pointer">Log in</UButton>
           </NuxtLink>
         </div>
       </div>
@@ -61,6 +62,10 @@ const user = userSession.user;
 async function handleLogout() {
   await $fetch("/api/auth/logout", { method: "POST" });
   await userSession.fetch();
+
+  if (userSession.user.value?.role !== "admin") {
+    navigateTo("/login");
+  }
 }
 
 const dropdownItems = computed<DropdownMenuItem[][]>(() => [

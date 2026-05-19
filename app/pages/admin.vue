@@ -32,7 +32,8 @@ import { useRoute } from "#app";
 import type { NavigationMenuItem } from "@nuxt/ui";
 
 definePageMeta({
-  layout: false
+  layout: false,
+  middleware: ["admin-role"],
 });
 
 const route = useRoute();
