@@ -2,12 +2,9 @@
   <UContainer>
     <div
       v-if="user"
-      class="flex items-center justify-center min-h-screen"
+      class="flex items-center justify-center pt-20"
     >
       <div class="text-center space-y-4">
-        <h1 class="text-3xl font-bold">
-          Welcome!
-        </h1>
         <p class="text-xl text-muted">
           You are logged in as <span class="font-semibold">{{ user.username }}</span>
         </p>
@@ -23,7 +20,7 @@
     </div>
     <div
       v-else
-      class="flex items-center justify-center min-h-screen"
+      class="flex items-center justify-center pt-20"
     >
       <div class="w-full max-w-md">
         <h1 class="text-2xl font-bold mb-6">
@@ -42,6 +39,7 @@
             <UInput
               v-model="state.username"
               class="w-full"
+              autofocus
             />
           </UFormField>
 
@@ -82,6 +80,7 @@ const userSession = useUserSession();
 const user = userSession.user;
 const toast = useToast();
 const pending = ref(false);
+const router = useRouter();
 
 const state = reactive<Partial<Schema>>({
   username: undefined,
@@ -90,14 +89,17 @@ const state = reactive<Partial<Schema>>({
 
 const loginError = ref<string | null>(null);
 
+function navigateAwayAfterLogin() {
+  const route = user.value?.role === "admin" ? "/admin" : "/";
+  router.push(route);
+}
+
 async function onSubmit() {
   pending.value = true;
   loginError.value = null;
+
   try {
-    await $fetch("/api/auth/login", {
-      method: "POST",
-      body: state
-    });
+    await $fetch("/api/auth/login", { method: "POST", body: state });
 
     toast.add({
       title: "Success",
@@ -106,6 +108,8 @@ async function onSubmit() {
     });
 
     await userSession.fetch();
+
+    navigateAwayAfterLogin();
   } catch (err) {
     const error = err as FetchError<LoginErrorData>;
 
@@ -141,7 +145,7 @@ async function logout() {
   toast.add({
     title: "Logged out",
     description: "You have been logged out",
-    color: "primary"
+    color: "primary",
   });
 }
 </script>
