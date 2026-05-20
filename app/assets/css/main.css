@@ -29,3 +29,11 @@ p {
   line-height: 1.625;
   color: var(--ui-text-muted);
 }
+
+/* Revert tailwind change and make all buttons have a pointer */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

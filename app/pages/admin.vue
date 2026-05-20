@@ -50,6 +50,12 @@ const navigationItems = computed<NavigationMenuItem[]>(() => [
     icon: "i-heroicons-tag-20-solid",
     to: "/admin/products",
     active: route.path.startsWith("/admin/products"),
-  }
+  },
+  {
+    label: "Add product",
+    icon: "i-heroicons-plus-solid",
+    to: "/admin/add-product",
+    active: route.path.startsWith("/admin/add-product"),
+  },
 ]);
 </script>
