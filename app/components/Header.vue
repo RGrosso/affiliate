@@ -56,31 +56,23 @@ const items = computed<NavigationMenuItem[]>(() => [
   },
 ]);
 
-const userSession = useUserSession();
-const user = userSession.user;
-
-async function handleLogout() {
-  await $fetch("/api/auth/logout", { method: "POST" });
-  await userSession.fetch();
-
-  if (userSession.user.value?.role !== "admin") {
-    navigateTo("/login");
-  }
-}
+const { user, isAdmin, logout } = useAuth();
 
 const dropdownItems = computed<DropdownMenuItem[][]>(() => [
   [
-    {
-      label: "Admin Dashboard",
-      icon: "i-heroicons-squares-2x2",
-      to: "/admin",
-    },
+    ...(isAdmin.value
+      ? [{
+          label: "Admin Dashboard",
+          icon: "i-heroicons-squares-2x2",
+          to: "/admin",
+        }]
+      : []),
     {
       label: "Logout",
       icon: "i-heroicons-arrow-left-on-rectangle",
-      onSelect: handleLogout,
+      onSelect: logout,
       class: "cursor-pointer",
-    }
-  ]
+    },
+  ],
 ]);
 </script>
