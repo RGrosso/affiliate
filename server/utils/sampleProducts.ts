@@ -1,6 +1,8 @@
 export type SampleProduct = {
   title: string;
   handle: string;
+  /** Guide price in cents. */
+  priceCents: number;
   description: string;
   retailer: string;
   seoDescription: string;
@@ -15,6 +17,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Cast Iron Skillet, 12-inch",
     handle: "cast-iron-skillet-12",
+    priceCents: 3499,
     description: "<p>A pre-seasoned skillet that goes from stovetop to oven to campfire. Even heat, great sear, and it only gets better with age.</p><ul><li>Pre-seasoned with vegetable oil</li><li>Oven safe to 500°F</li><li>Works on induction</li></ul>",
     retailer: "Kitchen Supply Co.",
     seoDescription: "Our pick for the best all-round cast iron skillet: pre-seasoned, oven safe and built to last a lifetime.",
@@ -23,6 +26,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Pour-Over Coffee Kit",
     handle: "pour-over-coffee-kit",
+    priceCents: 5999,
     description: "<p>Everything you need for a clean, bright cup: a ceramic dripper, gooseneck kettle and 100 paper filters.</p>",
     retailer: "Brew Bros",
     seoDescription: "A complete pour-over coffee kit with dripper, gooseneck kettle and filters, perfect for beginners.",
@@ -31,6 +35,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Chef's Knife, 8-inch",
     handle: "chefs-knife-8",
+    priceCents: 8995,
     description: "<p>A well-balanced German steel chef's knife that handles most kitchen prep. Holds an edge and is easy to sharpen.</p>",
     retailer: "Kitchen Supply Co.",
     seoDescription: "The 8-inch chef's knife we reach for every day. Balanced, sharp and great value.",
@@ -39,6 +44,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Digital Instant-Read Thermometer",
     handle: "instant-read-thermometer",
+    priceCents: 2499,
     description: "<p>Readings in under 3 seconds with a backlit display and a rotating screen for lefties and righties alike.</p>",
     retailer: "Gadget Hub",
     seoDescription: "A fast, accurate instant-read meat thermometer for grilling, roasting and baking.",
@@ -47,6 +53,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Glass Meal Prep Containers (10-pack)",
     handle: "glass-meal-prep-containers",
+    priceCents: 3999,
     description: "<p>Oven, microwave and dishwasher safe borosilicate glass containers with leak-proof locking lids.</p>",
     retailer: "Home Basics",
     seoDescription: "Leak-proof glass meal prep containers that go from fridge to oven. Ten-pack with locking lids.",
@@ -55,6 +62,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Ultralight Backpacking Tent",
     handle: "ultralight-backpacking-tent",
+    priceCents: 34900,
     description: "<p>A two-person, three-season tent that packs down to the size of a water bottle and weighs under 1kg.</p><ul><li>Freestanding design</li><li>Two doors, two vestibules</li><li>Pitches in under 3 minutes</li></ul>",
     retailer: "Trailhead Outfitters",
     seoDescription: "A two-person ultralight tent under 1kg, ideal for backpacking and thru-hikes.",
@@ -63,6 +71,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Insulated Water Bottle, 32oz",
     handle: "insulated-water-bottle-32oz",
+    priceCents: 3995,
     description: "<p>Keeps drinks cold for 24 hours or hot for 12. Powder-coated for grip, with a leak-proof straw lid.</p>",
     retailer: "Trailhead Outfitters",
     seoDescription: "A 32oz double-wall insulated water bottle that keeps drinks cold all day.",
@@ -71,6 +80,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Packable Down Jacket",
     handle: "packable-down-jacket",
+    priceCents: 19900,
     description: "<p>800-fill responsibly sourced down in a jacket that stuffs into its own pocket. Light enough to bring everywhere.</p>",
     retailer: "Summit Apparel",
     seoDescription: "Warm, light and packable: an 800-fill down jacket for travel and the trail.",
@@ -79,6 +89,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Rechargeable Headlamp",
     handle: "rechargeable-headlamp",
+    priceCents: 4495,
     description: "<p>400 lumens, red night-vision mode and USB-C charging. Comfortable enough to forget you're wearing it.</p>",
     retailer: "Gadget Hub",
     seoDescription: "A bright, USB-C rechargeable headlamp for camping, running and power cuts.",
@@ -87,6 +98,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Camping Hammock with Straps",
     handle: "camping-hammock",
+    priceCents: 2999,
     description: "<p>Parachute nylon hammock that holds up to 200kg and sets up in a minute with tree-friendly straps.</p>",
     retailer: "Trailhead Outfitters",
     seoDescription: "A lightweight camping hammock with tree straps included. Sets up in a minute.",
@@ -95,6 +107,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Noise-Cancelling Headphones",
     handle: "noise-cancelling-headphones",
+    priceCents: 27999,
     description: "<p>Over-ear headphones with adaptive noise cancelling, 30-hour battery and multipoint Bluetooth.</p>",
     retailer: "Sound Depot",
     seoDescription: "Our favourite noise-cancelling headphones for travel and focus, with 30 hours of battery life.",
@@ -103,6 +116,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Mechanical Keyboard, 75% Layout",
     handle: "mechanical-keyboard-75",
+    priceCents: 12900,
     description: "<p>A compact hot-swappable keyboard with a gasket mount, PBT keycaps and a satisfying, quiet thock.</p>",
     retailer: "Gadget Hub",
     seoDescription: "A compact 75% hot-swappable mechanical keyboard that sounds and feels great.",
@@ -111,6 +125,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Portable Power Bank, 20,000mAh",
     handle: "portable-power-bank-20000",
+    priceCents: 4999,
     description: "<p>Charge a phone four times over, or top up a laptop with 65W USB-C power delivery.</p>",
     retailer: "Gadget Hub",
     seoDescription: "A 20,000mAh power bank with 65W USB-C that can charge phones and laptops.",
@@ -119,6 +134,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Smart Plug (4-pack)",
     handle: "smart-plug-4-pack",
+    priceCents: 2999,
     description: "<p>Schedule lamps, fans and coffee makers from your phone. Works with all the major voice assistants.</p>",
     retailer: "Home Basics",
     seoDescription: "Simple Wi-Fi smart plugs that work with Alexa, Google and HomeKit. Four-pack.",
@@ -127,6 +143,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Wireless Charging Stand",
     handle: "wireless-charging-stand",
+    priceCents: 2499,
     description: "<p>A 15W stand that charges your phone in portrait or landscape, perfect beside your monitor.</p>",
     retailer: "Sound Depot",
     seoDescription: "A 15W wireless charging stand for your desk or nightstand.",
@@ -135,6 +152,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Ergonomic Office Chair",
     handle: "ergonomic-office-chair",
+    priceCents: 42900,
     description: "<p>Adjustable lumbar support, 4D armrests and a breathable mesh back for long days at the desk.</p><ul><li>Seat depth adjustment</li><li>Tilt lock in four positions</li><li>12-year warranty</li></ul>",
     retailer: "Workspace Direct",
     seoDescription: "A fully adjustable ergonomic office chair with lumbar support and a mesh back.",
@@ -143,6 +161,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Standing Desk Frame",
     handle: "standing-desk-frame",
+    priceCents: 29900,
     description: "<p>Dual-motor electric frame with four memory presets. Bring your own desktop or pair it with ours.</p>",
     retailer: "Workspace Direct",
     seoDescription: "A quiet, dual-motor standing desk frame with memory presets.",
@@ -151,6 +170,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "LED Desk Lamp",
     handle: "led-desk-lamp",
+    priceCents: 3999,
     description: "<p>Flicker-free light with adjustable colour temperature and a built-in USB charging port.</p>",
     retailer: "Home Basics",
     seoDescription: "A flicker-free LED desk lamp with adjustable brightness and colour temperature.",
@@ -159,6 +179,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Monitor Arm, Single",
     handle: "monitor-arm-single",
+    priceCents: 8999,
     description: "<p>A gas-spring arm for monitors up to 32 inches. Frees up desk space and gets your screen to eye level.</p>",
     retailer: "Workspace Direct",
     seoDescription: "A gas-spring monitor arm for screens up to 32 inches. Easy to install.",
@@ -167,6 +188,7 @@ export const sampleProducts: SampleProduct[] = [
   {
     title: "Linen Notebook Set",
     handle: "linen-notebook-set",
+    priceCents: 2799,
     description: "<p>Three A5 notebooks with dotted pages, lay-flat binding and 120gsm paper that handles fountain pens.</p>",
     retailer: "Paper & Co.",
     seoDescription: "A set of three linen-bound A5 dotted notebooks with fountain pen friendly paper.",

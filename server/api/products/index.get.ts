@@ -1,8 +1,19 @@
-import { asc, desc } from "drizzle-orm";
+import { asc, count, desc, eq, inArray } from "drizzle-orm";
 import { productImages, products } from "hub:db:schema";
+import { z } from "#shared/schemas/zod";
 
-export default defineApiHandler(async () => {
-  const rows = await db.select({
+const querySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+});
+
+export default defineApiHandler(async (event) => {
+  const query = querySchema.safeParse(getQuery(event));
+  if (!query.success) {
+    throw validationError(query.error);
+  }
+  const { limit } = query.data;
+
+  const listQuery = db.select({
     id: products.id,
     title: products.title,
     handle: products.handle,
@@ -14,15 +25,25 @@ export default defineApiHandler(async () => {
     createdAt: products.createdAt,
   })
     .from(products)
-    .orderBy(desc(products.createdAt), asc(products.title));
+    .orderBy(desc(products.createdAt), asc(products.title))
+    .$dynamic();
 
-  const images = await db.select({
-    productId: productImages.productId,
-    url: productImages.url,
-    alt: productImages.alt,
-  })
-    .from(productImages)
-    .orderBy(asc(productImages.position));
+  const rows = await (limit ? listQuery.limit(limit) : listQuery);
+
+  const [samples] = await db.select({ count: count() })
+    .from(products)
+    .where(eq(products.isSample, true));
+
+  const images = rows.length === 0
+    ? []
+    : await db.select({
+        productId: productImages.productId,
+        url: productImages.url,
+        alt: productImages.alt,
+      })
+        .from(productImages)
+        .where(inArray(productImages.productId, rows.map(row => row.id)))
+        .orderBy(asc(productImages.position));
 
   // The lowest-position image is the featured one
   const featured = new Map<string, { url: string; alt: string | null }>();
@@ -34,6 +55,6 @@ export default defineApiHandler(async () => {
 
   return ok({
     products: rows.map(row => ({ ...row, image: featured.get(row.id) ?? null })),
-    sampleCount: rows.filter(row => row.isSample).length,
+    sampleCount: samples?.count ?? 0,
   });
 });

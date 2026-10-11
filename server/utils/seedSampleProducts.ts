@@ -21,6 +21,7 @@ export async function seedSampleProductsOnce(authorId: string) {
       .values(sampleProducts.map(sample => ({
         title: sample.title,
         handle: sample.handle,
+        priceCents: sample.priceCents,
         description: sample.description,
         retailer: sample.retailer,
         affiliateUrl: `https://example.com/products/${sample.handle}`,
