@@ -1,6 +1,6 @@
 import type { H3Event } from "h3";
 import type { User } from "#auth-utils";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { users, type UserRow } from "hub:db:schema";
 import { UserState } from "#shared/types/user";
 
@@ -35,14 +35,35 @@ export async function findUserAwaitingSetup(username: string) {
   return user;
 }
 
+/**
+ * The session cookie is stateless, so it can outlive the user it points at
+ * (e.g. after a DB reset). Returns the user only if they can still log in.
+ */
+export async function findSessionUser(id: string) {
+  const [user] = await db.select()
+    .from(users)
+    .where(and(
+      eq(users.id, id),
+      isNotNull(users.password),
+      eq(users.state, UserState.Active)
+    ))
+    .limit(1);
+
+  return user;
+}
+
 export async function requireUser(event: H3Event) {
   const session = await getUserSession(event);
+  const user = session.user && await findSessionUser(session.user.id);
 
-  if (!session.user) {
+  if (!user) {
+    if (session.user) {
+      await clearUserSession(event);
+    }
     throw unauthorized();
   }
 
-  return session as typeof session & { user: User };
+  return { ...session, user: toSessionUser(user) };
 }
 
 export async function requireAdmin(event: H3Event) {
