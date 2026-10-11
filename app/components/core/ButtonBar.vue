@@ -34,14 +34,15 @@ import type { VNode } from "vue";
  * A persistent action bar pinned to the bottom of the scroll area, e.g. for
  * Save / Cancel while a form has unsaved changes. Buttons go in the default slot.
  */
-withDefaults(defineProps<{
+const {
+  show,
+  message = "Unsaved changes",
+  icon = "i-heroicons-exclamation-circle",
+} = defineProps<{
   show: boolean;
   message?: string;
   icon?: string;
-}>(), {
-  message: "Unsaved changes",
-  icon: "i-heroicons-exclamation-circle",
-});
+}>();
 
 defineSlots<{
   default: () => VNode[];

@@ -423,7 +423,7 @@ import type { EditableProduct } from "#shared/types/product";
 
 type Schema = z.output<typeof addProductSchema>;
 
-const props = defineProps<{
+const { product } = defineProps<{
   /** The product being edited. Omit to create a new product. */
   product?: EditableProduct;
 }>();
@@ -468,12 +468,12 @@ const toMedia = (product?: EditableProduct): MediaItem[] =>
     status: "done",
   }));
 
-const state = reactive(toState(props.product));
-const media = ref<MediaItem[]>(toMedia(props.product));
+const state = reactive(toState(product));
+const media = ref<MediaItem[]>(toMedia(product));
 const saving = ref(false);
 const seoOpen = ref(false);
 // When editing, keep the saved handle rather than re-deriving it from the title
-const handleTouched = ref(!!props.product);
+const handleTouched = ref(!!product);
 const dragIndex = ref<number | null>(null);
 const dropActive = ref(false);
 
@@ -632,7 +632,7 @@ function reset(product?: EditableProduct) {
 }
 
 function cancel() {
-  reset(props.product);
+  reset(product);
 }
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
@@ -645,8 +645,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
   saving.value = true;
   try {
-    if (props.product) {
-      const { data } = await $fetch(`/api/products/${props.product.id}`, { method: "PATCH", body });
+    if (product) {
+      const { data } = await $fetch(`/api/products/${product.id}`, { method: "PATCH", body });
       toast.add({ title: "Product saved", color: "success" });
       if (data) {
         reset(data);
