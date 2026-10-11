@@ -1,52 +1,45 @@
-import { eq } from "drizzle-orm";
-import { users } from "@@/server/db/schema";
-import { loginSchema } from "@@/schemas/auth.schema";
-import type { LoginErrorData } from "@@/shared/types/auth";
+import { loginSchema } from "#shared/schemas/auth.schema";
+import { UserState } from "#shared/types/user";
 
-export default defineEventHandler(async (event) => {
-  const createAuthError = (code: LoginErrorData["code"], message: string) => {
-    let statusCode = 401;
-    if (code === "USER_NOT_FOUND") statusCode = 404;
-    if (code === "INVALID_FORMAT") statusCode = 400;
+const invalidCredentials = () =>
+  apiError("INVALID_CREDENTIALS", "That username and password don't match. Please try again.");
 
-    return createError({
-      statusCode,
-      statusMessage: message,
-      data: { code, message } satisfies LoginErrorData,
-    });
-  };
+export default defineApiHandler(async (event) => {
+  const { username, password } = await readValidated(event, loginSchema);
 
-  const body = await readValidatedBody(event, loginSchema.safeParse);
+  const user = await findUserByUsername(username);
 
-  if (!body.success) {
-    throw createAuthError("INVALID_FORMAT", "Invalid username or password format");
+  if (!user || user.state === UserState.Deleted) {
+    throw invalidCredentials();
   }
 
-  const { username, password } = body.data;
+  if (user.password === null) {
+    if (user.state !== UserState.Active) {
+      throw invalidCredentials();
+    }
 
-  const [user] = await db.select()
-    .from(users)
-    .where(eq(users.username, username))
-    .limit(1);
-
-  if (!user) {
-    throw createAuthError("USER_NOT_FOUND", "User not found");
+    throw apiError("SETUP_REQUIRED", "You need to choose a password before you can log in");
   }
 
-  const isPasswordValid = await verifyPassword(user.password, password);
-
-  if (!isPasswordValid) {
-    throw createAuthError("INVALID_CREDENTIALS", "Invalid credentials");
+  if (!(await verifyPassword(user.password, password))) {
+    throw invalidCredentials();
   }
+
+  // Only reveal the account's state once the password has been confirmed
+  if (user.state === UserState.Disabled) {
+    throw apiError("ACCOUNT_DISABLED", "This account has been disabled. Please contact an administrator.");
+  }
+
+  if (user.state !== UserState.Active) {
+    throw forbidden("This account isn't active yet");
+  }
+
+  const sessionUser = toSessionUser(user);
 
   await setUserSession(event, {
-    user: {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-    },
+    user: sessionUser,
     loggedInAt: Date.now(),
   });
 
-  return { message: "Logged in successfully" };
+  return ok({ user: sessionUser }, "Logged in successfully");
 });

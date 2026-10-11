@@ -27,6 +27,7 @@
           Login
         </h1>
         <UForm
+          ref="form"
           :schema="loginSchema"
           :state="state"
           class="space-y-4"
@@ -39,6 +40,7 @@
             <UInput
               v-model="state.username"
               class="w-full"
+              autocomplete="username"
               autofocus
             />
           </UFormField>
@@ -46,12 +48,12 @@
           <UFormField
             label="Password"
             name="password"
-            :error="loginError ?? undefined"
           >
             <UInput
               v-model="state.password"
               type="password"
               class="w-full"
+              autocomplete="current-password"
             />
           </UFormField>
 
@@ -69,82 +71,59 @@
 </template>
 
 <script setup lang="ts">
-import type * as z from "zod";
-import type { FetchError } from "ofetch";
-import { loginSchema } from "@@/schemas/auth.schema";
-import type { LoginErrorData } from "@@/shared/types/auth";
+import type { FormSubmitEvent } from "@nuxt/ui";
+import { loginSchema, type LoginInput } from "#shared/schemas/auth.schema";
 
-type Schema = z.output<typeof loginSchema>;
-
-const { user, fetch } = useUserSession();
+const { user, fetch, logout, setupUsername, redirectAfterLogin } = useAuth();
 const toast = useToast();
+const form = useTemplateRef("form");
 const pending = ref(false);
-const router = useRouter();
 
-const state = reactive<Partial<Schema>>({
-  username: undefined,
-  password: undefined
-});
-
-const loginError = ref<string | null>(null);
-
-function navigateAwayAfterLogin() {
-  const route = user.value?.role === "admin" ? "/admin" : "/";
-  router.push(route);
+// Nobody has a password yet, so there's nothing to log in to: go straight to setup
+const { data: status } = await useFetch("/api/auth/status");
+if (!user.value && status.value?.data.hasAccounts === false) {
+  await navigateTo("/setup");
 }
 
-async function onSubmit() {
+const state = reactive<Partial<LoginInput>>({
+  username: undefined,
+  password: undefined,
+});
+
+async function onSubmit(event: FormSubmitEvent<LoginInput>) {
   pending.value = true;
-  loginError.value = null;
 
   try {
-    await $fetch("/api/auth/login", { method: "POST", body: state });
+    await $fetch("/api/auth/login", { method: "POST", body: event.data });
+    await fetch();
 
     toast.add({
       title: "Success",
       description: "Logged in successfully!",
-      color: "success"
+      color: "success",
     });
 
-    await fetch();
-
-    navigateAwayAfterLogin();
+    await redirectAfterLogin();
   } catch (err) {
-    const error = err as FetchError<LoginErrorData>;
+    const error = getApiError(err);
 
-    if (error.data?.code && error.data?.message) {
-      loginError.value = error.data.message;
-
-      if (error.data.code === "INVALID_FORMAT") {
-        toast.add({
-          title: "Validation Error",
-          description: error.data.message,
-          color: "error"
-        });
-      }
-    } else {
-      toast.add({
-        title: "Error",
-        description: error.statusMessage || "Login failed",
-        color: "error"
-      });
+    switch (error.code) {
+      case "SETUP_REQUIRED":
+        setupUsername.value = event.data.username;
+        await navigateTo("/setup");
+        break;
+      case "VALIDATION_ERROR":
+        form.value?.setErrors(toFormErrors(error.fieldErrors));
+        break;
+      case "INVALID_CREDENTIALS":
+      case "ACCOUNT_DISABLED":
+        form.value?.setErrors([{ name: "password", message: error.message }]);
+        break;
+      default:
+        toast.add({ title: "Login failed", description: error.message, color: "error" });
     }
   } finally {
     pending.value = false;
   }
-}
-
-async function logout() {
-  await $fetch("/api/auth/logout", {
-    method: "POST"
-  });
-
-  await fetch();
-
-  toast.add({
-    title: "Logged out",
-    description: "You have been logged out",
-    color: "primary",
-  });
 }
 </script>

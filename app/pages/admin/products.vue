@@ -1,6 +1,6 @@
 <template>
   <AdminContainer heading="Products">
-    <template #action>
+    <template #actions>
       <NuxtLink to="/admin/add-product">
         <UButton
           color="primary"
