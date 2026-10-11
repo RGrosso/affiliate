@@ -29,5 +29,7 @@ export default defineApiHandler(async (event) => {
     loggedInAt: Date.now(),
   });
 
+  await seedSampleProductsForAdmin(sessionUser);
+
   return ok({ user: sessionUser }, "Your password has been saved");
 });

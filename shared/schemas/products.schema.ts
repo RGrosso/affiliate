@@ -1,11 +1,20 @@
 import { z } from "./zod";
 
+const emptyToUndefined = (value: unknown) => (value === "" || value === null ? undefined : value);
+
 const optionalUrl = (label: string) =>
-  z
-    .url({ error: `Please enter a valid ${label}, e.g. https://example.com`, protocol: /^https?$/ })
-    .max(2048, `The ${label} is too long`)
-    .optional()
-    .nullable();
+  z.preprocess(
+    emptyToUndefined,
+    z
+      .url({ error: `Please enter a valid ${label}, e.g. https://example.com`, protocol: /^https?$/ })
+      .max(2048, `The ${label} is too long`)
+      .optional()
+  );
+
+export const productImageSchema = z.object({
+  url: z.string().min(1, "Image URL is required").max(2048, "The image URL is too long"),
+  alt: z.string().trim().max(255, "Alt text can be at most 255 characters").optional().nullable(),
+});
 
 export const addProductSchema = z.object({
   title: z
@@ -13,12 +22,21 @@ export const addProductSchema = z.object({
     .trim()
     .min(1, "Please give the product a title")
     .max(255, "The title can be at most 255 characters"),
+  /** Rich text from the editor, stored as HTML. */
   description: z
     .string()
     .trim()
-    .max(1000, "The description can be at most 1,000 characters")
+    .max(20_000, "The description is too long")
     .optional()
     .nullable(),
+  handle: z.preprocess(
+    emptyToUndefined,
+    z
+      .string()
+      .max(100, "The URL handle can be at most 100 characters")
+      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens only")
+      .optional()
+  ),
   /** Price in major units (e.g. 19.99). Stored as whole cents. */
   price: z
     .number({ error: "Please enter the price as a number" })
@@ -27,8 +45,11 @@ export const addProductSchema = z.object({
     .multipleOf(0.01, "The price can have at most 2 decimal places")
     .optional()
     .nullable(),
+  retailer: z.string().trim().max(100, "The retailer name can be at most 100 characters").optional().nullable(),
   affiliateUrl: optionalUrl("affiliate link"),
-  imageUrl: optionalUrl("image URL"),
+  seoTitle: z.string().trim().max(70, "The page title can be at most 70 characters").optional().nullable(),
+  seoDescription: z.string().trim().max(320, "The meta description can be at most 320 characters").optional().nullable(),
+  images: z.array(productImageSchema).max(10, "You can add up to 10 images").default([]),
 });
 
-export type AddProductInput = z.infer<typeof addProductSchema>;
+export type AddProductInput = z.input<typeof addProductSchema>;
