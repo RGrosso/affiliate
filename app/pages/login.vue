@@ -72,12 +72,11 @@
 import type * as z from "zod";
 import type { FetchError } from "ofetch";
 import { loginSchema } from "@@/schemas/auth.schema";
-import type { LoginErrorData } from "@@/type/auth";
+import type { LoginErrorData } from "@@/shared/types/auth";
 
 type Schema = z.output<typeof loginSchema>;
 
-const userSession = useUserSession();
-const user = userSession.user;
+const { user, fetch } = useUserSession();
 const toast = useToast();
 const pending = ref(false);
 const router = useRouter();
@@ -107,7 +106,7 @@ async function onSubmit() {
       color: "success"
     });
 
-    await userSession.fetch();
+    await fetch();
 
     navigateAwayAfterLogin();
   } catch (err) {
@@ -140,7 +139,7 @@ async function logout() {
     method: "POST"
   });
 
-  await userSession.fetch();
+  await fetch();
 
   toast.add({
     title: "Logged out",

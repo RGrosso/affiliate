@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { users } from "@@/server/db/schema";
 import { loginSchema } from "@@/schemas/auth.schema";
-import type { LoginErrorData } from "@@/type/auth";
+import type { LoginErrorData } from "@@/shared/types/auth";
 
 export default defineEventHandler(async (event) => {
   const createAuthError = (code: LoginErrorData["code"], message: string) => {
@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
       username: user.username,
       role: user.role,
     },
-    loggedInAt: new Date(),
+    loggedInAt: Date.now(),
   });
 
   return { message: "Logged in successfully" };
