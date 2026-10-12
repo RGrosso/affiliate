@@ -1,7 +1,11 @@
 <template>
   <div>
-    <section class="bg-primary-600 dark:bg-primary-800 text-white">
-      <UContainer class="py-12 sm:py-16 grid gap-10 lg:grid-cols-[1.2fr_1fr] items-center">
+    <CoreContainer
+      variant="full"
+      as="section"
+      class="bg-primary-600 dark:bg-primary-800 text-white"
+    >
+      <div class="py-12 sm:py-16 grid gap-10 lg:grid-cols-[1.2fr_1fr] items-center">
         <div class="flex flex-col items-start gap-5">
           <span class="rounded-md bg-secondary-100 text-secondary-900 text-sm font-bold px-3 py-1.5">
             No idea what to get? Same.
@@ -27,10 +31,10 @@
           height="400"
           class="w-full max-w-md mx-auto"
         >
-      </UContainer>
-    </section>
+      </div>
+    </CoreContainer>
 
-    <UContainer class="py-14">
+    <CoreContainer variant="padded">
       <section class="space-y-5">
         <div class="flex flex-wrap justify-between items-end gap-3">
           <div>
@@ -84,7 +88,7 @@
           We may earn a commission, at no cost to you.
         </p>
       </section>
-    </UContainer>
+    </CoreContainer>
   </div>
 </template>
 

@@ -64,7 +64,7 @@
     </template>
 
     <template #bottom>
-      <UContainer>
+      <CoreContainer>
         <nav
           aria-label="Categories"
           class="flex gap-1.5 overflow-x-auto pb-3 [scrollbar-width:none]"
@@ -79,7 +79,7 @@
             class="shrink-0 font-semibold"
           />
         </nav>
-      </UContainer>
+      </CoreContainer>
     </template>
 
     <template #body>

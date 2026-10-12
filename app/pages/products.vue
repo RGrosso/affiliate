@@ -1,5 +1,5 @@
 <template>
-  <UContainer>
+  <CoreContainer>
     <h1>Products</h1>
-  </UContainer>
+  </CoreContainer>
 </template>

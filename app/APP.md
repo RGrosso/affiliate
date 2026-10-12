@@ -24,6 +24,7 @@ Use the core component wherever one exists:
 
 | Component | Wraps | Use for |
 | --- | --- | --- |
+| `<CoreContainer>` | `UContainer` | Every page-width wrapper; use it in place of `UContainer`. `variant="padded"` adds vertical spacing for a page's main content. `variant="full"` is a full-width band (put the background on it) with page-width content inside, as in the homepage hero. `as` sets the element, e.g. `as="section"`. |
 | `<CoreAlert variant="warning" title="…" />` | `UAlert` | Inline messages. `variant` is `success`, `error`, `warning` or `info` and sets the colour and icon. Also takes `description`, `actions` and an optional `icon` override. |
 | `<CoreTag label="Sample" color="warning" />` | `UBadge` | Small labels on products. `color` defaults to `neutral`. |
 | `<CoreButtonBar :show="dirty">` | (custom) | The sticky "Unsaved changes" bar on forms; buttons go in the default slot. |
