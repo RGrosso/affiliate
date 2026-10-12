@@ -38,12 +38,12 @@
             v-if="row.original.image"
             :src="row.original.image.url"
             :alt="row.original.image.alt ?? row.original.title"
-            class="size-10 aspect-square object-cover rounded-md border border-default"
+            class="size-10 max-w-none shrink-0 aspect-square object-cover rounded-md border border-default"
             loading="lazy"
           >
           <div
             v-else
-            class="size-10 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"
+            class="size-10 shrink-0 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"
           >
             <UIcon
               name="i-heroicons-photo"
