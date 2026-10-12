@@ -30,3 +30,8 @@ logs
 coverage
 storybook-static
 *storybook.log
+.data-e2e
+.nuxt-e2e
+test/e2e/.auth
+playwright-report
+test-results
