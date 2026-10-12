@@ -47,7 +47,7 @@ The colour theme is the Signal Blue palette from the design handoff:
 
 - `app/assets/css/main.css` defines the colour scales, the fonts (Figtree for body text, Fredoka for `h1`, `h2` and `font-display`) and the light and dark surface colours. Fonts are downloaded and self-hosted by `@nuxt/fonts`, which picks up any font family named in the CSS; the weights it loads are set under `fonts` in `nuxt.config.ts`.
 - `app/app.config.ts` maps Nuxt UI's colours to those scales: `primary` is `signal`, `secondary` is `coral` and `neutral` is `slate`. The status colours use tonal scales too (`success` is `forest`, `info` is `sky`, `warning` is a sunny yellow, `error` is `crimson`). Colours are shaded 600 in light mode and 200 in dark mode so text on them passes contrast; warning and error have their own shading in `app.config.ts`, since yellow is too light for text and a pale red tint looks pink. Commented-out blocks switch to the Ocean Teal or Forest Green palettes; swap the surface colours in `main.css` too if you do.
-- `action` is an extra orange colour, registered in `nuxt.config.ts`, for buy buttons only (`<UButton color="action">`). Solid action buttons use dark navy text, because white text on orange fails contrast.
+- `action` is an extra orange colour, registered in `nuxt.config.ts`, for the main call-to-action button on a page (`<UButton color="action">`). Solid action buttons use dark navy text, because white text on orange fails contrast.
 
 ## Locale and currency
 

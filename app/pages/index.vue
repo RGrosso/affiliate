@@ -3,7 +3,7 @@
     <CoreContainer
       variant="full"
       as="section"
-      class="bg-primary-600 dark:bg-primary-800 text-white"
+      class="bg-band text-white"
     >
       <div class="py-12 sm:py-16 grid gap-10 lg:grid-cols-[1.2fr_1fr] items-center">
         <div class="flex flex-col items-start gap-5">
@@ -13,7 +13,7 @@
           <h1 class="text-4xl sm:text-6xl leading-[0.98]">
             Gifts for people (and pets) who are impossible to buy for
           </h1>
-          <p class="text-lg text-primary-100 max-w-xl">
+          <p class="text-lg text-band-muted max-w-xl">
             Silly, clever and genuinely good presents, hand-picked from shops across the internet.
           </p>
           <UButton

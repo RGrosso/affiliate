@@ -26,7 +26,7 @@
 
     <div
       v-if="products.length"
-      class="border border-default rounded-xl overflow-hidden"
+      class="border border-default rounded-md overflow-hidden"
     >
       <UTable
         :data="products"
@@ -77,7 +77,7 @@
 
     <div
       v-else-if="status !== 'pending'"
-      class="bg-default text-default border border-default rounded-xl p-12 text-center flex flex-col items-center justify-center shadow-sm"
+      class="bg-default text-default border border-default rounded-md p-12 text-center flex flex-col items-center justify-center shadow-sm"
     >
       <div class="h-12 w-12 rounded-lg bg-muted flex items-center justify-center text-muted mb-4">
         <UIcon

@@ -20,14 +20,11 @@
 <script setup lang="ts">
 import type { VNode } from "vue";
 
-// default: page-width content with side gutters
-// padded: default plus vertical spacing, for the main content of a page
-// full: a full-width band (put backgrounds on it) with page-width content inside
 export type CoreContainerVariant = "default" | "padded" | "full";
 
 const { variant = "default", as = "div" } = defineProps<{
   variant?: CoreContainerVariant;
-  as?: string;
+  as?: "div" | "section" | "main" | "header" | "footer" | "article";
 }>();
 
 defineSlots<{

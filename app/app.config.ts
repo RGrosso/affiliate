@@ -1,3 +1,7 @@
+// Tinting --ui-warning gives a muddy beige and --ui-error a pink, so subtle alerts and badges use the scales' pale tones
+const SUBTLE_WARNING = "bg-sunny-50 ring-sunny-300 dark:bg-sunny-950 dark:ring-sunny-800";
+const SUBTLE_ERROR = "bg-crimson-50 dark:bg-crimson-950";
+
 export default defineAppConfig({
   ui: {
     colors: {
@@ -34,17 +38,16 @@ export default defineAppConfig({
         },
       ],
     },
-    // Tinting --ui-warning gives a muddy beige and --ui-error a pink, so these use the scales' pale tones
     alert: {
       compoundVariants: [
-        { color: "warning", variant: "subtle", class: { root: "bg-sunny-50 ring-sunny-300 dark:bg-sunny-950 dark:ring-sunny-800" } },
-        { color: "error", variant: "subtle", class: { root: "bg-crimson-50 ring-crimson-200 dark:bg-crimson-950 dark:ring-crimson-800" } },
+        { color: "warning", variant: "subtle", class: { root: SUBTLE_WARNING } },
+        { color: "error", variant: "subtle", class: { root: SUBTLE_ERROR } },
       ],
     },
     badge: {
       compoundVariants: [
-        { color: "warning", variant: "subtle", class: "bg-sunny-50 ring-sunny-300 dark:bg-sunny-950 dark:ring-sunny-800" },
-        { color: "error", variant: "subtle", class: "bg-crimson-50 ring-crimson-200 dark:bg-crimson-950 dark:ring-crimson-800" },
+        { color: "warning", variant: "subtle", class: SUBTLE_WARNING },
+        { color: "error", variant: "subtle", class: SUBTLE_ERROR },
       ],
     },
   },

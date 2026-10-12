@@ -127,6 +127,13 @@
   --color-sky-950: #00112a;
 }
 
+/* Brand bands (hero, announcement strip) stay dark blue in both modes, so text on them is always white */
+@theme inline {
+  --color-band: var(--app-band);
+  --color-band-strong: var(--app-band-strong);
+  --color-band-muted: var(--app-band-muted);
+}
+
 /* ------------------------------------------------------------------
    Material shade mapping: strong 600 tones in light mode,
    soft 200 tones in dark mode (on-colour text is dark).
@@ -136,6 +143,10 @@
    from the mockup if you pick Ocean or Forest.
 ------------------------------------------------------------------- */
 :root {
+  --app-band: var(--ui-color-primary-600);
+  --app-band-strong: var(--ui-color-primary-700);
+  --app-band-muted: var(--ui-color-primary-100);
+
   /* Nuxt UI derives rounded-md (buttons, inputs) as 1.5× this = 6px */
   --ui-radius: 0.25rem;
 
@@ -163,6 +174,9 @@
 }
 
 .dark {
+  --app-band: var(--ui-color-primary-800);
+  --app-band-strong: var(--ui-color-primary-900);
+
   --ui-primary: var(--ui-color-primary-200);
   --ui-secondary: var(--ui-color-secondary-200);
   --ui-success: var(--ui-color-success-200);
