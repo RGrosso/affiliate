@@ -1,12 +1,12 @@
 <template>
-  <div class="flex h-screen bg-background text-foreground overflow-hidden">
-    <aside class="w-60 border-r border-border bg-muted/30 flex flex-col justify-between p-3 select-none shrink-0">
+  <div class="flex h-screen bg-default text-default overflow-hidden">
+    <aside class="w-60 border-r border-default bg-muted flex flex-col justify-between p-3 select-none shrink-0">
       <div class="space-y-4">
-        <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted">
-          <div class="h-6 w-6 rounded bg-secondary flex items-center justify-center text-primary-foreground font-bold text-xs">
-            A
+        <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-elevated">
+          <div class="h-6 w-6 rounded bg-secondary flex items-center justify-center text-inverted font-bold text-xs">
+            {{ SITE_NAME[0] }}
           </div>
-          <span class="font-semibold text-sm truncate">Affiliate Admin</span>
+          <span class="font-semibold text-sm truncate">{{ SITE_NAME }} Admin</span>
         </div>
 
         <UNavigationMenu
@@ -20,7 +20,7 @@
         />
       </div>
     </aside>
-    <main class="flex-1 overflow-y-auto bg-background">
+    <main class="flex-1 overflow-y-auto bg-default">
       <NuxtPage />
     </main>
   </div>
