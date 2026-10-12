@@ -13,6 +13,15 @@ Read `app/VUE.md` before writing or editing any `.vue` file or composable: it co
 - Keep comments for the non-obvious, like why something is done or a gotcha. Don't add docblocks that restate a name or type.
 - Avoid `any` in TypeScript. Use a precise type, `unknown` with narrowing, or a generic.
 
+## Git workflow
+
+- Before starting a task, pull the latest `main` and create a new branch from it, unless you're told to use a different branch.
+- Name the branch by the type of work:
+  - `bug/<short-description>` for fixing something that's broken.
+  - `feature/<short-description>` for everything else.
+- Keep `<short-description>` short and concise: lowercase words separated by hyphens, 20 characters at most (e.g. `feature/sample-products`, `bug/login-redirect`).
+- Never merge into `main` yourself. Every change goes through a pull request, and another person must approve it before it's merged.
+
 ## Locale: English (GB)
 
 The site is UK-based. Always prefer British English and UK formats over US ones.

@@ -99,3 +99,8 @@ pnpm preview
 ```
 
 The admin seed doesn't run in production. You'll need to create the first admin user yourself for now.
+
+## Contributing
+
+1. Pull the latest `main` and create a branch from it: `bug/<short-description>` for bug fixes, `feature/<short-description>` for everything else. Keep the description short and concise, 20 characters at most (e.g. `feature/sample-products`).
+2. Open a pull request when you're ready. Nothing is merged into `main` without a review and approval from another person.
