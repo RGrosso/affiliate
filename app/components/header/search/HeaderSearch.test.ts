@@ -34,7 +34,7 @@ describe("HeaderSearch", () => {
     const wrapper = await mountSuspended(HeaderSearch);
 
     await wrapper.get("form").trigger("submit");
-    const [{ value: first }] = toast.add.mock.results;
+    const first = toast.add.mock.results[0]?.value;
     await wrapper.get("form").trigger("submit");
 
     expect(toast.remove).toHaveBeenCalledWith(first?.id);

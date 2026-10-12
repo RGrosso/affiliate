@@ -1,4 +1,5 @@
 import type { H3Error } from "h3";
+import type { ApiError } from "#shared/types/api";
 import { describe, expect, it } from "vitest";
 import { rethrowAsDuplicateHandle, toImageValues, toProductValues } from "./products";
 
@@ -6,7 +7,7 @@ const thrown = (fn: () => unknown) => {
   try {
     fn();
   } catch (error) {
-    return error as H3Error;
+    return error as H3Error<ApiError>;
   }
   throw new Error("Expected the function to throw");
 };
@@ -36,7 +37,7 @@ describe("toProductValues", () => {
   it("asks for a handle when the title has no letters or numbers", () => {
     const error = thrown(() => toProductValues({ title: "!!!", images: [] }));
     expect(error.statusCode).toBe(400);
-    expect(error.data.fieldErrors).toEqual({ handle: ["Please add a URL handle using letters or numbers"] });
+    expect(error.data?.fieldErrors).toEqual({ handle: ["Please add a URL handle using letters or numbers"] });
   });
 });
 

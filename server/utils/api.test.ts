@@ -22,7 +22,7 @@ describe("apiError", () => {
   });
 
   it("has friendly default messages in its helpers", () => {
-    expect(notFound().data.message).toBe("We couldn't find what you were looking for");
+    expect(notFound().data?.message).toBe("We couldn't find what you were looking for");
   });
 });
 
@@ -43,6 +43,6 @@ describe("validationError", () => {
   it("uses a form-level message when there is one", () => {
     const schema = z.string().refine(() => false, "Something's not right");
     const error = validationError(schema.safeParse("x").error!);
-    expect(error.data.message).toBe("Something's not right");
+    expect(error.data?.message).toBe("Something's not right");
   });
 });
