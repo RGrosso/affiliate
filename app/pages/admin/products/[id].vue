@@ -12,11 +12,9 @@
     </template>
 
     <template v-if="product">
-      <UAlert
+      <CoreAlert
         v-if="product.isSample"
-        color="warning"
-        variant="subtle"
-        icon="i-heroicons-exclamation-triangle"
+        variant="warning"
         title="This is a sample product"
         description="It was added to show how your store looks. You can edit it, but it's still a sample: it keeps its Sample badge and is removed when you delete all sample products from the Products page."
       />
@@ -28,11 +26,9 @@
       />
     </template>
 
-    <UAlert
+    <CoreAlert
       v-else-if="error"
-      color="error"
-      variant="subtle"
-      icon="i-heroicons-exclamation-circle"
+      variant="error"
       title="Couldn't load this product"
       :description="getApiError(error).message"
     />
