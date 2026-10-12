@@ -1,0 +1,11 @@
+<script>
+  // Nuxt's colour mode plugin reads this object, which the server normally injects into the page.
+  // Storybook never server-renders, so provide a stand-in; the themes addon switches the class.
+  window.__NUXT_COLOR_MODE__ = {
+    preference: "light",
+    value: "light",
+    getColorScheme: () => "light",
+    addColorScheme: mode => document.documentElement.classList.add(mode),
+    removeColorScheme: mode => document.documentElement.classList.remove(mode),
+  };
+</script>

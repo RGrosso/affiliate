@@ -28,3 +28,5 @@ logs
 
 # Tests
 coverage
+storybook-static
+*storybook.log

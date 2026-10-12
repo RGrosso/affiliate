@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:unit": "vitest run --project unit",
     "test:nuxt": "vitest run --project nuxt",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.4.6",
@@ -34,6 +36,10 @@
     "@nuxt/test-utils": "4.3.2",
     "@nuxthub/core": "^0.10.8",
     "@playwright/test": "1.63.0",
+    "@storybook-vue/nuxt": "10.0.1",
+    "@storybook/addon-a11y": "10.6.1",
+    "@storybook/addon-docs": "10.6.1",
+    "@storybook/addon-themes": "10.6.1",
     "@types/node": "^24.19.2",
     "@typescript-eslint/eslint-plugin": "^8.71.1",
     "@typescript-eslint/parser": "^8.71.1",
@@ -42,6 +48,7 @@
     "@vue/test-utils": "2.5.1",
     "axe-core": "4.13.0",
     "h3": "1.15.11",
+    "storybook": "10.6.1",
     "typescript": "^5.9.3",
     "vitest": "5.0.2"
   }
