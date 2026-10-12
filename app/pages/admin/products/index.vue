@@ -153,7 +153,8 @@ const sampleCount = computed(() => data.value?.data.sampleCount ?? 0);
 type ProductRow = (typeof products.value)[number];
 
 const columns: TableColumn<ProductRow>[] = [
-  { id: "image", header: "" },
+  // An empty-string header renders a text node the server HTML lacks, causing a hydration mismatch
+  { id: "image", header: () => h("span", { class: "sr-only" }, "Image") },
   { accessorKey: "title", header: "Product" },
   { accessorKey: "retailer", header: "Retailer" },
   { accessorKey: "createdAt", header: "Added" },
