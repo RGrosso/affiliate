@@ -1,4 +1,8 @@
-/** The fields the admin product form reads and writes. */
+export type ProductImage = {
+  url: string;
+  alt: string | null;
+};
+
 export type EditableProduct = {
   id: string;
   title: string;
@@ -9,5 +13,5 @@ export type EditableProduct = {
   affiliateUrl: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
-  images: { url: string; alt: string | null }[];
+  images: ProductImage[];
 };

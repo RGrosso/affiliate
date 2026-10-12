@@ -35,9 +35,9 @@ To start again from scratch, stop the dev server and delete the `.data/` folder.
 
 ## Sample products
 
-The first time an admin logs in (or finishes setup), 20 example products with square placeholder images are added so the store isn't empty. A warning on **Admin → Products** lets you delete all of them in one go. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so deleting them won't bring them back. The sample data lives in `server/utils/sampleProducts.ts`.
+The first time an admin logs in (or finishes setup), 20 example products with square placeholder images are added so the store isn't empty. A warning on **Admin → Products** lets you delete all of them in one go. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so deleting them won't bring them back. If the store already has products, no samples are added. The sample data lives in `server/utils/sampleProducts.ts`.
 
-Product images uploaded from the create page are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
+Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
 
 ## Locale and currency
 

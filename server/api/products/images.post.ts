@@ -10,10 +10,14 @@ export default defineApiHandler(async (event) => {
     throw badRequest("Please choose an image to upload");
   }
 
+  if (!file.type.startsWith("image/")) {
+    throw badRequest("That file isn't an image. Please upload a JPG, PNG or WebP.");
+  }
+
   try {
     ensureBlob(file, { maxSize: "8MB", types: ["image"] });
-  } catch (error) {
-    throw badRequest(error instanceof Error ? error.message : "That file isn't a valid image");
+  } catch {
+    throw badRequest("Images can be at most 8MB. Please choose a smaller image.");
   }
 
   const stored = await blob.put(file.name, file, {

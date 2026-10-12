@@ -4,7 +4,7 @@ Vue 3.5 through Nuxt 4. Every component and page uses `<script setup lang="ts">`
 
 ## Props
 
-Destructure props straight from `defineProps`, with defaults as destructure defaults:
+When the script reads a prop, or a prop needs a default, destructure it straight from `defineProps`, with defaults as destructure defaults:
 
 ```ts
 const { label, size = "md", disabled = false } = defineProps<{
@@ -15,6 +15,14 @@ const { label, size = "md", disabled = false } = defineProps<{
 ```
 
 This replaces `withDefaults`. Destructured props stay reactive, but only when they are read inside a reactive scope. When you pass one to `watch`, a composable or anything else that tracks reactivity, wrap it in a getter: `watch(() => size, ...)`, `useFoo(() => label)`.
+
+When props are only used in the template and none needs a default, there's no need to destructure: call `defineProps<{ ... }>()` without assigning it. The template reads props directly by name.
+
+```ts
+defineProps<{
+  product: ProductCardData;
+}>();
+```
 
 ## Events
 

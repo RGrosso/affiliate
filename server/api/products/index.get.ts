@@ -1,5 +1,6 @@
 import { asc, count, desc, eq, inArray } from "drizzle-orm";
 import { productImages, products } from "hub:db:schema";
+import type { ProductImage } from "#shared/types/product";
 import { z } from "#shared/schemas/zod";
 
 const querySchema = z.object({
@@ -46,7 +47,7 @@ export default defineApiHandler(async (event) => {
         .orderBy(asc(productImages.position));
 
   // The lowest-position image is the featured one
-  const featured = new Map<string, { url: string; alt: string | null }>();
+  const featured = new Map<string, ProductImage>();
   for (const image of images) {
     if (!featured.has(image.productId)) {
       featured.set(image.productId, { url: image.url, alt: image.alt });

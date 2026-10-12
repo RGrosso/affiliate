@@ -22,7 +22,6 @@ export const users = pgTable("users", {
 export const products = pgTable("products", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
-  /** URL slug, used for `/products/<handle>`. */
   handle: text("handle").notNull().unique(),
   description: text("description"),
   pricePence: integer("price_pence"),
@@ -30,7 +29,6 @@ export const products = pgTable("products", {
   affiliateUrl: text("affiliate_url"),
   seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
-  /** Example products seeded on first admin login; can be bulk-deleted from the dashboard. */
   isSample: boolean("is_sample").default(false).notNull(),
   authorId: uuid("author_id").references(() => users.id).notNull(),
   ...timestamps,

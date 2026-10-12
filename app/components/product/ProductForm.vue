@@ -75,7 +75,7 @@
                 draggable="true"
                 @dragstart="dragIndex = index"
                 @dragover.prevent
-                @drop.prevent="moveMedia(index)"
+                @drop.prevent="moveTo(index)"
                 @dragend="dragIndex = null"
               >
                 <img
@@ -140,16 +140,16 @@
                     variant="solid"
                     size="xs"
                     aria-label="Remove image"
-                    @click="removeMedia(index)"
+                    @click="remove(index)"
                   />
                 </div>
               </div>
 
               <label
-                v-if="media.length < MAX_IMAGES"
+                v-if="media.length < MAX_PRODUCT_IMAGES"
                 class="aspect-square rounded-lg border-2 border-dashed border-default flex items-center justify-center text-muted hover:bg-elevated/50 cursor-pointer"
                 :class="{ 'border-primary bg-primary/5': dropActive }"
-                @dragover.prevent="dropActive = !dragIndexActive"
+                @dragover.prevent="dropActive = dragIndex === null"
                 @dragleave="dropActive = false"
                 @drop.prevent="onDrop"
               >
@@ -340,7 +340,7 @@
 
       <!-- Sidebar -->
       <div class="space-y-4">
-        <UCard v-if="media[0]">
+        <UCard v-if="featured">
           <template #header>
             <h2 class="text-sm font-semibold">
               Preview
@@ -350,8 +350,8 @@
           <div class="space-y-3">
             <div class="aspect-square rounded-lg overflow-hidden bg-muted">
               <img
-                :src="media[0].previewUrl"
-                :alt="media[0].alt"
+                :src="featured.previewUrl"
+                :alt="featured.alt"
                 class="size-full object-cover"
               >
             </div>
@@ -365,35 +365,12 @@
             </div>
           </div>
         </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-sm font-semibold">
-              Checklist
-            </h2>
-          </template>
-          <ul class="space-y-2 text-sm">
-            <li
-              v-for="item in checklist"
-              :key="item.label"
-              class="flex items-center gap-2"
-              :class="item.done ? 'text-default' : 'text-muted'"
-            >
-              <UIcon
-                :name="item.done ? 'i-heroicons-check-circle-solid' : 'i-heroicons-minus-circle'"
-                class="size-5"
-                :class="item.done ? 'text-success' : 'text-dimmed'"
-              />
-              {{ item.label }}
-            </li>
-          </ul>
-        </UCard>
       </div>
     </div>
 
     <CoreButtonBar
       :show="isDirty || saving"
-      :message="product ? 'Unsaved changes' : 'Unsaved product'"
+      :message="saveBarMessage"
     >
       <UButton
         color="neutral"
@@ -408,7 +385,7 @@
         type="submit"
         size="sm"
         :loading="saving"
-        :disabled="isUploading"
+        :disabled="isUploading || hasFailedUploads"
       >
         Save
       </UButton>
@@ -418,14 +395,13 @@
 
 <script setup lang="ts">
 import type { EditorToolbarItem, FormErrorEvent, FormSubmitEvent } from "@nuxt/ui";
-import type * as z from "zod";
+import type { z } from "#shared/schemas/zod";
 import { addProductSchema } from "#shared/schemas/products.schema";
 import type { EditableProduct } from "#shared/types/product";
 
 type Schema = z.output<typeof addProductSchema>;
 
 const { product } = defineProps<{
-  /** The product being edited. Omit to create a new product. */
   product?: EditableProduct;
 }>();
 
@@ -433,15 +409,6 @@ const emit = defineEmits<{
   saved: [product: EditableProduct];
 }>();
 
-type MediaItem = {
-  key: string;
-  previewUrl: string;
-  url?: string;
-  alt: string;
-  status: "uploading" | "done" | "error";
-};
-
-const MAX_IMAGES = 10;
 const SEO_FIELDS = ["handle", "seoTitle", "seoDescription"];
 
 const toast = useToast();
@@ -460,33 +427,29 @@ const toState = (product?: EditableProduct) => ({
   images: (product?.images ?? []).map(image => ({ ...image })) as { url: string; alt?: string | null }[],
 });
 
-const toMedia = (product?: EditableProduct): MediaItem[] =>
-  (product?.images ?? []).map(image => ({
-    key: image.url,
-    previewUrl: image.url,
-    url: image.url,
-    alt: image.alt ?? "",
-    status: "done",
-  }));
-
 const state = reactive(toState(product));
-const media = ref<MediaItem[]>(toMedia(product));
+const {
+  media,
+  dragIndex,
+  dropActive,
+  isUploading,
+  hasFailedUploads,
+  uploadedImages,
+  featured,
+  onFileInput,
+  onDrop,
+  remove,
+  moveTo,
+  reset: resetMedia,
+} = useProductMedia(product?.images);
 const saving = ref(false);
 const seoOpen = ref(false);
 // When editing, keep the saved handle rather than re-deriving it from the title
 const handleTouched = ref(!!product);
-const dragIndex = ref<number | null>(null);
-const dropActive = ref(false);
 
-const dragIndexActive = computed(() => dragIndex.value !== null);
-const isUploading = computed(() => media.value.some(item => item.status === "uploading"));
-
-// Keep the validated images field in sync with the successfully uploaded media.
-watch(media, (items) => {
-  state.images = items
-    .filter(item => item.status === "done" && item.url)
-    .map(item => ({ url: item.url!, alt: item.alt || null }));
-}, { deep: true });
+watch(uploadedImages, (images) => {
+  state.images = images;
+});
 
 // Auto-fill the handle from the title until the user edits it themselves.
 watch(() => state.title, (title) => {
@@ -495,7 +458,7 @@ watch(() => state.title, (title) => {
 
 const plainDescription = computed(() => htmlToText(state.description));
 
-/** Everything the user can change, normalised so it can be compared with the last saved version. */
+// Everything the user can change, normalised so it can be compared with the last saved version
 const snapshot = () => JSON.stringify({
   title: state.title.trim(),
   description: htmlToText(state.description) ? state.description : "",
@@ -511,6 +474,11 @@ const snapshot = () => JSON.stringify({
 const savedSnapshot = ref(snapshot());
 const isDirty = computed(() => snapshot() !== savedSnapshot.value);
 
+const saveBarMessage = computed(() => {
+  if (hasFailedUploads.value) return "Remove failed uploads before saving";
+  return product ? "Unsaved changes" : "Unsaved product";
+});
+
 const urlPrefix = computed(() => `${requestUrl.host}/products/`);
 
 const seoPreview = computed(() => ({
@@ -518,14 +486,6 @@ const seoPreview = computed(() => ({
   description: state.seoDescription || plainDescription.value.slice(0, 320),
   url: `${requestUrl.origin}/products/${state.handle || slugify(state.title)}`,
 }));
-
-const checklist = computed(() => [
-  { label: "Title", done: !!state.title.trim() },
-  { label: "Description", done: !!plainDescription.value },
-  { label: "At least one image", done: state.images.length > 0 },
-  { label: "Affiliate link", done: isHttpUrl(state.affiliateUrl) },
-  { label: "Search listing", done: !!(state.seoTitle || state.seoDescription) },
-]);
 
 const toolbarItems: EditorToolbarItem[][] = [
   [
@@ -556,76 +516,8 @@ function isHttpUrl(value: string | null | undefined): value is string {
   return !!value && /^https?:\/\/\S+\.\S+/.test(value);
 }
 
-function onFileInput(event: Event) {
-  const input = event.target as HTMLInputElement;
-  addFiles(Array.from(input.files ?? []));
-  input.value = "";
-}
-
-function onDrop(event: DragEvent) {
-  dropActive.value = false;
-  if (dragIndexActive.value) return;
-  addFiles(Array.from(event.dataTransfer?.files ?? []));
-}
-
-function addFiles(files: File[]) {
-  const images = files.filter(file => file.type.startsWith("image/"));
-  const available = MAX_IMAGES - media.value.length;
-
-  if (images.length > available) {
-    toast.add({ title: `You can add up to ${MAX_IMAGES} images`, color: "warning" });
-  }
-
-  for (const file of images.slice(0, available)) {
-    uploadFile(file);
-  }
-}
-
-async function uploadFile(file: File) {
-  const item = reactive<MediaItem>({
-    key: crypto.randomUUID(),
-    previewUrl: URL.createObjectURL(file),
-    alt: "",
-    status: "uploading",
-  });
-  media.value.push(item);
-
-  try {
-    const square = await cropToSquare(file);
-    URL.revokeObjectURL(item.previewUrl);
-    item.previewUrl = URL.createObjectURL(square);
-
-    const body = new FormData();
-    body.append("file", square);
-    const { data } = await $fetch("/api/products/images", { method: "POST", body });
-
-    item.url = data.url;
-    item.status = "done";
-  } catch (error) {
-    item.status = "error";
-    toast.add({ title: `Couldn't upload ${file.name}`, description: getApiError(error).message, color: "error" });
-  }
-}
-
-function removeMedia(index: number) {
-  const [removed] = media.value.splice(index, 1);
-  if (removed?.previewUrl.startsWith("blob:")) URL.revokeObjectURL(removed.previewUrl);
-}
-
-function moveMedia(targetIndex: number) {
-  const from = dragIndex.value;
-  dragIndex.value = null;
-  if (from === null || from === targetIndex) return;
-
-  const [moved] = media.value.splice(from, 1);
-  media.value.splice(targetIndex, 0, moved!);
-}
-
 function reset(product?: EditableProduct) {
-  media.value.forEach((item) => {
-    if (item.previewUrl.startsWith("blob:")) URL.revokeObjectURL(item.previewUrl);
-  });
-  media.value = toMedia(product);
+  resetMedia(product?.images);
   Object.assign(state, toState(product));
   handleTouched.value = !!product;
   form.value?.clear();
@@ -637,7 +529,7 @@ function cancel() {
 }
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  if (isUploading.value) return;
+  if (isUploading.value || hasFailedUploads.value) return;
 
   const body = {
     ...event.data,

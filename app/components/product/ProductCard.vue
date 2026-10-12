@@ -39,7 +39,7 @@
     <template #footer>
       <div class="flex justify-between items-center gap-4">
         <span class="text-lg font-bold text-primary">
-          {{ formatPrice(product.pricePence) ?? "" }}
+          {{ formatCurrency(product.pricePence) ?? "" }}
         </span>
         <UButton
           v-if="product.affiliateUrl"
@@ -59,12 +59,14 @@
 </template>
 
 <script setup lang="ts">
+import type { ProductImage } from "#shared/types/product";
+
 export type ProductCardData = {
   title: string;
   retailer: string | null;
   pricePence: number | null;
   affiliateUrl: string | null;
-  image: { url: string; alt: string | null } | null;
+  image: ProductImage | null;
 };
 
 defineProps<{

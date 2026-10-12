@@ -1,3 +1,4 @@
+import type { H3Event } from "h3";
 import { asc, eq } from "drizzle-orm";
 import { productImages, products } from "hub:db:schema";
 import { z } from "#shared/schemas/zod";
@@ -5,16 +6,30 @@ import type { addProductSchema } from "#shared/schemas/products.schema";
 
 type ProductInput = z.output<typeof addProductSchema>;
 
-export const productIdSchema = z.object({
-  id: z.uuid("We couldn't find that product"),
+const productIdSchema = z.object({
+  id: z.uuid(),
 });
 
-export const duplicateHandleError = () =>
-  apiError("CONFLICT", "Another product already uses this URL handle", {
-    handle: ["Another product already uses this URL handle"],
-  });
+export async function readProductId(event: H3Event): Promise<string> {
+  const result = productIdSchema.safeParse(getRouterParams(event));
 
-/** Maps validated form input onto product columns, deriving the handle from the title if empty. */
+  if (!result.success) {
+    throw notFound("We couldn't find that product");
+  }
+
+  return result.data.id;
+}
+
+/** Turns a unique-handle violation from a product insert or update into a field error. */
+export function rethrowAsDuplicateHandle(error: unknown): never {
+  if (isUniqueViolation(error)) {
+    throw apiError("CONFLICT", "Another product already uses this URL handle", {
+      handle: ["Another product already uses this URL handle"],
+    });
+  }
+  throw error;
+}
+
 export function toProductValues({ price, images: _images, handle, ...fields }: ProductInput) {
   const finalHandle = handle || slugify(fields.title);
 

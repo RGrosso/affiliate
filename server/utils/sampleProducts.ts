@@ -16,7 +16,7 @@ export const sampleProducts: SampleProduct[] = [
     title: "Cast Iron Skillet, 12-inch",
     handle: "cast-iron-skillet-12",
     pricePence: 3499,
-    description: "<p>A pre-seasoned skillet that goes from stovetop to oven to campfire. Even heat, great sear, and it only gets better with age.</p><ul><li>Pre-seasoned with vegetable oil</li><li>Oven safe to 260°C</li><li>Works on induction</li></ul>",
+    description: "<p>A pre-seasoned skillet that goes from hob to oven to campfire. Even heat, great sear, and it only gets better with age.</p><ul><li>Pre-seasoned with vegetable oil</li><li>Oven safe to 260°C</li><li>Works on induction</li></ul>",
     retailer: "Kitchen Supply Co.",
     seoDescription: "Our pick for the best all-round cast iron skillet: pre-seasoned, oven safe and built to last a lifetime.",
     imageCount: 3,
@@ -31,12 +31,12 @@ export const sampleProducts: SampleProduct[] = [
     imageCount: 2,
   },
   {
-    title: "Chef's Knife, 8-inch",
-    handle: "chefs-knife-8",
+    title: "Chef's Knife, 20cm",
+    handle: "chefs-knife-20cm",
     pricePence: 8995,
     description: "<p>A well-balanced German steel chef's knife that handles most kitchen prep. Holds an edge and is easy to sharpen.</p>",
     retailer: "Kitchen Supply Co.",
-    seoDescription: "The 8-inch chef's knife we reach for every day. Balanced, sharp and great value.",
+    seoDescription: "The 20cm chef's knife we reach for every day. Balanced, sharp and great value.",
     imageCount: 2,
   },
   {
@@ -45,7 +45,7 @@ export const sampleProducts: SampleProduct[] = [
     pricePence: 2499,
     description: "<p>Readings in under 3 seconds with a backlit display and a rotating screen for lefties and righties alike.</p>",
     retailer: "Gadget Hub",
-    seoDescription: "A fast, accurate instant-read meat thermometer for grilling, roasting and baking.",
+    seoDescription: "A fast, accurate instant-read meat thermometer for barbecuing, roasting and baking.",
     imageCount: 2,
   },
   {
@@ -63,7 +63,7 @@ export const sampleProducts: SampleProduct[] = [
     pricePence: 34900,
     description: "<p>A two-person, three-season tent that packs down to the size of a water bottle and weighs under 1kg.</p><ul><li>Freestanding design</li><li>Two doors, two vestibules</li><li>Pitches in under 3 minutes</li></ul>",
     retailer: "Trailhead Outfitters",
-    seoDescription: "A two-person ultralight tent under 1kg, ideal for backpacking and thru-hikes.",
+    seoDescription: "A two-person ultralight tent under 1kg, ideal for backpacking and long-distance hikes.",
     imageCount: 3,
   },
   {
@@ -144,7 +144,7 @@ export const sampleProducts: SampleProduct[] = [
     pricePence: 2499,
     description: "<p>A 15W stand that charges your phone in portrait or landscape, perfect beside your monitor.</p>",
     retailer: "Sound Depot",
-    seoDescription: "A 15W wireless charging stand for your desk or nightstand.",
+    seoDescription: "A 15W wireless charging stand for your desk or bedside table.",
     imageCount: 2,
   },
   {

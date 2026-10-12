@@ -5,6 +5,7 @@ export function slugify(value: string): string {
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 100);
+    // Trim after cutting to length, so the cut can't leave a trailing hyphen
+    .slice(0, 100)
+    .replace(/^-+|-+$/g, "");
 }

@@ -7,24 +7,17 @@ export default defineApiHandler(async (event) => {
   const input = await readValidated(event, addProductSchema);
   const values = toProductValues(input);
 
-  try {
-    const product = await db.transaction(async (tx) => {
-      const [product] = await tx.insert(products)
-        .values({ ...values, authorId: user.id })
-        .returning();
+  const product = await db.transaction(async (tx) => {
+    const [product] = await tx.insert(products)
+      .values({ ...values, authorId: user.id })
+      .returning();
 
-      if (input.images.length) {
-        await tx.insert(productImages).values(toImageValues(product!.id, input.images));
-      }
-
-      return product!;
-    });
-
-    return ok(product, "Product added successfully");
-  } catch (error) {
-    if (isUniqueViolation(error)) {
-      throw duplicateHandleError();
+    if (input.images.length) {
+      await tx.insert(productImages).values(toImageValues(product!.id, input.images));
     }
-    throw error;
-  }
+
+    return product!;
+  }).catch(rethrowAsDuplicateHandle);
+
+  return ok(product, "Product added successfully");
 });

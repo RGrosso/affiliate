@@ -1,12 +1,13 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import type { User } from "#auth-utils";
 import { productImages, products, settings } from "hub:db:schema";
 
 const SEEDED_KEY = "sample_products_seeded";
 
 /**
- * Inserts the sample products the first time it runs. A settings flag records that it ran,
- * so deleting the samples later never brings them back.
+ * Inserts the sample products once. A settings flag records that seeding has been decided,
+ * so deleting the samples never brings them back. A store that already has products is
+ * never seeded: it's marked as done instead, so samples don't appear among real products.
  */
 export async function seedSampleProductsOnce(authorId: string) {
   const [seeded] = await db.select()
@@ -17,6 +18,15 @@ export async function seedSampleProductsOnce(authorId: string) {
   if (seeded) return;
 
   await db.transaction(async (tx) => {
+    const [existing] = await tx.select({ count: count() }).from(products);
+
+    if (existing && existing.count > 0) {
+      await tx.insert(settings)
+        .values({ key: SEEDED_KEY, value: "skipped: store already had products" })
+        .onConflictDoNothing();
+      return;
+    }
+
     const inserted = await tx.insert(products)
       .values(sampleProducts.map(sample => ({
         title: sample.title,

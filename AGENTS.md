@@ -28,7 +28,7 @@ The site is UK-based. Always prefer British English and UK formats over US ones.
 
 - Write all copy, validation messages, comments and docs in British English: "colour", "favourite", "organise", "cancelled", "licence" (noun).
 - Use the shared formatters in `shared/utils/format.ts` instead of building your own `Intl` formatter. They use `LOCALE` (`en-GB`), `CURRENCY` (`GBP`) and the `Europe/London` time zone.
-  - Prices: `formatPrice(pence)` → `£34.99`.
+  - Prices: `formatCurrency(pence)` → `£34.99`. Options: `minDecimals` and `maxDecimals`, each `0` or `2` (default `2`). `{ minDecimals: 0 }` drops `.00` from whole amounts (`£429`); `{ maxDecimals: 0 }` rounds to whole pounds (`£35`).
   - Dates: `formatDate(value)` → `12 Oct 2026`, so day before month. Never `10/12/2026` or `Oct 12`.
   - Date and time: `formatDateTime(value)` → `12 Oct 2026, 14:05`. Use the 24-hour clock.
 - Never call `toLocaleString()`, `toLocaleDateString()` or `Intl.*` without a locale. They fall back to the browser or server default, which may be US.
@@ -42,4 +42,4 @@ The site is UK-based. Always prefer British English and UK formats over US ones.
 - Import `z` from `#shared/schemas/zod`, never from `"zod"`. That module installs the friendly fallback error messages; importing `"zod"` directly skips them.
 - One Zod schema validates both the `UForm` and the API route. Add or change validation in `shared/schemas/`, and the form and route pick it up together.
 - Validation messages are shown to end users as-is: write them as plain, friendly sentences ("The title can be at most 255 characters").
-- Money is in pounds sterling (GBP). It's stored as whole pence (`pricePence`) and entered as pounds (`price: 19.99`). Convert at the boundary in `server/utils/products.ts` and display with `formatPrice`. Never use cents, dollars or `USD`.
+- Money is in pounds sterling (GBP). It's stored as whole pence (`pricePence`) and entered as pounds (`price: 19.99`). Convert at the boundary in `server/utils/products.ts` and display with `formatCurrency`. Never use cents, dollars or `USD`.
