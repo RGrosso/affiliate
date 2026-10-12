@@ -1,5 +1,5 @@
 <template>
-  <UContainer>
+  <CoreContainer>
     <div class="flex items-center justify-center pt-20">
       <div class="w-full max-w-md">
         <h1 class="mb-2">
@@ -102,7 +102,7 @@
         </template>
       </div>
     </div>
-  </UContainer>
+  </CoreContainer>
 </template>
 
 <script setup lang="ts">

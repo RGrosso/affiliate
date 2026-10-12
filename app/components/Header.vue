@@ -1,60 +1,94 @@
 <template>
-  <UHeader>
-    <template #title>
-      Affiliate
-    </template>
-    <UNavigationMenu :items="items" />
-    <template #right>
-      <div class="flex items-center space-x-2">
-        <UColorModeButton />
-        <div v-if="user">
-          <UDropdownMenu
-            :items="dropdownItems"
-            :popper="{ placement: 'bottom-end' }"
-            class="cursor-pointer"
-          >
-            <UButton
-              color="neutral"
-              variant="ghost"
-              trailing-icon="i-heroicons-chevron-down-20-solid"
-            >
-              <UAvatar
-                color="primary"
-                :alt="user.username"
-              />
-              <span class="font-medium">{{ user.username }}</span>
-            </UButton>
-          </UDropdownMenu>
-        </div>
-        <div v-else>
-          <NuxtLink to="/login">
-            <UButton class="cursor-pointer">Log in</UButton>
-          </NuxtLink>
-        </div>
+  <UHeader
+    :ui="{
+      root: 'h-auto',
+      container: 'h-(--ui-header-height) gap-6',
+      left: 'lg:flex-none',
+      center: 'flex-1 max-w-xl',
+      right: 'lg:flex-none',
+    }"
+  >
+    <template #top>
+      <div class="bg-band-strong text-white text-sm font-semibold text-center px-4 py-2.5">
+        Gift ideas for humans, hounds and everything in between
       </div>
+    </template>
+
+    <template #title>
+      <span class="font-display font-bold text-3xl tracking-tight text-primary">
+        {{ SITE_NAME }}<span class="text-action">.</span>
+      </span>
+    </template>
+
+    <HeaderSearch />
+
+    <template #right>
+      <UColorModeButton />
+      <UDropdownMenu
+        v-if="user"
+        :items="dropdownItems"
+        :content="{ align: 'end' }"
+      >
+        <UButton
+          color="neutral"
+          variant="ghost"
+          trailing-icon="i-heroicons-chevron-down-20-solid"
+        >
+          <UAvatar
+            color="primary"
+            :alt="user.username"
+          />
+          <span class="font-medium">{{ user.username }}</span>
+        </UButton>
+      </UDropdownMenu>
+      <UButton
+        v-else
+        to="/login"
+        label="Log in"
+        color="neutral"
+        variant="ghost"
+      />
+    </template>
+
+    <template #bottom>
+      <CoreContainer>
+        <nav
+          aria-label="Categories"
+          class="flex gap-1.5 overflow-x-auto pb-3 [scrollbar-width:none]"
+        >
+          <UButton
+            v-for="category in categories"
+            :key="category.label"
+            :to="category.to"
+            :label="category.label"
+            :color="category.highlight ? 'secondary' : 'neutral'"
+            variant="ghost"
+            class="shrink-0 font-semibold"
+          />
+        </nav>
+      </CoreContainer>
+    </template>
+
+    <template #body>
+      <HeaderSearch />
     </template>
   </UHeader>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "#app";
-import type { DropdownMenuItem, NavigationMenuItem } from "@nuxt/ui";
+import type { DropdownMenuItem } from "@nuxt/ui";
 
-const route = useRoute();
-
-const items = computed<NavigationMenuItem[]>(() => [
-  {
-    label: "Home",
-    to: "/",
-    active: route.path === "/",
-  },
-  {
-    label: "Products",
-    to: "/products",
-    active: route.path.startsWith("/products"),
-  },
-]);
+// WIP: categories all land on the unfiltered product list for now
+const categories = [
+  { label: "For her", to: "/products?for=her" },
+  { label: "For him", to: "/products?for=him" },
+  { label: "For kids", to: "/products?for=kids" },
+  { label: "For dogs", to: "/products?for=dogs" },
+  { label: "For cats", to: "/products?for=cats" },
+  { label: "Under £20", to: "/products?max=20" },
+  { label: "Silly stuff", to: "/products?tag=silly", highlight: true },
+];
 
 const { user, isAdmin, logout } = useAuth();
 
@@ -71,7 +105,6 @@ const dropdownItems = computed<DropdownMenuItem[][]>(() => [
       label: "Logout",
       icon: "i-heroicons-arrow-left-on-rectangle",
       onSelect: logout,
-      class: "cursor-pointer",
     },
   ],
 ]);

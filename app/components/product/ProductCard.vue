@@ -1,60 +1,53 @@
 <template>
   <UCard
-    class="overflow-hidden group flex flex-col"
-    :ui="{ header: 'p-0 sm:p-0', body: 'flex-1' }"
+    class="group flex flex-col rounded-md"
+    :ui="{ body: 'p-3 sm:p-3 flex-1 flex flex-col gap-3' }"
   >
-    <template #header>
-      <div class="aspect-square bg-gray-100 dark:bg-gray-800 overflow-hidden">
-        <img
-          v-if="product.image"
-          :src="product.image.url"
-          :alt="product.image.alt ?? product.title"
-          class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
-        >
-        <div
-          v-else
-          class="size-full flex items-center justify-center"
-        >
-          <UIcon
-            name="i-heroicons-photo"
-            class="w-12 h-12 text-gray-400"
-          />
-        </div>
+    <div class="aspect-square rounded-sm bg-elevated overflow-hidden">
+      <img
+        v-if="product.image"
+        :src="product.image.url"
+        :alt="product.image.alt ?? product.title"
+        class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
+      >
+      <div
+        v-else
+        class="size-full flex items-center justify-center"
+      >
+        <UIcon
+          name="i-heroicons-photo"
+          class="w-12 h-12 text-dimmed"
+        />
       </div>
-    </template>
+    </div>
 
-    <div class="space-y-1">
+    <div class="px-1 flex-1 flex flex-col gap-1">
+      <h3 class="text-base font-bold leading-snug text-highlighted line-clamp-2">
+        {{ product.title }}
+      </h3>
       <p
         v-if="product.retailer"
-        class="text-sm text-gray-500"
+        class="text-sm text-toned"
       >
         {{ product.retailer }}
       </p>
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-        {{ product.title }}
-      </h3>
-    </div>
-
-    <template #footer>
-      <div class="flex justify-between items-center gap-4">
-        <span class="text-lg font-bold text-primary">
-          {{ formatCurrency(product.pricePence) ?? "" }}
+      <div class="mt-auto pt-2 flex justify-between items-center gap-4">
+        <span class="font-display font-bold text-xl text-highlighted">
+          {{ formatCurrency(product.pricePence, { minDecimals: 0 }) ?? "" }}
         </span>
-        <UButton
+        <ULink
           v-if="product.affiliateUrl"
           :to="product.affiliateUrl"
           target="_blank"
           rel="sponsored noopener noreferrer"
-          label="View deal"
-          icon="i-heroicons-arrow-top-right-on-square"
-          trailing
-          color="primary"
-          variant="soft"
-          size="sm"
-        />
+          raw
+          class="text-sm font-bold text-primary hover:underline"
+        >
+          View
+        </ULink>
       </div>
-    </template>
+    </div>
   </UCard>
 </template>
 

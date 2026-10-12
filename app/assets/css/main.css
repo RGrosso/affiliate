@@ -1,37 +1,243 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-h1 {
-  font-size: 3rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+/* ------------------------------------------------------------------
+   Material-style tonal scales (Tailwind 50–950).
+   Register whichever you use in app.config.ts.
+------------------------------------------------------------------- */
+@theme static {
+  --font-sans: "Figtree", system-ui, sans-serif;
+  --font-display: "Fredoka", sans-serif;
+
+  /* Signal Blue — primary */
+  --color-signal-50: #f3f8ff;
+  --color-signal-100: #d1e4ff;
+  --color-signal-200: #9ecaff;
+  --color-signal-300: #6eaff0;
+  --color-signal-400: #4d93d3;
+  --color-signal-500: #2a7ab7;
+  --color-signal-600: #0061a4;
+  --color-signal-700: #00497d;
+  --color-signal-800: #003258;
+  --color-signal-900: #001d36;
+  --color-signal-950: #001224;
+
+  /* Coral — secondary for Signal Blue */
+  --color-coral-50: #fff8f6;
+  --color-coral-100: #ffdbcf;
+  --color-coral-200: #ffb59c;
+  --color-coral-300: #f68f6a;
+  --color-coral-400: #d67552;
+  --color-coral-500: #b55c3b;
+  --color-coral-600: #964425;
+  --color-coral-700: #772d11;
+  --color-coral-800: #5a1a04;
+  --color-coral-900: #380d00;
+  --color-coral-950: #260700;
+
+  /* Action orange — buy / CTA buttons only (use dark text on it) */
+  --color-action-50: #fff6ef;
+  --color-action-100: #ffe4cf;
+  --color-action-200: #ffc49c;
+  --color-action-300: #ffa165;
+  --color-action-400: #ff8a3d;
+  --color-action-500: #ff7a1a;
+  --color-action-600: #f06400;
+  --color-action-700: #c44d00;
+  --color-action-800: #9a3d06;
+  --color-action-900: #7c340b;
+  --color-action-950: #431700;
+
+  /* Sunny — warning. Too light for text, so text uses the 800/200 tones (see app.config.ts) */
+  --color-sunny-50: #fff6d6;
+  --color-sunny-100: #ffedb0;
+  --color-sunny-200: #fde48a;
+  --color-sunny-300: #f2cf5b;
+  --color-sunny-400: #f5c400;
+  --color-sunny-500: #d9a900;
+  --color-sunny-600: #b38600;
+  --color-sunny-700: #8a6500;
+  --color-sunny-800: #5c4300;
+  --color-sunny-900: #3d2c00;
+  --color-sunny-950: #241a00;
+
+  /* Crimson — error. A warm, true red: Tailwind's red reads pink when tinted */
+  --color-crimson-50: #fdeeeb;
+  --color-crimson-100: #ffdad5;
+  --color-crimson-200: #ffb4ab;
+  --color-crimson-300: #ff8a7e;
+  --color-crimson-400: #f2574a;
+  --color-crimson-500: #de3730;
+  --color-crimson-600: #ba1a1a;
+  --color-crimson-700: #93000a;
+  --color-crimson-800: #690005;
+  --color-crimson-900: #410002;
+  --color-crimson-950: #2d0001;
+
+  /* Ocean Teal — primary */
+  --color-ocean-50: #effefd;
+  --color-ocean-100: #c8fffd;
+  --color-ocean-200: #6ff7f6;
+  --color-ocean-300: #4cdada;
+  --color-ocean-400: #00bebe;
+  --color-ocean-500: #00a1a1;
+  --color-ocean-600: #006a6a;
+  --color-ocean-700: #004f4f;
+  --color-ocean-800: #003737;
+  --color-ocean-900: #002020;
+  --color-ocean-950: #001414;
+
+  /* Amber — secondary for Ocean Teal */
+  --color-amber-50: #fff8f2;
+  --color-amber-100: #ffdcbd;
+  --color-amber-200: #ffb871;
+  --color-amber-300: #eb9c45;
+  --color-amber-400: #cc822c;
+  --color-amber-500: #ac6a12;
+  --color-amber-600: #8b5000;
+  --color-amber-700: #6a3c00;
+  --color-amber-800: #4a2800;
+  --color-amber-900: #2d1600;
+  --color-amber-950: #1f0d00;
+
+  /* Forest Green — primary */
+  --color-forest-50: #f3ffe8;
+  --color-forest-100: #b8f397;
+  --color-forest-200: #9dd67e;
+  --color-forest-300: #82ba65;
+  --color-forest-400: #689f4d;
+  --color-forest-500: #4f8436;
+  --color-forest-600: #386a20;
+  --color-forest-700: #205107;
+  --color-forest-800: #0e3900;
+  --color-forest-900: #052100;
+  --color-forest-950: #021500;
+
+  /* Sky — secondary for Forest Green */
+  --color-sky-50: #f7f9ff;
+  --color-sky-100: #d4e3ff;
+  --color-sky-200: #a5c8ff;
+  --color-sky-300: #85adec;
+  --color-sky-400: #6a92cf;
+  --color-sky-500: #5078b3;
+  --color-sky-600: #365f98;
+  --color-sky-700: #1b477e;
+  --color-sky-800: #003061;
+  --color-sky-900: #001b3d;
+  --color-sky-950: #00112a;
 }
 
-h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: -0.025em;
+/* Brand bands (hero, announcement strip) stay dark blue in both modes, so text on them is always white */
+@theme inline {
+  --color-band: var(--app-band);
+  --color-band-strong: var(--app-band-strong);
+  --color-band-muted: var(--app-band-muted);
 }
 
-h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
+/* ------------------------------------------------------------------
+   Material shade mapping: strong 600 tones in light mode,
+   soft 200 tones in dark mode (on-colour text is dark).
+   Every semantic colour uses the same shades, so status text
+   and badges stay readable on the page background.
+   Surfaces below are tuned for Signal Blue. Swap the hexes
+   from the mockup if you pick Ocean or Forest.
+------------------------------------------------------------------- */
+:root {
+  --app-band: var(--ui-color-primary-600);
+  --app-band-strong: var(--ui-color-primary-700);
+  --app-band-muted: var(--ui-color-primary-100);
+
+  /* Nuxt UI derives rounded-md (buttons, inputs) as 1.5× this = 6px */
+  --ui-radius: 0.25rem;
+
+  --ui-primary: var(--ui-color-primary-600);
+  --ui-secondary: var(--ui-color-secondary-600);
+  --ui-success: var(--ui-color-success-600);
+  --ui-info: var(--ui-color-info-600);
+  --ui-warning: var(--ui-color-warning-800);
+  --ui-error: var(--ui-color-error-600);
+
+  --ui-bg: #f8f9ff;
+  --ui-bg-muted: #f2f3fa;
+  --ui-bg-elevated: #ecedf4;
+  --ui-bg-accented: #e1e2e8;
+
+  --ui-text-highlighted: #191c20;
+  --ui-text: #191c20;
+  --ui-text-toned: #42474e;
+  --ui-text-muted: #5b6068;
+  --ui-text-dimmed: #72777f;
+
+  --ui-border: #c2c7cf;
+  --ui-border-muted: #e1e2e8;
+  --ui-border-accented: #72777f;
 }
 
-h4 {
-  font-size: 1.25rem;
-  font-weight: 600;
+.dark {
+  --app-band: var(--ui-color-primary-800);
+  --app-band-strong: var(--ui-color-primary-900);
+
+  --ui-primary: var(--ui-color-primary-200);
+  --ui-secondary: var(--ui-color-secondary-200);
+  --ui-success: var(--ui-color-success-200);
+  --ui-info: var(--ui-color-info-200);
+  --ui-warning: var(--ui-color-warning-200);
+  /* 200 is salmon pink for this scale, so error stays red with 400 */
+  --ui-error: var(--ui-color-error-400);
+
+  --ui-bg: #111418;
+  --ui-bg-muted: #191c20;
+  --ui-bg-elevated: #1d2024;
+  --ui-bg-accented: #272a2f;
+
+  --ui-text-highlighted: #e1e2e8;
+  --ui-text: #e1e2e8;
+  --ui-text-toned: #c2c7cf;
+  --ui-text-muted: #a3a8b0;
+  --ui-text-dimmed: #8c9199;
+
+  --ui-border: #42474e;
+  --ui-border-muted: #2a2d32;
+  --ui-border-accented: #8c9199;
 }
 
-p {
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1.625;
-  color: var(--ui-text-muted);
-}
-
-/* Revert tailwind change and make all buttons have a pointer */
+/* In the base layer so utility classes on a heading or paragraph can override these */
 @layer base {
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  h1 {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  h2 {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.625;
+    color: var(--ui-text-muted);
+  }
+
+  /* Revert tailwind change and make all buttons have a pointer */
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;

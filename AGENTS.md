@@ -4,6 +4,8 @@ Nuxt 4 affiliate product site: Nuxt UI v4, NuxtHub (Postgres via Drizzle, Blob s
 
 Read `app/VUE.md` before writing or editing any `.vue` file or composable: it covers props, emits, slots and VueUse.
 
+Read `app/APP.md` before building or styling UI: it covers the site name, theme colours and the core components that wrap Nuxt UI.
+
 ## Workflow
 
 - Package manager is `pnpm`.

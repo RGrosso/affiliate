@@ -11,7 +11,7 @@
       role="region"
       :aria-label="message"
     >
-      <div class="flex items-center justify-between gap-4 rounded-xl bg-inverted text-inverted px-4 py-2.5 shadow-lg">
+      <div class="flex items-center justify-between gap-4 rounded-md bg-inverted text-inverted px-4 py-2.5 shadow-lg">
         <span class="text-sm font-medium flex items-center gap-2 min-w-0">
           <UIcon
             :name="icon"

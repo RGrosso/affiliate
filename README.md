@@ -39,6 +39,16 @@ The first time an admin logs in (or finishes setup), 20 example products with sq
 
 Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
 
+## Brand and theme
+
+The site name is a placeholder, currently **Thingamagift**. It's set once as `SITE_NAME` in `shared/utils/site.ts` and used by the header, admin sidebar and page titles, so change it there to rename the site.
+
+The colour theme is the Signal Blue palette from the design handoff:
+
+- `app/assets/css/main.css` defines the colour scales, the fonts (Figtree for body text, Fredoka for `h1`, `h2` and `font-display`) and the light and dark surface colours. Fonts are downloaded and self-hosted by `@nuxt/fonts`, which picks up any font family named in the CSS; the weights it loads are set under `fonts` in `nuxt.config.ts`.
+- `app/app.config.ts` maps Nuxt UI's colours to those scales: `primary` is `signal`, `secondary` is `coral` and `neutral` is `slate`. The status colours use tonal scales too (`success` is `forest`, `info` is `sky`, `warning` is a sunny yellow, `error` is `crimson`). Colours are shaded 600 in light mode and 200 in dark mode so text on them passes contrast; warning and error have their own shading in `app.config.ts`, since yellow is too light for text and a pale red tint looks pink. Commented-out blocks switch to the Ocean Teal or Forest Green palettes; swap the surface colours in `main.css` too if you do.
+- `action` is an extra orange colour, registered in `nuxt.config.ts`, for the main call-to-action button on a page (`<UButton color="action">`). Solid action buttons use dark navy text, because white text on orange fails contrast.
+
 ## Locale and currency
 
 The site is UK-based. Copy is in British English, prices are in pounds sterling (stored as whole pence in `products.price_pence`), and dates and times use UK formats in the `Europe/London` time zone, e.g. `12 Oct 2026, 14:05`. The formatters in `shared/utils/format.ts` handle this.

@@ -10,4 +10,8 @@
 
 <script setup lang="ts">
 import { en_gb } from "@nuxt/ui/locale";
+
+useHead({
+  titleTemplate: title => (title ? `${title} · ${SITE_NAME}` : SITE_NAME),
+});
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <UContainer>
+  <CoreContainer>
     <div
       v-if="user"
       class="flex items-center justify-center pt-20"
@@ -67,7 +67,7 @@
         </UForm>
       </div>
     </div>
-  </UContainer>
+  </CoreContainer>
 </template>
 
 <script setup lang="ts">

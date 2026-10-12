@@ -11,11 +11,9 @@
       </NuxtLink>
     </template>
 
-    <UAlert
+    <CoreAlert
       v-if="sampleCount > 0"
-      color="warning"
-      variant="subtle"
-      icon="i-heroicons-exclamation-triangle"
+      variant="warning"
       title="You're viewing sample products"
       :description="`These ${sampleCount} products are here to show how your store looks. Delete them before you go live.`"
       :actions="[{
@@ -28,7 +26,7 @@
 
     <div
       v-if="products.length"
-      class="border border-default rounded-xl overflow-hidden"
+      class="border border-default rounded-md overflow-hidden"
     >
       <UTable
         :data="products"
@@ -61,14 +59,11 @@
             >
               {{ row.original.title }}
             </NuxtLink>
-            <UBadge
+            <CoreTag
               v-if="row.original.isSample"
+              label="Sample"
               color="warning"
-              variant="subtle"
-              size="sm"
-            >
-              Sample
-            </UBadge>
+            />
           </div>
         </template>
         <template #retailer-cell="{ row }">
@@ -82,9 +77,9 @@
 
     <div
       v-else-if="status !== 'pending'"
-      class="bg-card text-card-foreground border border-border rounded-xl p-12 text-center flex flex-col items-center justify-center shadow-sm"
+      class="bg-default text-default border border-default rounded-md p-12 text-center flex flex-col items-center justify-center shadow-sm"
     >
-      <div class="h-12 w-12 rounded-lg bg-muted flex items-center justify-center text-muted-foreground mb-4">
+      <div class="h-12 w-12 rounded-lg bg-muted flex items-center justify-center text-muted mb-4">
         <UIcon
           name="i-heroicons-tag"
           class="w-6 h-6"
@@ -93,7 +88,7 @@
       <h2 class="text-sm font-semibold mb-1">
         First step: add your products
       </h2>
-      <p class="text-sm text-muted-foreground max-w-sm mb-4">
+      <p class="text-sm text-muted max-w-sm mb-4">
         Write descriptions, add affiliate links, and upload product images to start sharing items on your site.
       </p>
       <NuxtLink to="/admin/add-product">
