@@ -188,7 +188,4 @@ async function deleteSamples() {
     deleting.value = false;
   }
 }
-
-const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
-const formatDate = (value: string | Date) => dateFormatter.format(new Date(value));
 </script>

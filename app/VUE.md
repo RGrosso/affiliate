@@ -31,7 +31,22 @@ Use it in place of the call-signature form (`(e: "save", id: string): void`). Ca
 
 ## Slots
 
-Type slots with `defineSlots<{ default(): any; actions?(): any }>()` and read them through the returned `slots` object (or `useSlots()`), templates included: `v-if="slots.actions"`.
+Type slots with `defineSlots`, returning `VNode[]` from `vue`. Never use `any`:
+
+```ts
+import type { VNode } from "vue";
+
+const slots = defineSlots<{
+  default: () => VNode[];
+  actions?: () => VNode[];
+}>();
+```
+
+Read them through the returned `slots` object (or `useSlots()`), templates included: `v-if="slots.actions"`.
+
+## TypeScript
+
+Avoid `any`. Use a precise type, `unknown` with narrowing, or a generic instead.
 
 ## Composables
 

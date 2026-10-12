@@ -27,7 +27,7 @@ export function toProductValues({ price, images: _images, handle, ...fields }: P
   return {
     ...fields,
     handle: finalHandle,
-    priceCents: price == null ? null : Math.round(price * 100),
+    pricePence: price == null ? null : Math.round(price * 100),
   };
 }
 

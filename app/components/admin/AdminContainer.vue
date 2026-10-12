@@ -16,7 +16,7 @@ defineProps<{
 }>();
 
 defineSlots<{
-  default: () => VNode;
-  actions?: () => VNode;
+  default: () => VNode[];
+  actions?: () => VNode[];
 }>();
 </script>

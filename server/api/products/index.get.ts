@@ -18,7 +18,7 @@ export default defineApiHandler(async (event) => {
     title: products.title,
     handle: products.handle,
     description: products.description,
-    priceCents: products.priceCents,
+    pricePence: products.pricePence,
     retailer: products.retailer,
     affiliateUrl: products.affiliateUrl,
     isSample: products.isSample,

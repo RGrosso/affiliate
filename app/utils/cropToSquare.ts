@@ -1,5 +1,5 @@
 /**
- * Center-crops an image file to a square and scales it down to at most `maxSize` pixels,
+ * Centre-crops an image file to a square and scales it down to at most `maxSize` pixels,
  * so every product image is stored square regardless of what was uploaded.
  */
 export async function cropToSquare(file: File, maxSize = 1200): Promise<File> {

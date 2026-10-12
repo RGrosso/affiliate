@@ -220,8 +220,9 @@
                 v-model="state.price"
                 :min="0"
                 :step="0.01"
-                :format-options="{ style: 'currency', currency: 'USD' }"
-                placeholder="$0.00"
+                :format-options="{ style: 'currency', currency: CURRENCY }"
+                :locale="LOCALE"
+                placeholder="£0.00"
                 class="w-full sm:w-48"
               />
             </UFormField>
@@ -451,7 +452,7 @@ const toState = (product?: EditableProduct) => ({
   title: product?.title ?? "",
   description: product?.description ?? "",
   handle: product?.handle ?? "",
-  price: product?.priceCents == null ? null : product.priceCents / 100,
+  price: product?.pricePence == null ? null : product.pricePence / 100,
   retailer: product?.retailer ?? "",
   affiliateUrl: product?.affiliateUrl ?? "",
   seoTitle: product?.seoTitle ?? "",

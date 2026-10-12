@@ -25,7 +25,7 @@ export const products = pgTable("products", {
   /** URL slug, used for `/products/<handle>`. */
   handle: text("handle").notNull().unique(),
   description: text("description"),
-  priceCents: integer("price_cents"),
+  pricePence: integer("price_pence"),
   retailer: text("retailer"),
   affiliateUrl: text("affiliate_url"),
   seoTitle: text("seo_title"),

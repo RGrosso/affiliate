@@ -37,7 +37,7 @@ export const addProductSchema = z.object({
       .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens only")
       .optional()
   ),
-  /** Price in major units (e.g. 19.99). Stored as whole cents. */
+  /** Price in major units (e.g. 19.99). Stored as whole pence. */
   price: z
     .number({ error: "Please enter the price as a number" })
     .min(0, "The price can't be negative")

@@ -4,7 +4,7 @@ export type EditableProduct = {
   title: string;
   handle: string;
   description: string | null;
-  priceCents: number | null;
+  pricePence: number | null;
   retailer: string | null;
   affiliateUrl: string | null;
   seoTitle: string | null;

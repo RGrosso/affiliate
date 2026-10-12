@@ -39,6 +39,10 @@ The first time an admin logs in (or finishes setup), 20 example products with sq
 
 Product images uploaded from the create page are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
 
+## Locale and currency
+
+The site is UK-based. Copy is in British English, prices are in pounds sterling (stored as whole pence in `products.price_pence`), and dates and times use UK formats in the `Europe/London` time zone, e.g. `12 Oct 2026, 14:05`. The formatters in `shared/utils/format.ts` handle this.
+
 ## Project structure
 
 | Path | What's in it |

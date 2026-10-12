@@ -30,10 +30,6 @@
 <script setup lang="ts">
 import type { VNode } from "vue";
 
-/**
- * A persistent action bar pinned to the bottom of the scroll area, e.g. for
- * Save / Cancel while a form has unsaved changes. Buttons go in the default slot.
- */
 const {
   show,
   message = "Unsaved changes",

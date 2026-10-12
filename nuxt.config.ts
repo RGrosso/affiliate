@@ -1,6 +1,11 @@
 export default defineNuxtConfig({
   modules: ["@nuxt/eslint", "@nuxt/ui", "@nuxthub/core", "nuxt-auth-utils"],
   devtools: { enabled: true },
+  app: {
+    head: {
+      htmlAttrs: { lang: "en-GB" },
+    },
+  },
   css: ["~/assets/css/main.css"],
   compatibilityDate: "2025-07-15",
   hub: {
