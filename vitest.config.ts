@@ -27,6 +27,19 @@ export default defineConfig({
       },
       () =>
         defineVitestProject({
+          // Pre-bundle what the tests import. Otherwise Vite finds these mid-run on a cold cache (as in CI),
+          // re-optimises and reloads, and every test file fails to import.
+          optimizeDeps: {
+            include: [
+              "vitest > expect-type",
+              "vitest > magic-string",
+              "vitest > chai",
+              "@vue/test-utils",
+              "@vue/devtools-kit",
+              "axe-core",
+              "zod",
+            ],
+          },
           test: {
             name: "nuxt",
             include: ["app/{components,composables}/**/*.test.ts", "test/nuxt/**/*.test.ts"],
