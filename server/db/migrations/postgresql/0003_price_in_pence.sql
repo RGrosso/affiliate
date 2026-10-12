@@ -1,0 +1,1 @@
+ALTER TABLE "products" RENAME COLUMN "price_cents" TO "price_pence";

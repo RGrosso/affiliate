@@ -33,6 +33,16 @@ The same flow applies to any user whose password is empty (`NULL`). Logging in a
 
 To start again from scratch, stop the dev server and delete the `.data/` folder. The admin will be seeded again on the next `pnpm dev`.
 
+## Sample products
+
+The first time an admin logs in (or finishes setup), 20 example products with square placeholder images are added so the store isn't empty. A warning on **Admin → Products** lets you delete all of them in one go. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so deleting them won't bring them back. If the store already has products, no samples are added. The sample data lives in `server/utils/sampleProducts.ts`.
+
+Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
+
+## Locale and currency
+
+The site is UK-based. Copy is in British English, prices are in pounds sterling (stored as whole pence in `products.price_pence`), and dates and times use UK formats in the `Europe/London` time zone, e.g. `12 Oct 2026, 14:05`. The formatters in `shared/utils/format.ts` handle this.
+
 ## Project structure
 
 | Path | What's in it |
@@ -89,3 +99,8 @@ pnpm preview
 ```
 
 The admin seed doesn't run in production. You'll need to create the first admin user yourself for now.
+
+## Contributing
+
+1. Pull the latest `main` and create a branch from it: `bug/<short-description>` for bug fixes, `feature/<short-description>` for everything else. Keep the description short and concise, 20 characters at most (e.g. `feature/sample-products`).
+2. Open a pull request when you're ready. Nothing is merged into `main` without a review and approval from another person.

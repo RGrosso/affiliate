@@ -1,21 +1,23 @@
-import { products } from "hub:db:schema";
+import { productImages, products } from "hub:db:schema";
 import { addProductSchema } from "#shared/schemas/products.schema";
 
 export default defineApiHandler(async (event) => {
   const { user } = await requireAdmin(event);
 
-  const { title, description, price, affiliateUrl, imageUrl } = await readValidated(event, addProductSchema);
+  const input = await readValidated(event, addProductSchema);
+  const values = toProductValues(input);
 
-  const [product] = await db.insert(products)
-    .values({
-      title,
-      description,
-      priceCents: price == null ? null : Math.round(price * 100),
-      affiliateUrl,
-      imageUrl,
-      authorId: user.id,
-    })
-    .returning();
+  const product = await db.transaction(async (tx) => {
+    const [product] = await tx.insert(products)
+      .values({ ...values, authorId: user.id })
+      .returning();
+
+    if (input.images.length) {
+      await tx.insert(productImages).values(toImageValues(product!.id, input.images));
+    }
+
+    return product!;
+  }).catch(rethrowAsDuplicateHandle);
 
   return ok(product, "Product added successfully");
 });

@@ -41,5 +41,7 @@ export default defineApiHandler(async (event) => {
     loggedInAt: Date.now(),
   });
 
+  await seedSampleProductsForAdmin(sessionUser);
+
   return ok({ user: sessionUser }, "Logged in successfully");
 });

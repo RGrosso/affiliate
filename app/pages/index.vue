@@ -47,40 +47,61 @@
           />
         </div>
 
-        <!-- Temporary loading product list -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          <UCard
-            v-for="i in 3"
-            :key="i"
-            class="overflow-hidden group"
-          >
-            <template #header>
-              <div class="h-48 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-md flex items-center justify-center">
-                <UIcon
-                  name="i-heroicons-photo"
-                  class="w-12 h-12 text-gray-400"
-                />
+          <template v-if="status === 'pending'">
+            <UCard
+              v-for="i in FEATURED_COUNT"
+              :key="i"
+              class="overflow-hidden"
+              :ui="{ header: 'p-0 sm:p-0' }"
+            >
+              <template #header>
+                <div class="aspect-square bg-gray-200 dark:bg-gray-800 animate-pulse flex items-center justify-center">
+                  <UIcon
+                    name="i-heroicons-photo"
+                    class="w-12 h-12 text-gray-400"
+                  />
+                </div>
+              </template>
+              <div class="space-y-2">
+                <div class="h-4 w-1/3 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+                <div class="h-6 w-3/4 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
               </div>
-            </template>
-            <div class="space-y-2">
-              <div class="h-4 w-1/3 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-              <div class="h-6 w-3/4 bg-gray-300 dark:bg-gray-700 rounded animate-pulse" />
-            </div>
-            <template #footer>
-              <div class="flex justify-between items-center">
-                <div class="h-6 w-16 bg-primary-100 dark:bg-primary-900 rounded animate-pulse" />
-                <UButton
-                  disabled
-                  label="View Link"
-                  color="primary"
-                  variant="soft"
-                  size="xs"
-                />
-              </div>
-            </template>
-          </UCard>
+              <template #footer>
+                <div class="flex justify-between items-center">
+                  <div class="h-6 w-16 bg-primary-100 dark:bg-primary-900 rounded animate-pulse" />
+                  <div class="h-8 w-24 bg-primary-100 dark:bg-primary-900 rounded animate-pulse" />
+                </div>
+              </template>
+            </UCard>
+          </template>
+
+          <ProductCard
+            v-for="product in featured"
+            v-else
+            :key="product.id"
+            :product="product"
+          />
         </div>
+
+        <p
+          v-if="status !== 'pending' && !featured.length"
+          class="text-center text-gray-500 py-12"
+        >
+          {{ error ? "We couldn't load products right now. Please try again later." : "New finds are on the way. Check back soon!" }}
+        </p>
       </UContainer>
     </section>
   </div>
 </template>
+
+<script setup lang="ts">
+const FEATURED_COUNT = 6;
+
+const { data, status, error } = await useFetch("/api/products", {
+  query: { limit: FEATURED_COUNT },
+  lazy: true,
+});
+
+const featured = computed(() => data.value?.data.products ?? []);
+</script>

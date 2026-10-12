@@ -15,6 +15,20 @@
       "when": 1791741649379,
       "tag": "0001_nostalgic_lucky_pierre",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791745490783,
+      "tag": "0002_early_clea",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791815942649,
+      "tag": "0003_price_in_pence",
+      "breakpoints": true
     }
   ]
 }

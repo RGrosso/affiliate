@@ -1,9 +1,16 @@
 <template>
   <AdminContainer heading="Add product">
-    <p>This will be an add form</p>
+    <template #actions>
+      <UButton
+        to="/admin/products"
+        color="neutral"
+        variant="ghost"
+        icon="i-heroicons-arrow-left"
+      >
+        Products
+      </UButton>
+    </template>
+
+    <ProductForm />
   </AdminContainer>
 </template>
-
-<script setup lang="ts">
-
-</script>
