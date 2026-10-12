@@ -41,7 +41,8 @@ import type { EditableProduct } from "#shared/types/product";
 const route = useRoute();
 const id = route.params.id as string;
 
-const { data, error } = await useFetch(`/api/products/${id}`);
+// Nitro can't infer the response type from a template-literal URL, so give it explicitly
+const { data, error } = await useFetch<ApiSuccess<EditableProduct & { isSample: boolean }>>(`/api/products/${id}`);
 
 const product = computed(() => data.value?.data ?? null);
 

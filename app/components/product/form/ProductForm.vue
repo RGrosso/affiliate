@@ -539,7 +539,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   saving.value = true;
   try {
     if (product) {
-      const { data } = await $fetch(`/api/products/${product.id}`, { method: "PATCH", body });
+      const { data } = await $fetch<ApiSuccess<EditableProduct | undefined>>(`/api/products/${product.id}`, {
+        method: "PATCH",
+        body,
+      });
       toast.add({ title: "Product saved", color: "success" });
       if (data) {
         reset(data);
