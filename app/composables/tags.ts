@@ -10,8 +10,6 @@ import type { UpdateTagInput } from "#shared/schemas/tags.schema";
 export function useTags() {
   const { data, status, error, refresh } = useFetch<ApiSuccess<AdminTag[]>>("/api/tags", {
     key: "admin-tags",
-    // Product counts change whenever a product is saved, so don't serve a stale list from the payload
-    getCachedData: () => undefined,
   });
 
   const tags = computed(() => data.value?.data ?? []);
