@@ -16,6 +16,7 @@ Read `app/APP.md` before building or styling UI: it covers the site name, theme 
 - When behaviour described in `README.md` changes, update the README in the same change.
 - Keep comments for the non-obvious, like why something is done or a gotcha. Don't add docblocks that restate a name or type.
 - Avoid `any` in TypeScript. Use a precise type, `unknown` with narrowing, or a generic.
+- When you finish a task, end with a short, concise summary of the changes: what changed and why, in a few bullets.
 
 ## Git workflow
 
@@ -38,6 +39,14 @@ The site is UK-based. Always prefer British English and UK formats over US ones.
 - Never call `toLocaleString()`, `toLocaleDateString()` or `Intl.*` without a locale. They fall back to the browser or server default, which may be US.
 - Nuxt UI is set to `en_gb` on `UApp` in `app/app.vue`, and `<html lang="en-GB">` is set in `nuxt.config.ts`. Pass `:locale="LOCALE"` and `currency: CURRENCY` to currency inputs such as `UInputNumber`.
 - Prefer metric units in copy (cm, kg, litres, °C), except where inches are the usual UK term, such as screen sizes and pan diameters.
+
+## Server code
+
+- New data access goes in a repository in `server/repositories/`. Repositories are the only code that queries `db` with Drizzle.
+- Business rules go in a service in `server/services/`. Services own transactions and build repositories on `tx` inside them.
+- Routes in `server/api/` stay thin: check auth, validate input with `readValidated` or `readValidatedQuery`, call one service method and return `ok(...)`. Never query `db` from a route.
+- New list endpoints validate `?page` and `?pageSize` with `pageQuerySchema` and return `PagedResult<T>`, both from `shared/`.
+- Test repositories and services against `createTestDb()` in `test/setup/db.ts`, not by mocking `db`.
 
 ## Shared code (`shared/`)
 

@@ -70,6 +70,16 @@ export async function readValidated<S extends ZodType>(event: H3Event, schema: S
   return result.data;
 }
 
+/** Validates the query string, throwing a `VALIDATION_ERROR` on failure. */
+export function readValidatedQuery<S extends ZodType>(event: H3Event, schema: S): z.output<S> {
+  const result = schema.safeParse(getQuery(event));
+  if (!result.success) {
+    throw validationError(result.error);
+  }
+
+  return result.data;
+}
+
 const codeForStatus = (status: number): ApiErrorCode => {
   switch (status) {
     case 401: return "UNAUTHORIZED";

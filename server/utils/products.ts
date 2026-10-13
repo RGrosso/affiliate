@@ -1,6 +1,4 @@
 import type { H3Event } from "h3";
-import { asc, eq } from "drizzle-orm";
-import { productImages, products } from "hub:db:schema";
 import { z } from "#shared/schemas/zod";
 import type { addProductSchema } from "#shared/schemas/products.schema";
 
@@ -10,11 +8,13 @@ const productIdSchema = z.object({
   id: z.uuid(),
 });
 
+export const productNotFound = () => notFound("We couldn't find that product");
+
 export async function readProductId(event: H3Event): Promise<string> {
   const result = productIdSchema.safeParse(getRouterParams(event));
 
   if (!result.success) {
-    throw notFound("We couldn't find that product");
+    throw productNotFound();
   }
 
   return result.data.id;
@@ -53,23 +53,4 @@ export function toImageValues(productId: string, images: ProductInput["images"])
     alt: image.alt,
     position,
   }));
-}
-
-export async function findProductWithImages(id: string) {
-  const [product] = await db.select()
-    .from(products)
-    .where(eq(products.id, id))
-    .limit(1);
-
-  if (!product) return undefined;
-
-  const images = await db.select({
-    url: productImages.url,
-    alt: productImages.alt,
-  })
-    .from(productImages)
-    .where(eq(productImages.productId, id))
-    .orderBy(asc(productImages.position));
-
-  return { ...product, images };
 }

@@ -1,6 +1,37 @@
+import { createEvent } from "h3";
+import { IncomingMessage, ServerResponse } from "node:http";
+import { Socket } from "node:net";
 import { describe, expect, it } from "vitest";
 import { z } from "#shared/schemas/zod";
-import { apiError, notFound, ok, validationError } from "./api";
+import { pageQuerySchema } from "#shared/schemas/pagination.schema";
+import { apiError, notFound, ok, readValidatedQuery, validationError } from "./api";
+
+describe("readValidatedQuery", () => {
+  const eventFor = (search: string) => {
+    const req = new IncomingMessage(new Socket());
+    req.url = `/api/products${search}`;
+    return createEvent(req, new ServerResponse(req));
+  };
+
+  it("parses and coerces the query string", () => {
+    expect(readValidatedQuery(eventFor("?page=2&pageSize=5"), pageQuerySchema)).toEqual({ page: 2, pageSize: 5 });
+    expect(readValidatedQuery(eventFor(""), pageQuerySchema)).toEqual({ page: 1, pageSize: 20 });
+  });
+
+  it("throws a validation error with field messages", () => {
+    try {
+      readValidatedQuery(eventFor("?pageSize=500"), pageQuerySchema);
+    } catch (error) {
+      expect((error as { statusCode: number }).statusCode).toBe(400);
+      expect((error as { data: unknown }).data).toMatchObject({
+        code: "VALIDATION_ERROR",
+        fieldErrors: { pageSize: ["The page size can be at most 100"] },
+      });
+      return;
+    }
+    throw new Error("Expected the query to be rejected");
+  });
+});
 
 describe("ok", () => {
   it("wraps data, with an optional message", () => {

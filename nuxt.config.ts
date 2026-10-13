@@ -21,6 +21,12 @@ export default defineNuxtConfig({
     },
   },
   compatibilityDate: "2025-07-15",
+  nitro: {
+    imports: {
+      // Auto-imported in server code like server/utils
+      dirs: ["server/repositories", "server/services"],
+    },
+  },
   hub: {
     db: "postgresql",
     blob: true,

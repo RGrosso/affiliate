@@ -29,6 +29,7 @@ Use the core component wherever one exists:
 | `<CoreAlert variant="warning" title="…" />` | `UAlert` | Inline messages. `variant` is `success`, `error`, `warning` or `info` and sets the colour and icon. Also takes `description`, `actions` and an optional `icon` override. |
 | `<CoreTag label="Sample" color="warning" />` | `UBadge` | Small labels on products. `color` defaults to `neutral`. |
 | `<CoreButtonBar :show="dirty">` | (custom) | The sticky "Unsaved changes" bar on forms; buttons go in the default slot. |
+| `<CorePagination v-model:page="page" :total="total" :page-size="pageSize" />` | `UPagination` | Page controls under a paginated list. Renders nothing when there is only one page. |
 
 Add a row here when you add a core component.
 

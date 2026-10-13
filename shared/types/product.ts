@@ -20,3 +20,18 @@ export type EditableProduct = {
 export type AdminProduct = EditableProduct & {
   isSample: boolean;
 };
+
+/** A row in the product list API, with its featured image. */
+export type ProductListItem = {
+  id: string;
+  title: string;
+  handle: string;
+  description: string | null;
+  pricePence: number | null;
+  retailer: string | null;
+  affiliateUrl: string | null;
+  isSample: boolean;
+  /** A `Date` on the server, an ISO string once it has come through the API. */
+  createdAt: Date | string;
+  image: ProductImage | null;
+};
