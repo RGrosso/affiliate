@@ -15,6 +15,7 @@ const product: EditableProduct = {
   seoTitle: null,
   seoDescription: null,
   images: [],
+  tagIds: [],
 };
 
 // UFormField links its label to the input with `for`, so find the input the way a user's screen reader would

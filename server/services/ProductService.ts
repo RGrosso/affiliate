@@ -9,21 +9,31 @@ type ProductInput = z.output<typeof addProductSchema>;
 
 export class ProductService {
   private readonly products: ProductRepository;
+  private readonly tags: TagRepository;
 
   constructor(private readonly db: DbExecutor) {
     this.products = new ProductRepository(db);
+    this.tags = new TagRepository(db);
   }
 
-  async list(query: PageQuery) {
+  async list(query: PageQuery & { tag?: string }) {
     const [{ items, total }, sampleCount] = await Promise.all([
       this.products.findPage(query),
       this.products.countSamples(),
     ]);
-    const featured = await this.products.findFeaturedImages(items.map(item => item.id));
+    const ids = items.map(item => item.id);
+    const [featured, tags] = await Promise.all([
+      this.products.findFeaturedImages(ids),
+      this.tags.findForProducts(ids),
+    ]);
 
-    const withImages: ProductListItem[] = items.map(item => ({ ...item, image: featured.get(item.id) ?? null }));
+    const listItems: ProductListItem[] = items.map(item => ({
+      ...item,
+      image: featured.get(item.id) ?? null,
+      tags: tags.get(item.id) ?? [],
+    }));
 
-    return { ...toPagedResult(withImages, total, query), sampleCount };
+    return { ...toPagedResult(listItems, total, query), sampleCount };
   }
 
   async get(id: string) {
@@ -32,7 +42,9 @@ export class ProductService {
       throw productNotFound();
     }
 
-    return product;
+    const tags = (await this.tags.findForProducts([id])).get(id) ?? [];
+
+    return { ...product, tags, tagIds: tags.map(tag => tag.id) };
   }
 
   async create(input: ProductInput, authorId: string) {
@@ -40,22 +52,30 @@ export class ProductService {
 
     return this.db.transaction(async (tx) => {
       const products = new ProductRepository(tx);
+      const tags = new TagRepository(tx);
+      await assertTagsExist(tags, input.tagIds);
+
       const product = await products.insert({ ...values, authorId });
       await products.insertImages(toImageValues(product.id, input.images));
+      await tags.replaceForProduct(product.id, input.tagIds);
       return product;
     }).catch(rethrowAsDuplicateHandle);
   }
 
-  /** Replaces the fields and images. `isSample` isn't editable, so a sample stays a sample. */
+  /** Replaces the fields, images and tags. `isSample` isn't editable, so a sample stays a sample. */
   async update(id: string, input: ProductInput) {
     const values = toProductValues(input);
 
     const updated = await this.db.transaction(async (tx) => {
       const products = new ProductRepository(tx);
+      const tags = new TagRepository(tx);
+      await assertTagsExist(tags, input.tagIds);
+
       const product = await products.update(id, values);
       if (!product) return undefined;
 
       await products.replaceImages(id, toImageValues(id, input.images));
+      await tags.replaceForProduct(id, input.tagIds);
       return product;
     }).catch(rethrowAsDuplicateHandle);
 

@@ -9,6 +9,20 @@ test.describe("API", () => {
     expect(await response.json()).toMatchObject({ success: false, code: "UNAUTHORIZED" });
   });
 
+  test("rejects the tag list for logged-out requests with an ApiError", async ({ request }) => {
+    const response = await request.get("/api/tags");
+
+    expect(response.status()).toBe(401);
+    expect(await response.json()).toMatchObject({ success: false, code: "UNAUTHORIZED" });
+  });
+
+  test("returns no products for an unknown tag", async ({ request }) => {
+    const response = await request.get("/api/products?tag=no-such-tag");
+
+    expect(response.status()).toBe(200);
+    expect((await response.json()).data).toMatchObject({ items: [], total: 0 });
+  });
+
   test("pages the product list", async ({ request }) => {
     const list = async (query: string) => {
       const response = await request.get(`/api/products?${query}`);

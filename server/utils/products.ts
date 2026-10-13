@@ -30,6 +30,18 @@ export function rethrowAsDuplicateHandle(error: unknown): never {
   throw error;
 }
 
+/** Catches a tag deleted since the form loaded, which would otherwise fail on the foreign key. */
+export async function assertTagsExist(tags: TagRepository, tagIds: string[]) {
+  const unique = new Set(tagIds);
+  if (!unique.size) return;
+
+  if ((await tags.findByIds([...unique])).length !== unique.size) {
+    throw apiError("VALIDATION_ERROR", "Please check the highlighted fields and try again", {
+      tagIds: ["One of these tags no longer exists. Please refresh and try again"],
+    });
+  }
+}
+
 export function toProductValues({ price, images: _images, tagIds: _tagIds, handle, ...fields }: ProductInput) {
   const finalHandle = handle || slugify(fields.title);
 

@@ -125,6 +125,79 @@ describe("update", () => {
   });
 });
 
+describe("tags", () => {
+  const addTag = (name: string, priority: number | null = null) =>
+    new TagRepository(db).insert({ name, slug: name.toLowerCase().replaceAll(" ", "-"), priority });
+
+  it("stores the tags on create and returns them from get", async () => {
+    const [deals, gifts] = [await addTag("Deals", 5), await addTag("Gifts")];
+
+    const { id } = await service.create({ title: "Lamp", tagIds: [gifts.id, deals.id], images: [] }, authorId);
+
+    const found = await service.get(id);
+    expect(found.tags.map(tag => tag.name)).toEqual(["Deals", "Gifts"]);
+    expect([...found.tagIds].sort()).toEqual([deals.id, gifts.id].sort());
+  });
+
+  it("replaces the tags on update", async () => {
+    const [deals, gifts] = [await addTag("Deals"), await addTag("Gifts")];
+    const { id } = await service.create({ title: "Lamp", tagIds: [deals.id], images: [] }, authorId);
+
+    const updated = await service.update(id, { title: "Lamp", tagIds: [gifts.id], images: [] });
+    expect(updated.tagIds).toEqual([gifts.id]);
+
+    expect((await service.update(id, { title: "Lamp", tagIds: [], images: [] })).tags).toEqual([]);
+  });
+
+  it("rejects an unknown tag with a field error and changes nothing", async () => {
+    const deals = await addTag("Deals");
+    const { id } = await service.create({ title: "Lamp", tagIds: [deals.id], images: [{ url: "/keep.jpg" }] }, authorId);
+
+    const error = await rejection(service.update(id, { title: "Changed", tagIds: [unknownId], images: [] }));
+    expect(error.statusCode).toBe(400);
+    expect(error.data?.fieldErrors?.tagIds).toEqual(["One of these tags no longer exists. Please refresh and try again"]);
+
+    const found = await service.get(id);
+    expect(found.title).toBe("Lamp");
+    expect(found.tagIds).toEqual([deals.id]);
+    expect(found.images).toHaveLength(1);
+  });
+
+  it("rejects an unknown tag on create without adding the product", async () => {
+    const error = await rejection(service.create({ title: "Lamp", tagIds: [unknownId], images: [] }, authorId));
+    expect(error.statusCode).toBe(400);
+    expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(0);
+  });
+
+  it("lists only the tagged products, with the right total", async () => {
+    const [deals, gifts] = [await addTag("Deals"), await addTag("Gifts")];
+    const tagged = await service.create({ title: "Tagged", tagIds: [deals.id, gifts.id], images: [] }, authorId);
+    await service.create({ title: "Also tagged", tagIds: [deals.id], images: [] }, authorId);
+    await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
+
+    const dealsPage = await service.list({ page: 1, pageSize: 1, tag: "deals" });
+    expect(dealsPage).toMatchObject({ total: 2, totalPages: 2 });
+    expect(dealsPage.items).toHaveLength(1);
+
+    const giftsPage = await service.list({ page: 1, pageSize: 10, tag: "gifts" });
+    expect(giftsPage.items.map(item => item.id)).toEqual([tagged.id]);
+    expect(giftsPage.total).toBe(1);
+
+    expect((await service.list({ page: 1, pageSize: 10, tag: "no-such-tag" })).total).toBe(0);
+    expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(3);
+  });
+
+  it("includes each product's tags, highest priority first", async () => {
+    const [low, high, none] = [await addTag("Low", 1), await addTag("High", 9), await addTag("None")];
+    const { id } = await service.create({ title: "Lamp", tagIds: [none.id, low.id, high.id], images: [] }, authorId);
+    await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
+
+    const { items } = await service.list({ page: 1, pageSize: 10 });
+    expect(items.find(item => item.id === id)?.tags.map(tag => tag.name)).toEqual(["High", "Low", "None"]);
+    expect(items.find(item => item.title === "Plain")?.tags).toEqual([]);
+  });
+});
+
 describe("deleteSamples", () => {
   it("returns how many samples were removed", async () => {
     const sample = await service.create({ title: "Sample", tagIds: [], images: [] }, authorId);
