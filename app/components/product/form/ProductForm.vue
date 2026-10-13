@@ -365,6 +365,23 @@
             </div>
           </div>
         </UCard>
+
+        <UCard>
+          <template #header>
+            <h2 class="text-sm font-semibold">
+              Tags
+            </h2>
+          </template>
+
+          <UFormField name="tagIds">
+            <TagPicker
+              v-model="state.tagIds"
+              :tags="tags"
+              :creating="creating"
+              @create="addTag"
+            />
+          </UFormField>
+        </UCard>
       </div>
     </div>
 
@@ -425,6 +442,7 @@ const toState = (product?: EditableProduct) => ({
   seoTitle: product?.seoTitle ?? "",
   seoDescription: product?.seoDescription ?? "",
   images: (product?.images ?? []).map(image => ({ ...image })) as { url: string; alt?: string | null }[],
+  tagIds: [...(product?.tagIds ?? [])],
 });
 
 const state = reactive(toState(product));
@@ -442,6 +460,8 @@ const {
   moveTo,
   reset: resetMedia,
 } = useProductMedia(product?.images);
+const { tags, create: createTag } = useTags();
+const creating = ref(false);
 const saving = ref(false);
 const seoOpen = ref(false);
 // When editing, keep the saved handle rather than re-deriving it from the title
@@ -469,6 +489,7 @@ const snapshot = () => JSON.stringify({
   seoTitle: state.seoTitle.trim(),
   seoDescription: state.seoDescription.trim(),
   media: media.value.map(item => [item.url ?? item.key, item.alt.trim()]),
+  tagIds: [...state.tagIds].sort(),
 });
 
 const savedSnapshot = ref(snapshot());
@@ -522,6 +543,18 @@ function reset(product?: EditableProduct) {
   handleTouched.value = !!product;
   form.value?.clear();
   savedSnapshot.value = snapshot();
+}
+
+async function addTag(name: string) {
+  creating.value = true;
+  try {
+    const tag = await createTag(name);
+    if (!state.tagIds.includes(tag.id)) state.tagIds.push(tag.id);
+  } catch (error) {
+    toast.add({ title: "Couldn't add tag", description: getApiError(error).message, color: "error" });
+  } finally {
+    creating.value = false;
+  }
 }
 
 function cancel() {
