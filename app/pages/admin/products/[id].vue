@@ -36,13 +36,13 @@
 </template>
 
 <script setup lang="ts">
-import type { EditableProduct } from "#shared/types/product";
+import type { AdminProduct, EditableProduct } from "#shared/types/product";
 
 const route = useRoute();
 const id = route.params.id as string;
 
 // Nitro can't infer the response type from a template-literal URL, so give it explicitly
-const { data, error } = await useFetch<ApiSuccess<EditableProduct & { isSample: boolean }>>(`/api/products/${id}`);
+const { data, error } = await useFetch<ApiSuccess<AdminProduct>>(`/api/products/${id}`);
 
 const product = computed(() => data.value?.data ?? null);
 

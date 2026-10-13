@@ -15,3 +15,8 @@ export type EditableProduct = {
   seoDescription: string | null;
   images: ProductImage[];
 };
+
+/** What the admin product API returns: the editable fields plus whether it's a sample. */
+export type AdminProduct = EditableProduct & {
+  isSample: boolean;
+};
