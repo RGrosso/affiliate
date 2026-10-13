@@ -5,3 +5,5 @@ allowBuilds:
   vue-demi: true
 overrides:
   unrun: 0.2.39
+patchedDependencies:
+  '@nuxt/fonts@0.14.0': patches/@nuxt__fonts@0.14.0.patch

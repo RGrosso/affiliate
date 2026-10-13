@@ -1,0 +1,20 @@
+diff --git a/dist/module.mjs b/dist/module.mjs
+index c6401a76a217cf024201ff040558c2c4803adb1a..a264390850ee9a856c3506ecb3f826b4b5b85365 100644
+--- a/dist/module.mjs
++++ b/dist/module.mjs
+@@ -131,7 +131,14 @@ async function setupPublicAssetStrategy(options = {}) {
+         server.middlewares.use(
+           context.assetsBaseURL,
+           async (req, res) => {
+-            res.end(await devEventHandler({ path: req.url }));
++            // Pass the real request and response so setResponseHeader works, and answer errors
++            // (e.g. an unknown font's 404) instead of letting them crash the dev server
++            try {
++              res.end(await devEventHandler({ path: req.url, node: { req, res } }));
++            } catch (error) {
++              res.statusCode = error?.statusCode || 500;
++              res.end();
++            }
+           }
+         );
+       }
