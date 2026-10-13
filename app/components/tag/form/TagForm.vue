@@ -69,7 +69,7 @@
 
     <UFormField
       name="showOnCards"
-      help="Product cards show up to 3 tags, highest priority first."
+      :help="`Product cards show up to ${MAX_CARD_TAGS} tags, highest priority first.`"
     >
       <USwitch
         v-model="state.showOnCards"

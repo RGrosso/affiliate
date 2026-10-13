@@ -4,23 +4,13 @@
     :text="tooltip"
   >
     <UBadge
-      :label="label"
-      :color="color"
-      :icon="icon ? tagIconNames[icon] : undefined"
-      variant="subtle"
-      size="sm"
-      class="font-semibold"
+      v-bind="badgeProps"
       tabindex="0"
     />
   </UTooltip>
   <UBadge
     v-else
-    :label="label"
-    :color="color"
-    :icon="icon ? tagIconNames[icon] : undefined"
-    variant="subtle"
-    size="sm"
-    class="font-semibold"
+    v-bind="badgeProps"
   />
 </template>
 
@@ -28,10 +18,19 @@
 import type { BadgeProps } from "@nuxt/ui";
 import type { TagIcon } from "#shared/types/tag";
 
-const { color = "neutral" } = defineProps<{
+const { label, color = "neutral", icon, tooltip } = defineProps<{
   label: string;
   color?: BadgeProps["color"];
   icon?: TagIcon | null;
   tooltip?: string | null;
 }>();
+
+const badgeProps = computed<BadgeProps>(() => ({
+  label,
+  color,
+  icon: icon ? tagIconNames[icon] : undefined,
+  variant: "subtle",
+  size: "sm",
+  class: "font-semibold",
+}));
 </script>
