@@ -3,6 +3,7 @@ import { registerEndpoint } from "@nuxt/test-utils/runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ProductForm } from "#components";
 import type { EditableProduct } from "#shared/types/product";
+import { readJsonBody } from "~~/test/nuxt/body";
 import { mountInApp } from "~~/test/nuxt/mount";
 
 const product: EditableProduct = {
@@ -41,8 +42,7 @@ registerEndpoint("/api/tags", () => ({ success: true, data: [tag(SALE_ID, "Sale"
 registerEndpoint("/api/products/p1", {
   method: "PATCH",
   handler: async (event) => {
-    // readBody needs Node's Buffer, which the browser test runtime lacks, so read the mock request's body directly
-    patches.push(JSON.parse((event.node.req as unknown as { body: string }).body));
+    patches.push(readJsonBody(event) as { tagIds?: string[] });
     return { success: true };
   },
 });

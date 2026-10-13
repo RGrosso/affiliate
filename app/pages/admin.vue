@@ -53,6 +53,12 @@ const navigationItems = computed<NavigationMenuItem[]>(() => [
     active: route.path.startsWith("/admin/products"),
   },
   {
+    label: "Tags",
+    icon: "i-lucide-tags",
+    to: "/admin/tags",
+    active: route.path.startsWith("/admin/tags"),
+  },
+  {
     label: "Add product",
     icon: "i-heroicons-plus-solid",
     to: "/admin/add-product",
