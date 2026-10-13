@@ -9,6 +9,6 @@ export function toPagedResult<T>(items: T[], total: number, { page, pageSize }: 
     page,
     pageSize,
     total,
-    totalPages: Math.ceil(total / pageSize),
+    totalPages: totalPagesFor(total, pageSize),
   };
 }

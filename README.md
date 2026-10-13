@@ -68,7 +68,7 @@ The site is UK-based. Copy is in British English, prices are in pounds sterling 
 
 ## Server structure
 
-API routes in `server/api/` are thin. A route checks the caller with `requireAdmin`, validates the input, calls one service method and returns `ok(...)`. It never queries the database itself.
+API routes in `server/api/` are thin. A route checks the caller where needed (`requireAdmin`), validates the input, calls one service method and returns `ok(...)`. It never queries the database itself.
 
 - **Services** (`server/services/`) hold the business rules: converting pounds to pence, building a handle from the title when none is given, turning a duplicate handle into a field error, and throwing 404s. They own transactions.
 - **Repositories** (`server/repositories/`) are the only code that queries the database. They return rows or `undefined` and never throw HTTP errors.

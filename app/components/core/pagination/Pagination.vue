@@ -20,5 +20,5 @@ const { total, pageSize } = defineProps<{
 
 const page = defineModel<number>("page", { default: 1 });
 
-const totalPages = computed(() => Math.ceil(total / pageSize));
+const totalPages = computed(() => totalPagesFor(total, pageSize));
 </script>

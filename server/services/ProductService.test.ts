@@ -2,8 +2,9 @@ import type { H3Error } from "h3";
 import type { ApiError } from "#shared/types/api";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { products } from "../db/schema";
+import { productImages, products, settings } from "../db/schema";
 import { createTestDb, insertTestUser, resetDb, type TestDb } from "../../test/setup/db";
+import { sampleProducts } from "../utils/sampleProducts";
 import { ProductService } from "./ProductService";
 
 let db: TestDb;
@@ -132,5 +133,47 @@ describe("deleteSamples", () => {
 
     expect(await service.deleteSamples()).toBe(1);
     expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(1);
+  });
+});
+
+describe("seedSamplesOnce", () => {
+  const imageTotal = sampleProducts.reduce((sum, sample) => sum + sample.imageCount, 0);
+  const allProducts = () => db.select().from(products);
+
+  it("seeds every sample product with its images", async () => {
+    await service.seedSamplesOnce(authorId);
+
+    const seeded = await allProducts();
+    expect(seeded.map(product => product.handle).sort()).toEqual(sampleProducts.map(sample => sample.handle).sort());
+    expect(seeded.every(product => product.isSample && product.authorId === authorId)).toBe(true);
+    expect(await db.select().from(productImages)).toHaveLength(imageTotal);
+  });
+
+  it("does not duplicate the samples when run twice", async () => {
+    await service.seedSamplesOnce(authorId);
+    await service.seedSamplesOnce(authorId);
+
+    expect(await allProducts()).toHaveLength(sampleProducts.length);
+    expect(await db.select().from(productImages)).toHaveLength(imageTotal);
+  });
+
+  it("does not bring the samples back after they are deleted", async () => {
+    await service.seedSamplesOnce(authorId);
+    await service.deleteSamples();
+    await service.seedSamplesOnce(authorId);
+
+    expect(await allProducts()).toHaveLength(0);
+  });
+
+  it("skips a store that already has products and marks it as done", async () => {
+    const real = await service.create({ title: "Real", images: [] }, authorId);
+
+    await service.seedSamplesOnce(authorId);
+    expect(await allProducts()).toHaveLength(1);
+    expect(await db.select().from(settings)).toHaveLength(1);
+
+    await db.delete(products).where(eq(products.id, real.id));
+    await service.seedSamplesOnce(authorId);
+    expect(await allProducts()).toHaveLength(0);
   });
 });

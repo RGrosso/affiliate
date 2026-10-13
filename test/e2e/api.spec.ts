@@ -10,16 +10,27 @@ test.describe("API", () => {
   });
 
   test("pages the product list", async ({ request }) => {
-    const response = await request.get("/api/products?page=1&pageSize=2");
+    const list = async (query: string) => {
+      const response = await request.get(`/api/products?${query}`);
+      expect(response.status()).toBe(200);
+      return (await response.json()).data;
+    };
 
-    expect(response.status()).toBe(200);
-    const { success, data } = await response.json();
-    expect(success).toBe(true);
-    expect(data).toMatchObject({ page: 1, pageSize: 2 });
-    expect(data.items.length).toBeLessThanOrEqual(2);
-    expect(data.total).toBeGreaterThanOrEqual(data.items.length);
-    expect(data.totalPages).toBe(Math.ceil(data.total / 2));
-    expect(typeof data.sampleCount).toBe("number");
+    // The sample products are seeded by the setup login, so there's always more than one
+    const all = await list("pageSize=100");
+    expect(all.total).toBeGreaterThan(1);
+    expect(all.items).toHaveLength(all.total);
+
+    const first = await list("page=1&pageSize=1");
+    expect(first).toMatchObject({ page: 1, pageSize: 1, total: all.total, totalPages: all.total });
+    expect(first.items).toEqual([all.items[0]]);
+
+    const last = await list(`page=${all.total}&pageSize=1`);
+    expect(last.items).toEqual([all.items.at(-1)]);
+
+    const past = await list(`page=${all.total + 1}&pageSize=1`);
+    expect(past.items).toEqual([]);
+    expect(past.total).toBe(all.total);
   });
 
   test("rejects a page size over the maximum", async ({ request }) => {

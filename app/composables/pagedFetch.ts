@@ -4,7 +4,10 @@ import { DEFAULT_PAGE_SIZE } from "#shared/schemas/pagination.schema";
 
 type PagedFetchOptions = {
   pageSize?: number;
-  /** Extra query params, such as a filter. Changing any of them resets to page 1. */
+  /**
+   * Extra query params, such as a filter. Changing any of them resets to page 1.
+   * To keep a filter in the URL, derive it from the route query (e.g. `() => ({ tag: route.query.tag })`).
+   */
   query?: MaybeRefOrGetter<Record<string, string | number | undefined>>;
 };
 
@@ -26,19 +29,19 @@ export async function usePagedFetch<T, Extra extends object = object>(
     },
   });
 
-  const pageSize = computed(() => options.pageSize ?? DEFAULT_PAGE_SIZE);
+  const pageSize = options.pageSize ?? DEFAULT_PAGE_SIZE;
   const extraQuery = computed(() => toValue(options.query) ?? {});
 
   // Fetches are triggered by hand below: watching the query would fetch the new filter on the
   // old page first, then again once the page resets.
   // Not awaited yet: watchers made after an `await` lose the component's scope and are never stopped.
   const request = useFetch<ApiSuccess<PagedResult<T> & Extra>>(url, {
-    query: computed(() => ({ ...extraQuery.value, page: page.value, pageSize: pageSize.value })),
+    query: computed(() => ({ ...extraQuery.value, page: page.value, pageSize })),
     watch: false,
   });
   const { data, status, refresh, error } = request;
 
-  watch([page, pageSize], () => refresh());
+  watch(page, () => refresh());
 
   watch(extraQuery, () => {
     if (page.value === 1) refresh();

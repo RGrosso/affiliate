@@ -8,11 +8,13 @@ const productIdSchema = z.object({
   id: z.uuid(),
 });
 
+export const productNotFound = () => notFound("We couldn't find that product");
+
 export async function readProductId(event: H3Event): Promise<string> {
   const result = productIdSchema.safeParse(getRouterParams(event));
 
   if (!result.success) {
-    throw notFound("We couldn't find that product");
+    throw productNotFound();
   }
 
   return result.data.id;

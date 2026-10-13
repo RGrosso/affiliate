@@ -1,7 +1,8 @@
 import { asc, count, desc, eq, inArray } from "drizzle-orm";
 import { productImages, products } from "hub:db:schema";
 import type { PageQuery } from "#shared/schemas/pagination.schema";
-import type { ProductImage } from "#shared/types/product";
+import type { PgColumn } from "drizzle-orm/pg-core";
+import type { ProductImage, ProductListItem } from "#shared/types/product";
 
 export type NewProduct = typeof products.$inferInsert;
 export type NewProductImage = typeof productImages.$inferInsert;
@@ -16,7 +17,7 @@ const listColumns = {
   affiliateUrl: products.affiliateUrl,
   isSample: products.isSample,
   createdAt: products.createdAt,
-};
+} satisfies Record<Exclude<keyof ProductListItem, "image">, PgColumn>;
 
 export class ProductRepository {
   constructor(private readonly db: DbExecutor) {}
@@ -90,9 +91,22 @@ export class ProductRepository {
     return result?.count ?? 0;
   }
 
+  async count() {
+    const [result] = await this.db.select({ count: count() }).from(products);
+    return result?.count ?? 0;
+  }
+
   async insert(values: NewProduct) {
     const [product] = await this.db.insert(products).values(values).returning();
     return product!;
+  }
+
+  /** Skips handles that are already taken, so only the rows actually inserted come back. */
+  insertSamples(values: NewProduct[]) {
+    return this.db.insert(products)
+      .values(values)
+      .onConflictDoNothing({ target: products.handle })
+      .returning({ id: products.id, handle: products.handle });
   }
 
   async update(id: string, values: Partial<NewProduct>) {

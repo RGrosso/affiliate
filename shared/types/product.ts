@@ -31,6 +31,7 @@ export type ProductListItem = {
   retailer: string | null;
   affiliateUrl: string | null;
   isSample: boolean;
-  createdAt: Date;
+  /** A `Date` on the server, an ISO string once it has come through the API. */
+  createdAt: Date | string;
   image: ProductImage | null;
 };

@@ -25,7 +25,7 @@
     />
 
     <div
-      v-if="products.length"
+      v-if="total > 0"
       class="border border-default rounded-md overflow-hidden"
     >
       <UTable
@@ -102,7 +102,7 @@
     </div>
 
     <CorePagination
-      v-if="products.length"
+      v-if="total > 0"
       v-model:page="page"
       :total="total"
       :page-size="pageSize"
