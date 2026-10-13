@@ -7,3 +7,4 @@ overrides:
   unrun: 0.2.39
 patchedDependencies:
   '@nuxt/fonts@0.14.0': patches/@nuxt__fonts@0.14.0.patch
+  '@storybook-vue/nuxt@10.0.1': patches/@storybook-vue__nuxt@10.0.1.patch
