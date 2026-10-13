@@ -24,6 +24,17 @@
       }]"
     />
 
+    <USelectMenu
+      v-model="tagFilter"
+      :items="tagItems"
+      value-key="value"
+      placeholder="Filter by tag"
+      icon="i-heroicons-tag"
+      clear
+      searchable
+      class="w-full sm:w-64"
+    />
+
     <div
       v-if="total > 0"
       class="border border-default rounded-md overflow-hidden"
@@ -69,10 +80,41 @@
         <template #retailer-cell="{ row }">
           {{ row.original.retailer ?? "—" }}
         </template>
+        <template #tags-cell="{ row }">
+          <div
+            v-if="row.original.tags.length"
+            class="flex flex-wrap gap-1 min-w-32"
+          >
+            <CoreTag
+              v-for="tag in row.original.tags"
+              :key="tag.id"
+              :label="tag.name"
+              :icon="tag.icon"
+              :tooltip="tag.tooltip"
+            />
+          </div>
+          <span v-else>—</span>
+        </template>
         <template #createdAt-cell="{ row }">
           {{ formatDate(row.original.createdAt) }}
         </template>
       </UTable>
+    </div>
+
+    <div
+      v-else-if="status !== 'pending' && tagFilter"
+      class="bg-default text-default border border-default rounded-md p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm"
+    >
+      <p class="text-sm text-muted">
+        No products have this tag.
+      </p>
+      <UButton
+        variant="outline"
+        color="neutral"
+        @click="tagFilter = undefined"
+      >
+        Clear filter
+      </UButton>
     </div>
 
     <div
@@ -154,7 +196,26 @@ import type { ProductListItem } from "#shared/types/product";
 
 const toast = useToast();
 
-const { data, items: products, total, page, pageSize, status, refresh } = await usePagedFetch<ProductListItem, { sampleCount: number }>("/api/products");
+const route = useRoute();
+const router = useRouter();
+const { tags } = useTags();
+
+const tagItems = computed(() => tags.value.map(tag => ({ label: tag.name, value: tag.slug })));
+
+const tagFilter = computed<string | undefined>({
+  get() {
+    const value = Array.isArray(route.query.tag) ? route.query.tag[0] : route.query.tag;
+    return value || undefined;
+  },
+  set(slug) {
+    const { tag: _tag, page: _page, ...rest } = route.query;
+    router.replace({ query: slug ? { ...rest, tag: slug } : rest });
+  },
+});
+
+const { data, items: products, total, page, pageSize, status, refresh } = await usePagedFetch<ProductListItem, { sampleCount: number }>("/api/products", {
+  query: () => ({ tag: tagFilter.value }),
+});
 
 const sampleCount = computed(() => data.value?.sampleCount ?? 0);
 
@@ -163,6 +224,7 @@ const columns: TableColumn<ProductListItem>[] = [
   { id: "image", header: () => h("span", { class: "sr-only" }, "Image") },
   { accessorKey: "title", header: "Product" },
   { accessorKey: "retailer", header: "Retailer" },
+  { id: "tags", header: "Tags" },
   { accessorKey: "createdAt", header: "Added" },
 ];
 

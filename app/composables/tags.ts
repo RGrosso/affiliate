@@ -1,0 +1,37 @@
+import type { ApiSuccess } from "#shared/types/api";
+import type { AdminTag, Tag } from "#shared/types/tag";
+import type { UpdateTagInput } from "#shared/schemas/tags.schema";
+
+/**
+ * The admin's tags, shared by every caller through one fetch key, so a tag added from the product
+ * form shows on the Tags page without a reload. Mutations refresh the list; errors are thrown for
+ * the caller to show (see `getApiError`).
+ */
+export function useTags() {
+  const { data, status, error, refresh } = useFetch<ApiSuccess<AdminTag[]>>("/api/tags", {
+    key: "admin-tags",
+    // Product counts change whenever a product is saved, so don't serve a stale list from the payload
+    getCachedData: () => undefined,
+  });
+
+  const tags = computed(() => data.value?.data ?? []);
+
+  async function create(name: string): Promise<Tag> {
+    const { data: tag } = await $fetch<ApiSuccess<Tag>>("/api/tags", { method: "POST", body: { name } });
+    await refresh();
+    return tag;
+  }
+
+  async function update(id: string, input: UpdateTagInput): Promise<Tag> {
+    const { data: tag } = await $fetch<ApiSuccess<Tag>>(`/api/tags/${id}`, { method: "PATCH", body: input });
+    await refresh();
+    return tag;
+  }
+
+  async function remove(id: string) {
+    await $fetch(`/api/tags/${id}`, { method: "DELETE" });
+    await refresh();
+  }
+
+  return { tags, status, error, refresh, create, update, remove };
+}
