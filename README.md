@@ -130,6 +130,40 @@ npx nuxt hub db generate
 
 It's applied automatically the next time you run `pnpm dev`.
 
+## Tags
+
+Tags label products. They'll later drive filtering and collections. They're stored in `tags` and linked to products through `product_tags`. Deleting a tag or a product removes its links.
+
+A tag is unique by its slug, which is built from the name. "Air Fryers" and "air fryers" are the same tag, so adding a duplicate is rejected with "A tag with this name already exists".
+
+Each tag has:
+
+- **Name and slug**: the slug is generated from the name.
+- **Description** and **tooltip**: the tooltip is shown when you hover over the tag.
+- **Icon**: a key from a fixed list in `shared/types/tag.ts`: `star`, `sparkle`, `flame`, `percent`, `tag`, `gift`, `heart`, `trophy`, `zap`, `smile` and `leaf`. The app maps each key to a Lucide icon in `app/utils/tagIcons.ts`, so you can change how icons look without touching the data.
+- **Priority**: higher shows first. An empty priority counts as 0 (`sortTagsByPriority`).
+- **Show on cards**: product cards show at most 3 of the tags with this turned on, highest priority first.
+
+In the admin:
+
+- The Tags card on the product form lets you pick existing tags or add new ones. Type a new name and choose **Add** to create the tag straight away.
+- **Admin → Tags** (`/admin/tags`) lets you edit descriptions, tooltips, icons, priority and card visibility, or delete tags. It also shows how many products use each tag.
+- **Admin → Products** has a tags column and a tag filter.
+
+Tag routes are admin only:
+
+| Method | Path | What it does |
+| --- | --- | --- |
+| `GET` | `/api/tags` | Lists tags, each with a `productCount` |
+| `POST` | `/api/tags` | Creates a tag from `{ name }` |
+| `PATCH` | `/api/tags/:id` | Updates a tag |
+| `DELETE` | `/api/tags/:id` | Deletes a tag and its product links |
+
+Product routes change as follows:
+
+- `GET /api/products?tag=<slug>` filters the list. Each item now includes `tags`, highest priority first.
+- Product create and update accept `tagIds`. If a tag no longer exists, the response is a `VALIDATION_ERROR` on `tagIds`.
+
 ## Testing
 
 | Command | What it runs |
