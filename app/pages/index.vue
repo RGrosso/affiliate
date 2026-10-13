@@ -96,9 +96,9 @@
 const FEATURED_COUNT = 8;
 
 const { data, status, error } = await useFetch("/api/products", {
-  query: { limit: FEATURED_COUNT },
+  query: { pageSize: FEATURED_COUNT },
   lazy: true,
 });
 
-const featured = computed(() => data.value?.data.products ?? []);
+const featured = computed(() => data.value?.data.items ?? []);
 </script>

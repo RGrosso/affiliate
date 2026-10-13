@@ -59,10 +59,21 @@ The site is UK-based. Copy is in British English, prices are in pounds sterling 
 | --- | --- |
 | `app/` | Pages, components, composables and route middleware (Vue) |
 | `server/api/` | API routes |
-| `server/utils/` | Server helpers, auto-imported: API responses, auth |
+| `server/services/` | Business rules and transactions, one class per area (e.g. `ProductService`) |
+| `server/repositories/` | The only code that queries the database with Drizzle (e.g. `ProductRepository`) |
+| `server/utils/` | Server helpers, auto-imported: API responses, auth, pure helpers |
 | `server/db/` | Drizzle schema, migrations and dev seed SQL |
-| `shared/types/` | Types used by both client and server (`ApiResponse`, `UserState`, …) |
+| `shared/types/` | Types used by both client and server (`ApiResponse`, `UserState`, `PagedResult`, …) |
 | `shared/schemas/` | Zod validation schemas used by both forms and API routes |
+
+## Server structure
+
+API routes in `server/api/` are thin. A route checks the caller with `requireAdmin`, validates the input, calls one service method and returns `ok(...)`. It never queries the database itself.
+
+- **Services** (`server/services/`) hold the business rules: converting pounds to pence, building a handle from the title when none is given, turning a duplicate handle into a field error, and throwing 404s. They own transactions.
+- **Repositories** (`server/repositories/`) are the only code that queries the database. They return rows or `undefined` and never throw HTTP errors.
+
+Both are classes that take a `DbExecutor` (defined in `server/utils/db.ts`) in the constructor. That can be NuxtHub's `db`, a transaction or a test database. A route creates one with e.g. `new ProductService(db).list(query)`. Inside a transaction, a service builds its repositories on `tx` so they share it. Services and repositories are auto-imported, like `server/utils/`. Pure helpers, such as `toProductValues` in `server/utils/products.ts`, stay in `server/utils/`.
 
 ## API responses
 
@@ -76,9 +87,27 @@ Every `/api` route is wrapped in `defineApiHandler` and returns one of two shape
 { success: false, code: "VALIDATION_ERROR" | "UNAUTHORIZED" | ..., message: string, fieldErrors?: Record<string, string[]> }
 ```
 
-On the server, return `ok(data, message?)` and throw `apiError(code, message)` or one of the shortcuts: `badRequest`, `unauthorized`, `forbidden`, `notFound`, `conflict`. Use `readValidated(event, schema)` to parse and validate a request body, and `requireUser` / `requireAdmin` to guard a route.
+On the server, return `ok(data, message?)` and throw `apiError(code, message)` or one of the shortcuts: `badRequest`, `unauthorized`, `forbidden`, `notFound`, `conflict`. Use `readValidated(event, schema)` to parse and validate a request body, `readValidatedQuery(event, schema)` for query parameters, and `requireUser` / `requireAdmin` to guard a route.
 
 On the client, `getApiError(err)` turns a failed `$fetch` into an `ApiError`, and `toFormErrors(error.fieldErrors)` maps it onto a `UForm`.
+
+List endpoints are paginated by offset. They take `?page` (1 or more, default 1) and `?pageSize` (1 to 100, default 20), validated by `pageQuerySchema` in `shared/schemas/pagination.schema.ts`. Their `data` is a `PagedResult<T>` from `shared/types/pagination.ts`. `GET /api/products` also returns `sampleCount`. For example, `GET /api/products?page=2&pageSize=20` returns:
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [{ "id": "3f1c9e52-…", "title": "Moon Lamp" }],
+    "page": 2,
+    "pageSize": 20,
+    "total": 45,
+    "totalPages": 3,
+    "sampleCount": 20
+  }
+}
+```
+
+On the client, `usePagedFetch` (in `app/composables/pagedFetch.ts`) keeps the current page in the URL, and `<CorePagination>` renders the controls.
 
 ## Users
 
@@ -110,6 +139,8 @@ It's applied automatically the next time you run `pnpm dev`.
 | `pnpm test:e2e` | Playwright end-to-end tests against a dev server with its own database (`.data-e2e/`), so your `.data/` is untouched |
 | `pnpm lint:check` | ESLint without fixing (`pnpm lint` fixes) |
 | `pnpm storybook` | Storybook for the core components on `http://localhost:6006` |
+
+Repository and service tests run against an in-memory PGlite database with the real migrations applied (`createTestDb()` in `test/setup/db.ts`), so they don't mock the database.
 
 The first time, install the test browser with `pnpm exec playwright install chromium`. CI runs all of these on every pull request.
 

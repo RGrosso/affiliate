@@ -101,6 +101,14 @@
       </NuxtLink>
     </div>
 
+    <CorePagination
+      v-if="products.length"
+      v-model:page="page"
+      :total="total"
+      :page-size="pageSize"
+      class="mt-4 flex justify-end"
+    />
+
     <UModal
       v-model:open="confirmOpen"
       :title="`Delete ${sampleCount} sample products?`"
@@ -142,17 +150,15 @@
 
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
+import type { ProductListItem } from "#shared/types/product";
 
 const toast = useToast();
 
-const { data, status, refresh } = await useFetch("/api/products");
+const { data, items: products, total, page, pageSize, status, refresh } = await usePagedFetch<ProductListItem, { sampleCount: number }>("/api/products");
 
-const products = computed(() => data.value?.data.products ?? []);
-const sampleCount = computed(() => data.value?.data.sampleCount ?? 0);
+const sampleCount = computed(() => data.value?.sampleCount ?? 0);
 
-type ProductRow = (typeof products.value)[number];
-
-const columns: TableColumn<ProductRow>[] = [
+const columns: TableColumn<ProductListItem>[] = [
   // An empty-string header renders a text node the server HTML lacks, causing a hydration mismatch
   { id: "image", header: () => h("span", { class: "sr-only" }, "Image") },
   { accessorKey: "title", header: "Product" },
