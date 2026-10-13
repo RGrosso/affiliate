@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, exists, inArray } from "drizzle-orm";
 import { productImages, productTags, products, tags } from "hub:db:schema";
-import type { PageQuery } from "#shared/schemas/pagination.schema";
+import type { ProductListQuery } from "#shared/schemas/products.schema";
 import type { PgColumn } from "drizzle-orm/pg-core";
 import type { ProductImage, ProductListItem } from "#shared/types/product";
 
@@ -47,7 +47,7 @@ export class ProductRepository {
   }
 
   /** Newest first. The title breaks ties so pages don't shuffle between requests. */
-  async findPage(query: PageQuery & { tag?: string }) {
+  async findPage(query: ProductListQuery) {
     const filter = query.tag
       ? exists(this.db.select({ one: productTags.productId })
           .from(productTags)

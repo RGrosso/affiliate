@@ -47,6 +47,13 @@ test.describe("API", () => {
     expect(past.total).toBe(all.total);
   });
 
+  test("only lets admins ask for every tag on the product list", async ({ request }) => {
+    const response = await request.get("/api/products?allTags=true");
+
+    expect(response.status()).toBe(401);
+    expect(await response.json()).toMatchObject({ success: false, code: "UNAUTHORIZED" });
+  });
+
   test("rejects a page size over the maximum", async ({ request }) => {
     const response = await request.get("/api/products?pageSize=500");
 

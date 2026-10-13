@@ -1,8 +1,8 @@
 import type { z } from "#shared/schemas/zod";
 import type { createTagSchema, updateTagSchema } from "#shared/schemas/tags.schema";
 
-type CreateTagInput = z.output<typeof createTagSchema>;
-type UpdateTagInput = z.output<typeof updateTagSchema>;
+type CreateTagData = z.output<typeof createTagSchema>;
+type UpdateTagData = z.output<typeof updateTagSchema>;
 
 export class TagService {
   private readonly tags: TagRepository;
@@ -15,12 +15,15 @@ export class TagService {
     return this.tags.findAll();
   }
 
-  create({ name }: CreateTagInput) {
-    return this.tags.insert({ name, slug: toTagSlug(name) }).catch(rethrowAsDuplicateTag);
+  create({ name }: CreateTagData) {
+    return this.tags.insert({ name, slug: slugify(name) }).catch(rethrowAsDuplicateTag);
   }
 
-  async update(id: string, input: UpdateTagInput) {
-    const tag = await this.tags.update(id, { ...input, slug: toTagSlug(input.name) }).catch(rethrowAsDuplicateTag);
+  async update(id: string, { name, ...rest }: UpdateTagData) {
+    const values = { ...rest, ...(name !== undefined && { name, slug: slugify(name) }) };
+    const tag = Object.keys(values).length
+      ? await this.tags.update(id, values).catch(rethrowAsDuplicateTag)
+      : await this.tags.findById(id);
     if (!tag) {
       throw tagNotFound();
     }

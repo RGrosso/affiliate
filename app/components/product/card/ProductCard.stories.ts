@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook-vue/nuxt";
 import type { Tag } from "#shared/types/tag";
+import { pickCardTags } from "#shared/utils/tags";
 import ProductCard from "./ProductCard.vue";
 
 function makeTag(name: string, overrides: Partial<Tag> = {}): Tag {
@@ -22,6 +23,8 @@ const eco = makeTag("Eco", { icon: "leaf", tooltip: "Made from recycled material
 const gift = makeTag("Gift", { icon: "gift", priority: 5 });
 const hidden = makeTag("Internal", { priority: 2000, showOnCards: false });
 
+const mixedTags = [gift, eco, hidden, newTag, bestseller];
+
 const product = {
   title: "Moon Lamp",
   retailer: "Gadget Hub",
@@ -43,11 +46,12 @@ type Story = StoryObj<typeof meta>;
 export const NoTags: Story = {};
 
 export const FewTags: Story = {
-  args: { product: { ...product, tags: [bestseller, eco] } },
+  args: { product: { ...product, tags: pickCardTags([bestseller, eco]) } },
 };
 
+// The server picks card tags with `pickCardTags`: on-card only, top three by priority
 export const MoreThanThreeTags: Story = {
-  args: { product: { ...product, tags: [gift, eco, hidden, newTag, bestseller] } },
+  args: { product: { ...product, tags: pickCardTags(mixedTags) } },
 };
 
 export const Grid: Story = {
@@ -56,9 +60,9 @@ export const Grid: Story = {
     components: { ProductCard },
     setup: () => ({
       products: [
-        { ...product, title: "Moon Lamp", tags: [newTag, bestseller, eco] },
-        { ...product, title: "Desk Cactus", retailer: "Plant Place", pricePence: 1200, tags: [gift] },
-        { ...product, title: "Pet Mug", pricePence: 899, tags: [gift, eco, hidden, newTag, bestseller] },
+        { ...product, title: "Moon Lamp", tags: pickCardTags([newTag, bestseller, eco]) },
+        { ...product, title: "Desk Cactus", retailer: "Plant Place", pricePence: 1200, tags: pickCardTags([gift]) },
+        { ...product, title: "Pet Mug", pricePence: 899, tags: pickCardTags(mixedTags) },
         { ...product, title: "Plain Notebook", pricePence: 450 },
       ],
     }),

@@ -29,7 +29,7 @@
       :items="tagItems"
       value-key="value"
       placeholder="Filter by tag"
-      icon="i-heroicons-tag"
+      icon="i-lucide-tags"
       clear
       searchable
       class="w-full sm:w-64"
@@ -214,7 +214,7 @@ const tagFilter = computed<string | undefined>({
 });
 
 const { data, items: products, total, page, pageSize, status, refresh } = await usePagedFetch<ProductListItem, { sampleCount: number }>("/api/products", {
-  query: () => ({ tag: tagFilter.value }),
+  query: () => ({ tag: tagFilter.value, allTags: "true" }),
 });
 
 const sampleCount = computed(() => data.value?.sampleCount ?? 0);

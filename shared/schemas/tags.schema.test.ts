@@ -21,15 +21,13 @@ describe("createTagSchema", () => {
 });
 
 describe("updateTagSchema", () => {
-  it("defaults the optional details to empty", () => {
-    expect(updateTagSchema.parse({ name: "New" })).toEqual({
-      name: "New",
-      description: null,
-      tooltip: null,
-      icon: null,
-      priority: null,
-      showOnCards: false,
-    });
+  it("leaves out fields that weren't sent, so a PATCH only changes what it names", () => {
+    expect(updateTagSchema.parse({ tooltip: "Just landed" })).toEqual({ tooltip: "Just landed" });
+    expect(updateTagSchema.parse({})).toEqual({});
+  });
+
+  it("still validates a name when one is sent", () => {
+    expect(fieldErrors(updateTagSchema, { name: " " }).name).toEqual(["Please give the tag a name"]);
   });
 
   it("treats blank text as no value", () => {

@@ -1,6 +1,5 @@
 import type { z } from "#shared/schemas/zod";
-import type { addProductSchema } from "#shared/schemas/products.schema";
-import type { PageQuery } from "#shared/schemas/pagination.schema";
+import type { addProductSchema, ProductListQuery } from "#shared/schemas/products.schema";
 import type { ProductListItem } from "#shared/types/product";
 
 const SEEDED_KEY = "sample_products_seeded";
@@ -16,7 +15,8 @@ export class ProductService {
     this.tags = new TagRepository(db);
   }
 
-  async list(query: PageQuery & { tag?: string }) {
+  /** Public lists carry only the badges a card shows; admins get every tag. */
+  async list(query: ProductListQuery, { forAdmin = false }: { forAdmin?: boolean } = {}) {
     const [{ items, total }, sampleCount] = await Promise.all([
       this.products.findPage(query),
       this.products.countSamples(),
@@ -30,7 +30,9 @@ export class ProductService {
     const listItems: ProductListItem[] = items.map(item => ({
       ...item,
       image: featured.get(item.id) ?? null,
-      tags: tags.get(item.id) ?? [],
+      tags: forAdmin
+        ? sortTagsByPriority(tags.get(item.id) ?? []).map(toTagBadge)
+        : pickCardTags(tags.get(item.id) ?? []),
     }));
 
     return { ...toPagedResult(listItems, total, query), sampleCount };
@@ -53,7 +55,7 @@ export class ProductService {
     return this.db.transaction(async (tx) => {
       const products = new ProductRepository(tx);
       const tags = new TagRepository(tx);
-      await assertTagsExist(tags, input.tagIds);
+      await this.assertTagsExist(tags, input.tagIds);
 
       const product = await products.insert({ ...values, authorId });
       await products.insertImages(toImageValues(product.id, input.images));
@@ -69,7 +71,7 @@ export class ProductService {
     const updated = await this.db.transaction(async (tx) => {
       const products = new ProductRepository(tx);
       const tags = new TagRepository(tx);
-      await assertTagsExist(tags, input.tagIds);
+      await this.assertTagsExist(tags, input.tagIds);
 
       const product = await products.update(id, values);
       if (!product) return undefined;
@@ -84,6 +86,18 @@ export class ProductService {
     }
 
     return this.get(id);
+  }
+
+  /** Catches a tag deleted since the form loaded, which would otherwise fail on the foreign key. */
+  private async assertTagsExist(tags: TagRepository, tagIds: string[]) {
+    const unique = new Set(tagIds);
+    if (!unique.size) return;
+
+    if ((await tags.findByIds([...unique])).length !== unique.size) {
+      throw apiError("VALIDATION_ERROR", "Please check the highlighted fields and try again", {
+        tagIds: ["One of these tags no longer exists. Please refresh and try again"],
+      });
+    }
   }
 
   deleteSamples() {

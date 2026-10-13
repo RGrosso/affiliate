@@ -65,9 +65,7 @@
 
 <script setup lang="ts">
 import type { ProductImage } from "#shared/types/product";
-import type { Tag } from "#shared/types/tag";
-
-const MAX_CARD_TAGS = 3;
+import type { TagBadge } from "#shared/types/tag";
 
 export type ProductCardData = {
   title: string;
@@ -75,14 +73,12 @@ export type ProductCardData = {
   pricePence: number | null;
   affiliateUrl: string | null;
   image: ProductImage | null;
-  tags?: Tag[];
+  tags?: TagBadge[];
 };
 
 const { product } = defineProps<{
   product: ProductCardData;
 }>();
 
-const cardTags = computed(() =>
-  sortTagsByPriority((product.tags ?? []).filter(tag => tag.showOnCards)).slice(0, MAX_CARD_TAGS)
-);
+const cardTags = computed(() => (product.tags ?? []).slice(0, MAX_CARD_TAGS));
 </script>

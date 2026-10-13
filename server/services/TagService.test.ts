@@ -63,6 +63,25 @@ describe("update", () => {
     expect(updated).toMatchObject({ id, name: "Hot Deals", slug: "hot-deals", tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true });
   });
 
+  it("changes only the fields that are sent", async () => {
+    const { id } = await service.create({ name: "Deals" });
+    await service.update(id, { icon: "flame", priority: 4, showOnCards: true });
+
+    const updated = await service.update(id, { tooltip: "Reduced" });
+    expect(updated).toMatchObject({ name: "Deals", slug: "deals", tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true });
+  });
+
+  it("returns the tag unchanged for an empty update", async () => {
+    const { id } = await service.create({ name: "Deals" });
+
+    expect(await service.update(id, {})).toMatchObject({ id, name: "Deals", slug: "deals" });
+  });
+
+  it("throws a 404 for an empty update of an unknown tag", async () => {
+    const error = await rejection(service.update(unknownId, {}));
+    expect(error.statusCode).toBe(404);
+  });
+
   it("rejects a rename that clashes with another tag", async () => {
     await service.create({ name: "Gifts" });
     const { id } = await service.create({ name: "Deals" });

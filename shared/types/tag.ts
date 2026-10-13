@@ -15,7 +15,9 @@ export type Tag = {
   showOnCards: boolean;
 };
 
-/** A tag in the admin list, with how many products use it. */
+/** Just what a badge needs, so public responses don't carry admin-only details. */
+export type TagBadge = Pick<Tag, "id" | "name" | "slug" | "icon" | "tooltip">;
+
 export type AdminTag = Tag & {
   productCount: number;
 };

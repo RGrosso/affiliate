@@ -1,7 +1,7 @@
 import type { H3Error } from "h3";
 import type { ApiError } from "#shared/types/api";
 import { describe, expect, it } from "vitest";
-import { rethrowAsDuplicateTag, toTagSlug } from "./tags";
+import { rethrowAsDuplicateTag } from "./tags";
 
 const thrown = (fn: () => unknown) => {
   try {
@@ -11,13 +11,6 @@ const thrown = (fn: () => unknown) => {
   }
   throw new Error("Expected the function to throw");
 };
-
-describe("toTagSlug", () => {
-  it("makes the same slug for names that differ only by case or spacing", () => {
-    expect(toTagSlug("Air Fryers")).toBe("air-fryers");
-    expect(toTagSlug("  air   fryers ")).toBe("air-fryers");
-  });
-});
 
 describe("rethrowAsDuplicateTag", () => {
   it("turns a unique violation into a conflict on the name field", () => {

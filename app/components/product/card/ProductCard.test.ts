@@ -1,7 +1,7 @@
 import { mountSuspended } from "@nuxt/test-utils/runtime";
 import { describe, expect, it } from "vitest";
 import { ProductCard } from "#components";
-import type { Tag } from "#shared/types/tag";
+import type { TagBadge } from "#shared/types/tag";
 import { expectAccessible } from "~~/test/nuxt/axe";
 import { mountInApp } from "~~/test/nuxt/mount";
 
@@ -13,18 +13,8 @@ const product = {
   image: { url: "/images/moon-lamp.jpg", alt: "A glowing moon lamp" },
 };
 
-function makeTag(name: string, overrides: Partial<Tag> = {}): Tag {
-  return {
-    id: name,
-    name,
-    slug: name.toLowerCase(),
-    description: null,
-    tooltip: null,
-    icon: null,
-    priority: 0,
-    showOnCards: true,
-    ...overrides,
-  };
+function makeBadge(name: string, overrides: Partial<TagBadge> = {}): TagBadge {
+  return { id: name, name, slug: name.toLowerCase(), icon: null, tooltip: null, ...overrides };
 }
 
 describe("ProductCard", () => {
@@ -88,37 +78,22 @@ describe("ProductCard", () => {
       expect(wrapper.findAllComponents({ name: "CoreTag" })).toHaveLength(0);
     });
 
-    it("hides tags that aren't shown on cards", async () => {
-      const tags = [makeTag("New"), makeTag("Hidden", { showOnCards: false })];
+    it("shows the tags it's given", async () => {
+      const tags = [makeBadge("New"), makeBadge("Eco")];
       const wrapper = await mountInApp(ProductCard, { product: { ...product, tags } });
 
-      expect(wrapper.text()).toContain("New");
-      expect(wrapper.text()).not.toContain("Hidden");
+      expect(wrapper.findAllComponents({ name: "CoreTag" }).map(tag => tag.text())).toEqual(["New", "Eco"]);
     });
 
-    it("shows nothing when no tag is shown on cards", async () => {
-      const tags = [makeTag("Hidden", { showOnCards: false })];
+    it("shows at most three tags as a safety net", async () => {
+      const tags = ["A", "B", "C", "D", "E"].map(name => makeBadge(name));
       const wrapper = await mountInApp(ProductCard, { product: { ...product, tags } });
 
-      expect(wrapper.findAllComponents({ name: "CoreTag" })).toHaveLength(0);
-    });
-
-    it("shows at most three tags, highest priority first, whatever order they arrive in", async () => {
-      const tags = [
-        makeTag("Eco", { priority: 5 }),
-        makeTag("Gift", { priority: 10 }),
-        makeTag("New", { priority: 1000 }),
-        makeTag("Clearance", { priority: 1 }),
-        makeTag("Bestseller", { priority: 50 }),
-      ];
-      const wrapper = await mountInApp(ProductCard, { product: { ...product, tags } });
-      const labels = wrapper.findAllComponents({ name: "CoreTag" }).map(tag => tag.text());
-
-      expect(labels).toEqual(["New", "Bestseller", "Gift"]);
+      expect(wrapper.findAllComponents({ name: "CoreTag" }).map(tag => tag.text())).toEqual(["A", "B", "C"]);
     });
 
     it("passes each tag's icon and tooltip to the badge", async () => {
-      const tags = [makeTag("Hot", { icon: "flame", tooltip: "Selling fast" })];
+      const tags = [makeBadge("Hot", { icon: "flame", tooltip: "Selling fast" })];
       const wrapper = await mountInApp(ProductCard, { product: { ...product, tags } });
       const tag = wrapper.getComponent({ name: "CoreTag" });
 
@@ -128,7 +103,7 @@ describe("ProductCard", () => {
     });
 
     it("is accessible with tags", async () => {
-      const tags = [makeTag("New", { icon: "sparkle", tooltip: "Just arrived" }), makeTag("Eco", { icon: "leaf" })];
+      const tags = [makeBadge("New", { icon: "sparkle", tooltip: "Just arrived" }), makeBadge("Eco", { icon: "leaf" })];
 
       await expectAccessible(await mountInApp(ProductCard, { product: { ...product, tags } }));
     });

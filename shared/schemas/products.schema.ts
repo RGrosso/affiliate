@@ -1,3 +1,4 @@
+import { pageQuerySchema } from "./pagination.schema";
 import { z } from "./zod";
 
 const emptyToUndefined = (value: unknown) => (value === "" || value === null ? undefined : value);
@@ -52,3 +53,12 @@ export const addProductSchema = z.object({
 });
 
 export type AddProductInput = z.input<typeof addProductSchema>;
+
+export const productListQuerySchema = pageQuerySchema.extend({
+  /** A tag slug. */
+  tag: z.string().trim().max(100, "The tag can be at most 100 characters").optional(),
+  /** Admin only: every tag on each product, not just the ones shown on cards. */
+  allTags: z.stringbool({ error: "allTags must be true or false" }).optional(),
+});
+
+export type ProductListQuery = z.output<typeof productListQuerySchema>;

@@ -126,8 +126,8 @@ describe("update", () => {
 });
 
 describe("tags", () => {
-  const addTag = (name: string, priority: number | null = null) =>
-    new TagRepository(db).insert({ name, slug: name.toLowerCase().replaceAll(" ", "-"), priority });
+  const addTag = (name: string, priority: number | null = null, showOnCards = false) =>
+    new TagRepository(db).insert({ name, slug: name.toLowerCase().replaceAll(" ", "-"), priority, showOnCards });
 
   it("stores the tags on create and returns them from get", async () => {
     const [deals, gifts] = [await addTag("Deals", 5), await addTag("Gifts")];
@@ -187,14 +187,41 @@ describe("tags", () => {
     expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(3);
   });
 
-  it("includes each product's tags, highest priority first", async () => {
-    const [low, high, none] = [await addTag("Low", 1), await addTag("High", 9), await addTag("None")];
-    const { id } = await service.create({ title: "Lamp", tagIds: [none.id, low.id, high.id], images: [] }, authorId);
-    await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
+  describe("list tags", () => {
+    const query = { page: 1, pageSize: 10 };
 
-    const { items } = await service.list({ page: 1, pageSize: 10 });
-    expect(items.find(item => item.id === id)?.tags.map(tag => tag.name)).toEqual(["High", "Low", "None"]);
-    expect(items.find(item => item.title === "Plain")?.tags).toEqual([]);
+    const createTagged = async () => {
+      const tags = [
+        await addTag("Low", 1, true),
+        await addTag("Top", 9, true),
+        await addTag("Mid", 5, true),
+        await addTag("Fourth", 2, true),
+        await addTag("Hidden", 100),
+      ];
+      await service.create({ title: "Lamp", tagIds: tags.map(tag => tag.id), images: [] }, authorId);
+      await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
+    };
+
+    it("gives the public list only the top three on-card tags as badges", async () => {
+      await createTagged();
+
+      const { items } = await service.list(query);
+      const lamp = items.find(item => item.title === "Lamp")!;
+      expect(lamp.tags.map(tag => tag.name)).toEqual(["Top", "Mid", "Fourth"]);
+      expect(Object.keys(lamp.tags[0]!).sort()).toEqual(["icon", "id", "name", "slug", "tooltip"]);
+      expect(items.find(item => item.title === "Plain")?.tags).toEqual([]);
+    });
+
+    it("gives the admin list every tag as a badge, highest priority first", async () => {
+      await createTagged();
+
+      const { items } = await service.list(query, { forAdmin: true });
+      const lamp = items.find(item => item.title === "Lamp")!;
+      expect(lamp.tags.map(tag => tag.name)).toEqual(["Hidden", "Top", "Mid", "Fourth", "Low"]);
+      expect(lamp.tags[0]).not.toHaveProperty("showOnCards");
+      expect(lamp.tags[0]).not.toHaveProperty("priority");
+      expect(lamp.tags[0]).not.toHaveProperty("description");
+    });
   });
 });
 

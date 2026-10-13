@@ -1,4 +1,4 @@
-import type { Tag } from "./tag";
+import type { Tag, TagBadge } from "./tag";
 
 export type ProductImage = {
   url: string;
@@ -25,7 +25,7 @@ export type AdminProduct = EditableProduct & {
   tags: Tag[];
 };
 
-/** A row in the product list API, with its featured image and tags (highest priority first). */
+/** A row in the product list API, with its featured image and tags (highest priority first). Public, so tags are badges only. */
 export type ProductListItem = {
   id: string;
   title: string;
@@ -38,5 +38,5 @@ export type ProductListItem = {
   /** A `Date` on the server, an ISO string once it has come through the API. */
   createdAt: Date | string;
   image: ProductImage | null;
-  tags: Tag[];
+  tags: TagBadge[];
 };

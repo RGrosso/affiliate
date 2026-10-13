@@ -16,3 +16,13 @@ export function isUniqueViolation(error: unknown): boolean {
   }
   return false;
 }
+
+/** A `.catch` handler that turns a unique violation into a conflict on `field`, and rethrows anything else. */
+export function rethrowUniqueViolationAs(field: string, message: string) {
+  return (error: unknown): never => {
+    if (isUniqueViolation(error)) {
+      throw apiError("CONFLICT", message, { [field]: [message] });
+    }
+    throw error;
+  };
+}
