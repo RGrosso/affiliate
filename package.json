@@ -10,6 +10,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",
     "test:nuxt": "vitest run --project nuxt",
