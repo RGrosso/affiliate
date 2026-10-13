@@ -27,7 +27,7 @@ Use the core component wherever one exists:
 | --- | --- | --- |
 | `<CoreContainer>` | `UContainer` | Every page-width wrapper; use it in place of `UContainer`. `variant="padded"` adds vertical spacing for a page's main content. `variant="full"` is a full-width band (put the background on it) with page-width content inside, as in the homepage hero. `as` sets the element, e.g. `as="section"`. |
 | `<CoreAlert variant="warning" title="…" />` | `UAlert` | Inline messages. `variant` is `success`, `error`, `warning` or `info` and sets the colour and icon. Also takes `description`, `actions` and an optional `icon` override. |
-| `<CoreTag label="Sample" color="warning" />` | `UBadge` | Small labels on products. `color` defaults to `neutral`. |
+| `<CoreTag label="Sample" color="warning" />` | `UBadge` | Small labels on products. `color` defaults to `neutral`. `icon` is a `TagIcon` key shown as the leading icon (mapped in `app/utils/tagIcons.ts`). `tooltip` wraps the badge in a focusable `UTooltip`, which needs `UApp` above it. |
 | `<CoreButtonBar :show="dirty">` | (custom) | The sticky "Unsaved changes" bar on forms; buttons go in the default slot. |
 | `<CorePagination v-model:page="page" :total="total" :page-size="pageSize" />` | `UPagination` | Page controls under a paginated list. Renders nothing when there is only one page. |
 
