@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook-vue/nuxt";
+import UButton from "@nuxt/ui/components/Button.vue";
 import ButtonBar from "./ButtonBar.vue";
 
 const meta = {
@@ -6,7 +7,9 @@ const meta = {
   component: ButtonBar,
   args: { show: true },
   render: args => ({
-    components: { ButtonBar },
+    // Story templates aren't .vue files, so Nuxt's auto-imports don't apply, and Storybook's Vite
+    // can't resolve #components: import what they use from Nuxt UI directly
+    components: { ButtonBar, UButton },
     setup: () => ({ args }),
     template: `
       <ButtonBar v-bind="args">

@@ -1,6 +1,6 @@
 import type { Preview } from "@storybook-vue/nuxt";
 import { withThemeByClassName } from "@storybook/addon-themes";
-import { UApp } from "#components";
+import UApp from "@nuxt/ui/components/App.vue";
 import "~/assets/css/main.css";
 
 const preview: Preview = {
