@@ -10,7 +10,7 @@ test.describe("homepage", () => {
 
     const cards = page.locator("h3");
     await expect(cards).toHaveCount(8);
-    await expect(page.getByText(/^£\d+(\.\d{2})?$/).first()).toBeVisible();
+    await expect(page.getByText(/^£[\d,]+(\.\d{2})?$/).first()).toBeVisible();
     await expect(page.getByText("We may earn a commission, at no cost to you.")).toBeVisible();
   });
 

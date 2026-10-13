@@ -8,7 +8,8 @@ export default defineConfig<ConfigOptions>({
   // The tests share one database and build on each other's data, so run them in order
   workers: 1,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  // No retries: the tests share one database, so a retry would run against data the first attempt changed
+  retries: 0,
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : [["list"], ["html", { open: "on-failure" }]],
   timeout: 60_000,
   webServer: {
