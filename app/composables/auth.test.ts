@@ -1,6 +1,6 @@
 import { mockNuxtImport, registerEndpoint } from "@nuxt/test-utils/runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useAuth } from "./useAuth";
+import { useAuth } from "./auth";
 
 // nuxt-auth-utils is pre-bundled in browser mode, so mockNuxtImport can't replace useUserSession.
 // Its real session endpoint is mocked instead.

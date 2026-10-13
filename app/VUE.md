@@ -58,6 +58,6 @@ Avoid `any`. Use a precise type, `unknown` with narrowing, or a generic instead.
 
 ## Composables
 
-- Put reusable stateful logic in a `use*` composable in `app/composables/` (auto-imported).
+- Put reusable stateful logic in a `use*` composable in `app/composables/` (auto-imported). Name the file after what it's about, without the `use` prefix: `useAuth()` lives in `auth.ts`, `useProductMedia()` in `productMedia.ts`, and its test beside it in `auth.test.ts`. Nuxt auto-imports by the exported function name, so the file name doesn't change how it's called.
 - Reach for VueUse (`useDebounceFn`, `useEventListener`, `useLocalStorage`, `onClickOutside`, ...) before writing your own listener, timer or browser-API wrapper. It is not a direct dependency yet: the first time you need it, add `@vueuse/nuxt` to `modules` in `nuxt.config.ts` so its composables are auto-imported.
 - Template refs use `useTemplateRef("name")`.
