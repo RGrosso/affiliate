@@ -45,6 +45,25 @@ describe("Header", () => {
     expect(wrapper.findAll("a").some(link => link.text() === "Log in")).toBe(false);
   });
 
+  it("shows only the logo, colour mode and account menu on minimal pages such as /admin", async () => {
+    const route = useRoute();
+    route.meta.minimalHeader = true;
+    auth.user.value = { username: "admin" };
+
+    try {
+      const wrapper = await mountSuspended(Header);
+
+      expect(wrapper.text()).toContain(SITE_NAME);
+      expect(wrapper.text()).toContain("admin");
+      expect(wrapper.find("button[aria-label*='mode']").exists()).toBe(true);
+      expect(wrapper.text()).not.toContain("Gift ideas for humans");
+      expect(wrapper.find("form[role=search]").exists()).toBe(false);
+      expect(wrapper.find("nav[aria-label=Categories]").exists()).toBe(false);
+    } finally {
+      delete route.meta.minimalHeader;
+    }
+  });
+
   it("is accessible", async () => {
     await expectAccessible(await mountSuspended(Header));
   });
