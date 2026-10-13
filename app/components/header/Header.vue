@@ -7,8 +7,12 @@
       center: 'flex-1 max-w-xl',
       right: 'lg:flex-none',
     }"
+    :toggle="!minimal"
   >
-    <template #top>
+    <template
+      v-if="!minimal"
+      #top
+    >
       <div class="bg-band-strong text-white text-sm font-semibold text-center px-4 py-2.5">
         Gift ideas for humans, hounds and everything in between
       </div>
@@ -20,7 +24,7 @@
       </span>
     </template>
 
-    <HeaderSearch />
+    <HeaderSearch v-if="!minimal" />
 
     <template #right>
       <UColorModeButton />
@@ -50,7 +54,10 @@
       />
     </template>
 
-    <template #bottom>
+    <template
+      v-if="!minimal"
+      #bottom
+    >
       <CoreContainer>
         <nav
           aria-label="Categories"
@@ -69,7 +76,10 @@
       </CoreContainer>
     </template>
 
-    <template #body>
+    <template
+      v-if="!minimal"
+      #body
+    >
       <HeaderSearch />
     </template>
   </UHeader>
@@ -78,6 +88,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { DropdownMenuItem } from "@nuxt/ui";
+
+const route = useRoute();
+const minimal = computed(() => route.meta.minimalHeader === true);
 
 // WIP: categories all land on the unfiltered product list for now
 const categories = [

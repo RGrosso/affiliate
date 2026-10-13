@@ -1,0 +1,14 @@
+diff --git a/dist/preview.mjs b/dist/preview.mjs
+index 31cc2cc99b59403c5eb0bdc952e01cbf25fd9f1b..bd2cc16f076e18d2a9b122bf25abe3c46d281b02 100644
+--- a/dist/preview.mjs
++++ b/dist/preview.mjs
+@@ -1,7 +1,8 @@
+ import { createNuxtPayload } from 'virtual:nuxt-runtime-config';
+ import { setup } from '@storybook/vue3-vite';
+ import { createNuxtApp, applyPlugins } from 'nuxt/app';
+-import { getContext } from 'unctx';
++// Nuxt 4.6 keeps its app context in its own registry, not unctx's, so register the story's app there
++import { getNuxtAppCtx as getContext } from '#app/nuxt';
+ import { $fetch } from 'ofetch';
+ export { applyDecorators, argTypesEnhancers, mount, parameters, render, renderToCanvas } from '@storybook/vue3/entry-preview';
+ import '#build/css';

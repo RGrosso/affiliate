@@ -397,7 +397,7 @@
 import type { EditorToolbarItem, FormErrorEvent, FormSubmitEvent } from "@nuxt/ui";
 import type { z } from "#shared/schemas/zod";
 import { addProductSchema } from "#shared/schemas/products.schema";
-import type { EditableProduct } from "#shared/types/product";
+import type { AdminProduct, EditableProduct } from "#shared/types/product";
 
 type Schema = z.output<typeof addProductSchema>;
 
@@ -539,7 +539,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   saving.value = true;
   try {
     if (product) {
-      const { data } = await $fetch(`/api/products/${product.id}`, { method: "PATCH", body });
+      const { data } = await $fetch<ApiSuccess<AdminProduct | undefined>>(`/api/products/${product.id}`, {
+        method: "PATCH",
+        body,
+      });
       toast.add({ title: "Product saved", color: "success" });
       if (data) {
         reset(data);

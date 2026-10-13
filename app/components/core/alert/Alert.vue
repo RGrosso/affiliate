@@ -6,6 +6,7 @@
     :title="title"
     :description="description"
     :actions="actions"
+    :ui="{ description: 'opacity-100' }"
   />
 </template>
 

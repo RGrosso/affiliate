@@ -31,3 +31,9 @@ Use the core component wherever one exists:
 | `<CoreButtonBar :show="dirty">` | (custom) | The sticky "Unsaved changes" bar on forms; buttons go in the default slot. |
 
 Add a row here when you add a core component.
+
+## Component folders
+
+Every component lives in its own folder named after it, with its test beside it: `core/alert/Alert.vue` and `core/alert/Alert.test.ts`. Nuxt drops the repeated name, so that's still `<CoreAlert>`. Core components also need a story, `core/alert/Alert.stories.ts`, so they show up in Storybook (`pnpm storybook`). `test/unit/component-coverage.test.ts` fails when any of these is missing.
+
+Component tests run in a real browser. Check accessibility with `expectAccessible(wrapper)` from `test/nuxt/axe.ts`, which runs axe in light and dark mode.

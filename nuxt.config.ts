@@ -1,5 +1,13 @@
 export default defineNuxtConfig({
   modules: ["@nuxt/eslint", "@nuxt/fonts", "@nuxt/ui", "@nuxthub/core", "nuxt-auth-utils"],
+  $env: {
+    // `nuxt dev --envName e2e`, used by the Playwright tests: a separate build and database,
+    // so they can run alongside `pnpm dev` without touching its data
+    e2e: {
+      buildDir: ".nuxt-e2e",
+      hub: { dir: ".data-e2e" },
+    },
+  },
   devtools: { enabled: true },
   app: {
     head: {

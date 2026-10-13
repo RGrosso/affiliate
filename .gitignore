@@ -25,3 +25,13 @@ logs
 
 # Claude Code local launch config
 .claude/launch.json
+
+# Tests
+coverage
+storybook-static
+*storybook.log
+.data-e2e
+.nuxt-e2e
+test/e2e/.auth
+playwright-report
+test-results

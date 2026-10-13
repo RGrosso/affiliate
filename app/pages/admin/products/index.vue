@@ -38,12 +38,12 @@
             v-if="row.original.image"
             :src="row.original.image.url"
             :alt="row.original.image.alt ?? row.original.title"
-            class="size-10 aspect-square object-cover rounded-md border border-default"
+            class="size-10 max-w-none shrink-0 aspect-square object-cover rounded-md border border-default"
             loading="lazy"
           >
           <div
             v-else
-            class="size-10 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"
+            class="size-10 shrink-0 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"
           >
             <UIcon
               name="i-heroicons-photo"
@@ -153,7 +153,8 @@ const sampleCount = computed(() => data.value?.data.sampleCount ?? 0);
 type ProductRow = (typeof products.value)[number];
 
 const columns: TableColumn<ProductRow>[] = [
-  { id: "image", header: "" },
+  // An empty-string header renders a text node the server HTML lacks, causing a hydration mismatch
+  { id: "image", header: () => h("span", { class: "sr-only" }, "Image") },
   { accessorKey: "title", header: "Product" },
   { accessorKey: "retailer", header: "Retailer" },
   { accessorKey: "createdAt", header: "Added" },

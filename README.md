@@ -101,6 +101,18 @@ npx nuxt hub db generate
 
 It's applied automatically the next time you run `pnpm dev`.
 
+## Testing
+
+| Command | What it runs |
+| --- | --- |
+| `pnpm test` | Unit tests (Node) and component tests (headless Chromium, with accessibility checks) |
+| `pnpm test:types` | Type check of the app, server and tests |
+| `pnpm test:e2e` | Playwright end-to-end tests against a dev server with its own database (`.data-e2e/`), so your `.data/` is untouched |
+| `pnpm lint:check` | ESLint without fixing (`pnpm lint` fixes) |
+| `pnpm storybook` | Storybook for the core components on `http://localhost:6006` |
+
+The first time, install the test browser with `pnpm exec playwright install chromium`. CI runs all of these on every pull request.
+
 ## Production
 
 ```bash
