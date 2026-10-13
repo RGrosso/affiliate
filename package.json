@@ -2,6 +2,7 @@
   "name": "affiliate",
   "type": "module",
   "private": true,
+  "packageManager": "pnpm@12.11.2",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
