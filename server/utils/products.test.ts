@@ -14,28 +14,29 @@ const thrown = (fn: () => unknown) => {
 
 describe("toProductValues", () => {
   it("converts the price from pounds to whole pence", () => {
-    expect(toProductValues({ title: "Moon Lamp", price: 19.99, images: [] }).pricePence).toBe(1999);
-    expect(toProductValues({ title: "Moon Lamp", price: 0.29, images: [] }).pricePence).toBe(29);
+    expect(toProductValues({ title: "Moon Lamp", price: 19.99, tagIds: [], images: [] }).pricePence).toBe(1999);
+    expect(toProductValues({ title: "Moon Lamp", price: 0.29, tagIds: [], images: [] }).pricePence).toBe(29);
   });
 
   it("keeps a missing price as null", () => {
-    expect(toProductValues({ title: "Moon Lamp", images: [] }).pricePence).toBeNull();
-    expect(toProductValues({ title: "Moon Lamp", price: null, images: [] }).pricePence).toBeNull();
+    expect(toProductValues({ title: "Moon Lamp", tagIds: [], images: [] }).pricePence).toBeNull();
+    expect(toProductValues({ title: "Moon Lamp", price: null, tagIds: [], images: [] }).pricePence).toBeNull();
   });
 
   it("builds the handle from the title when none is given", () => {
-    expect(toProductValues({ title: "Moon Lamp", images: [] }).handle).toBe("moon-lamp");
-    expect(toProductValues({ title: "Moon Lamp", handle: "lamp", images: [] }).handle).toBe("lamp");
+    expect(toProductValues({ title: "Moon Lamp", tagIds: [], images: [] }).handle).toBe("moon-lamp");
+    expect(toProductValues({ title: "Moon Lamp", handle: "lamp", tagIds: [], images: [] }).handle).toBe("lamp");
   });
 
-  it("leaves images and price out of the row", () => {
-    const values = toProductValues({ title: "Moon Lamp", price: 1, images: [{ url: "/a.jpg" }] });
+  it("leaves images, tags and price out of the row", () => {
+    const values = toProductValues({ title: "Moon Lamp", price: 1, tagIds: [], images: [{ url: "/a.jpg" }] });
     expect(values).not.toHaveProperty("images");
+    expect(values).not.toHaveProperty("tagIds");
     expect(values).not.toHaveProperty("price");
   });
 
   it("asks for a handle when the title has no letters or numbers", () => {
-    const error = thrown(() => toProductValues({ title: "!!!", images: [] }));
+    const error = thrown(() => toProductValues({ title: "!!!", tagIds: [], images: [] }));
     expect(error.statusCode).toBe(400);
     expect(error.data?.fieldErrors).toEqual({ handle: ["Please add a URL handle using letters or numbers"] });
   });

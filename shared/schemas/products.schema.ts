@@ -48,6 +48,7 @@ export const addProductSchema = z.object({
   seoTitle: z.string().trim().max(70, "The page title can be at most 70 characters").optional().nullable(),
   seoDescription: z.string().trim().max(320, "The meta description can be at most 320 characters").optional().nullable(),
   images: z.array(productImageSchema).max(10, "You can add up to 10 images").default([]),
+  tagIds: z.array(z.uuid("Please choose tags from the list")).max(50, "You can add up to 50 tags").default([]),
 });
 
 export type AddProductInput = z.input<typeof addProductSchema>;

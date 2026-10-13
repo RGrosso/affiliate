@@ -29,6 +29,13 @@
       "when": 1791815942649,
       "tag": "0003_price_in_pence",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791908552121,
+      "tag": "0004_tags",
+      "breakpoints": true
     }
   ]
 }

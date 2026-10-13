@@ -30,7 +30,7 @@ export function rethrowAsDuplicateHandle(error: unknown): never {
   throw error;
 }
 
-export function toProductValues({ price, images: _images, handle, ...fields }: ProductInput) {
+export function toProductValues({ price, images: _images, tagIds: _tagIds, handle, ...fields }: ProductInput) {
   const finalHandle = handle || slugify(fields.title);
 
   if (!finalHandle) {

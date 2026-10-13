@@ -38,7 +38,7 @@ beforeEach(async () => {
 describe("create", () => {
   it("stores the price in pence and the images in order", async () => {
     const created = await service.create(
-      { title: "Moon Lamp", price: 19.99, images: [{ url: "/a.jpg", alt: "A" }, { url: "/b.jpg" }] },
+      { title: "Moon Lamp", price: 19.99, tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/b.jpg" }] },
       authorId
     );
 
@@ -49,9 +49,9 @@ describe("create", () => {
   });
 
   it("rejects a duplicate handle as a conflict on the handle field", async () => {
-    await service.create({ title: "Lamp", images: [] }, authorId);
+    await service.create({ title: "Lamp", tagIds: [], images: [] }, authorId);
 
-    const error = await rejection(service.create({ title: "Other", handle: "lamp", images: [] }, authorId));
+    const error = await rejection(service.create({ title: "Other", handle: "lamp", tagIds: [], images: [] }, authorId));
     expect(error.statusCode).toBe(409);
     expect(error.data?.fieldErrors?.handle).toEqual(["Another product already uses this URL handle"]);
   });
@@ -79,11 +79,11 @@ describe("list", () => {
 
   it("pages the products with their featured image and counts the samples", async () => {
     const withImage = await service.create(
-      { title: "A", images: [{ url: "/a.jpg", alt: "A" }, { url: "/a2.jpg" }] },
+      { title: "A", tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/a2.jpg" }] },
       authorId
     );
-    const sample = await service.create({ title: "B", images: [] }, authorId);
-    await service.create({ title: "C", images: [] }, authorId);
+    const sample = await service.create({ title: "B", tagIds: [], images: [] }, authorId);
+    await service.create({ title: "C", tagIds: [], images: [] }, authorId);
     await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
 
     const paged = await service.list({ page: 1, pageSize: 2 });
@@ -98,18 +98,18 @@ describe("list", () => {
 
 describe("update", () => {
   it("replaces the fields and images", async () => {
-    const { id } = await service.create({ title: "Lamp", price: 10, images: [{ url: "/old.jpg" }] }, authorId);
+    const { id } = await service.create({ title: "Lamp", price: 10, tagIds: [], images: [{ url: "/old.jpg" }] }, authorId);
 
-    const updated = await service.update(id, { title: "Lamp 2", price: 12.5, images: [{ url: "/new.jpg" }] });
+    const updated = await service.update(id, { title: "Lamp 2", price: 12.5, tagIds: [], images: [{ url: "/new.jpg" }] });
     expect(updated).toMatchObject({ title: "Lamp 2", pricePence: 1250, images: [{ url: "/new.jpg", alt: null }] });
   });
 
   it("rolls back the images when the handle is already used", async () => {
-    await service.create({ title: "Taken", images: [] }, authorId);
-    const { id } = await service.create({ title: "Mine", images: [{ url: "/keep.jpg" }] }, authorId);
+    await service.create({ title: "Taken", tagIds: [], images: [] }, authorId);
+    const { id } = await service.create({ title: "Mine", tagIds: [], images: [{ url: "/keep.jpg" }] }, authorId);
 
     const error = await rejection(
-      service.update(id, { title: "Mine", handle: "taken", images: [{ url: "/lost.jpg" }] })
+      service.update(id, { title: "Mine", handle: "taken", tagIds: [], images: [{ url: "/lost.jpg" }] })
     );
     expect(error.statusCode).toBe(409);
     expect(error.data?.fieldErrors?.handle).toBeDefined();
@@ -120,15 +120,15 @@ describe("update", () => {
   });
 
   it("throws a 404 for an unknown product", async () => {
-    const error = await rejection(service.update(unknownId, { title: "x", images: [] }));
+    const error = await rejection(service.update(unknownId, { title: "x", tagIds: [], images: [] }));
     expect(error.statusCode).toBe(404);
   });
 });
 
 describe("deleteSamples", () => {
   it("returns how many samples were removed", async () => {
-    const sample = await service.create({ title: "Sample", images: [] }, authorId);
-    await service.create({ title: "Real", images: [] }, authorId);
+    const sample = await service.create({ title: "Sample", tagIds: [], images: [] }, authorId);
+    await service.create({ title: "Real", tagIds: [], images: [] }, authorId);
     await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
 
     expect(await service.deleteSamples()).toBe(1);
@@ -166,7 +166,7 @@ describe("seedSamplesOnce", () => {
   });
 
   it("skips a store that already has products and marks it as done", async () => {
-    const real = await service.create({ title: "Real", images: [] }, authorId);
+    const real = await service.create({ title: "Real", tagIds: [], images: [] }, authorId);
 
     await service.seedSamplesOnce(authorId);
     expect(await allProducts()).toHaveLength(1);
