@@ -1,10 +1,10 @@
 import type { ProductDetail } from "#shared/types/product";
 import { CURRENCY } from "#shared/utils/format";
-import { htmlToText } from "#shared/utils/htmlToText";
+import { metaDescription } from "#shared/utils/metaDescription";
 
 /** schema.org Product structured data, so search engines can show the price and brand. Empty fields are left out. */
 export function productJsonLd(product: ProductDetail) {
-  const description = product.seoDescription || htmlToText(product.description) || undefined;
+  const description = metaDescription(product.seoDescription, product.description) || undefined;
 
   return {
     "@context": "https://schema.org",
@@ -18,7 +18,6 @@ export function productJsonLd(product: ProductDetail) {
         "@type": "Offer",
         "price": (product.pricePence / 100).toFixed(2),
         "priceCurrency": CURRENCY,
-        "availability": "https://schema.org/InStock",
         ...(product.affiliateUrl && { url: product.affiliateUrl }),
         ...(product.retailer && { seller: { "@type": "Organization", "name": product.retailer } }),
       },

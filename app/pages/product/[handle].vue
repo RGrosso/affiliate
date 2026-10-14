@@ -115,7 +115,7 @@ const RICH_TEXT_CLASS = [
 const route = useRoute();
 const handle = computed(() => String(route.params.handle));
 
-const { data, error } = await useFetch(() => `/api/products/handle/${handle.value}`);
+const { data, error } = await useFetch(() => `/api/products/handle/${encodeURIComponent(handle.value)}`);
 
 if (error.value) {
   const statusCode = error.value.statusCode ?? 500;
@@ -134,15 +134,15 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
   { label: product.value?.title ?? "", class: "text-toned" },
 ]);
 
-const metaDescription = computed(() =>
-  product.value?.seoDescription || htmlToText(product.value?.description).slice(0, 160) || undefined
+const seoDescription = computed(() =>
+  metaDescription(product.value?.seoDescription, product.value?.description) || undefined
 );
 
 useSeoMeta({
   title: () => product.value?.seoTitle || product.value?.title,
-  description: metaDescription,
+  description: seoDescription,
   ogTitle: () => product.value?.seoTitle || product.value?.title,
-  ogDescription: metaDescription,
+  ogDescription: seoDescription,
   ogImage: () => product.value?.images[0]?.url,
   ogType: "website",
 });

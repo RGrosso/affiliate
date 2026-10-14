@@ -31,7 +31,6 @@ describe("productJsonLd", () => {
         "@type": "Offer",
         "price": "24.99",
         "priceCurrency": "GBP",
-        "availability": "https://schema.org/InStock",
         "url": "https://example.com/moon-lamp",
         "seller": { "@type": "Organization", "name": "Lamp Shop" },
       },

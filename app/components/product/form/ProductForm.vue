@@ -332,7 +332,7 @@
             >
               <UTextarea
                 v-model="state.seoDescription"
-                :placeholder="plainDescription.slice(0, 320)"
+                :placeholder="metaDescription(null, state.description)"
                 :rows="3"
                 autoresize
                 class="w-full"
@@ -535,7 +535,7 @@ const urlPrefix = computed(() => `${requestUrl.host}/product/`);
 
 const seoPreview = computed(() => ({
   title: state.seoTitle || state.title,
-  description: state.seoDescription || plainDescription.value.slice(0, 320),
+  description: metaDescription(state.seoDescription, state.description),
   url: `${requestUrl.origin}/product/${state.handle || slugify(state.title)}`,
 }));
 
