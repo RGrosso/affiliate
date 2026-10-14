@@ -38,7 +38,7 @@ beforeEach(async () => {
 describe("create", () => {
   it("stores the price in pence and the images in order", async () => {
     const created = await service.create(
-      { title: "Moon Lamp", price: 19.99, images: [{ url: "/a.jpg", alt: "A" }, { url: "/b.jpg" }] },
+      { title: "Moon Lamp", price: 19.99, tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/b.jpg" }] },
       authorId
     );
 
@@ -49,9 +49,9 @@ describe("create", () => {
   });
 
   it("rejects a duplicate handle as a conflict on the handle field", async () => {
-    await service.create({ title: "Lamp", images: [] }, authorId);
+    await service.create({ title: "Lamp", tagIds: [], images: [] }, authorId);
 
-    const error = await rejection(service.create({ title: "Other", handle: "lamp", images: [] }, authorId));
+    const error = await rejection(service.create({ title: "Other", handle: "lamp", tagIds: [], images: [] }, authorId));
     expect(error.statusCode).toBe(409);
     expect(error.data?.fieldErrors?.handle).toEqual(["Another product already uses this URL handle"]);
   });
@@ -79,11 +79,11 @@ describe("list", () => {
 
   it("pages the products with their featured image and counts the samples", async () => {
     const withImage = await service.create(
-      { title: "A", images: [{ url: "/a.jpg", alt: "A" }, { url: "/a2.jpg" }] },
+      { title: "A", tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/a2.jpg" }] },
       authorId
     );
-    const sample = await service.create({ title: "B", images: [] }, authorId);
-    await service.create({ title: "C", images: [] }, authorId);
+    const sample = await service.create({ title: "B", tagIds: [], images: [] }, authorId);
+    await service.create({ title: "C", tagIds: [], images: [] }, authorId);
     await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
 
     const paged = await service.list({ page: 1, pageSize: 2 });
@@ -98,18 +98,18 @@ describe("list", () => {
 
 describe("update", () => {
   it("replaces the fields and images", async () => {
-    const { id } = await service.create({ title: "Lamp", price: 10, images: [{ url: "/old.jpg" }] }, authorId);
+    const { id } = await service.create({ title: "Lamp", price: 10, tagIds: [], images: [{ url: "/old.jpg" }] }, authorId);
 
-    const updated = await service.update(id, { title: "Lamp 2", price: 12.5, images: [{ url: "/new.jpg" }] });
+    const updated = await service.update(id, { title: "Lamp 2", price: 12.5, tagIds: [], images: [{ url: "/new.jpg" }] });
     expect(updated).toMatchObject({ title: "Lamp 2", pricePence: 1250, images: [{ url: "/new.jpg", alt: null }] });
   });
 
   it("rolls back the images when the handle is already used", async () => {
-    await service.create({ title: "Taken", images: [] }, authorId);
-    const { id } = await service.create({ title: "Mine", images: [{ url: "/keep.jpg" }] }, authorId);
+    await service.create({ title: "Taken", tagIds: [], images: [] }, authorId);
+    const { id } = await service.create({ title: "Mine", tagIds: [], images: [{ url: "/keep.jpg" }] }, authorId);
 
     const error = await rejection(
-      service.update(id, { title: "Mine", handle: "taken", images: [{ url: "/lost.jpg" }] })
+      service.update(id, { title: "Mine", handle: "taken", tagIds: [], images: [{ url: "/lost.jpg" }] })
     );
     expect(error.statusCode).toBe(409);
     expect(error.data?.fieldErrors?.handle).toBeDefined();
@@ -120,15 +120,126 @@ describe("update", () => {
   });
 
   it("throws a 404 for an unknown product", async () => {
-    const error = await rejection(service.update(unknownId, { title: "x", images: [] }));
+    const error = await rejection(service.update(unknownId, { title: "x", tagIds: [], images: [] }));
     expect(error.statusCode).toBe(404);
+  });
+});
+
+describe("tags", () => {
+  const addTag = (name: string, priority: number | null = null, showOnCards = false) =>
+    new TagRepository(db).insert({ name, slug: name.toLowerCase().replaceAll(" ", "-"), priority, showOnCards });
+
+  it("stores the tags on create and returns them from get", async () => {
+    const [deals, gifts] = [await addTag("Deals", 5), await addTag("Gifts")];
+
+    const { id } = await service.create({ title: "Lamp", tagIds: [gifts.id, deals.id], images: [] }, authorId);
+
+    const found = await service.get(id);
+    expect(found.tags.map(tag => tag.name)).toEqual(["Deals", "Gifts"]);
+    expect([...found.tagIds].sort()).toEqual([deals.id, gifts.id].sort());
+  });
+
+  it("replaces the tags on update", async () => {
+    const [deals, gifts] = [await addTag("Deals"), await addTag("Gifts")];
+    const { id } = await service.create({ title: "Lamp", tagIds: [deals.id], images: [] }, authorId);
+
+    const updated = await service.update(id, { title: "Lamp", tagIds: [gifts.id], images: [] });
+    expect(updated.tagIds).toEqual([gifts.id]);
+
+    expect((await service.update(id, { title: "Lamp", tagIds: [], images: [] })).tags).toEqual([]);
+  });
+
+  it("rejects an unknown tag with a field error and changes nothing", async () => {
+    const deals = await addTag("Deals");
+    const { id } = await service.create({ title: "Lamp", tagIds: [deals.id], images: [{ url: "/keep.jpg" }] }, authorId);
+
+    const error = await rejection(service.update(id, { title: "Changed", tagIds: [unknownId], images: [] }));
+    expect(error.statusCode).toBe(400);
+    expect(error.data?.fieldErrors?.tagIds).toEqual(["One of these tags no longer exists. Please refresh and try again"]);
+
+    const found = await service.get(id);
+    expect(found.title).toBe("Lamp");
+    expect(found.tagIds).toEqual([deals.id]);
+    expect(found.images).toHaveLength(1);
+  });
+
+  it("rejects an unknown tag on create without adding the product", async () => {
+    const error = await rejection(service.create({ title: "Lamp", tagIds: [unknownId], images: [] }, authorId));
+    expect(error.statusCode).toBe(400);
+    expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(0);
+  });
+
+  it("lists only the tagged products, with the right total", async () => {
+    const [deals, gifts] = [await addTag("Deals"), await addTag("Gifts")];
+    const tagged = await service.create({ title: "Tagged", tagIds: [deals.id, gifts.id], images: [] }, authorId);
+    await service.create({ title: "Also tagged", tagIds: [deals.id], images: [] }, authorId);
+    await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
+
+    const dealsPage = await service.list({ page: 1, pageSize: 1, tag: ["deals"] });
+    expect(dealsPage).toMatchObject({ total: 2, totalPages: 2 });
+    expect(dealsPage.items).toHaveLength(1);
+
+    const giftsPage = await service.list({ page: 1, pageSize: 10, tag: ["gifts"] });
+    expect(giftsPage.items.map(item => item.id)).toEqual([tagged.id]);
+    expect(giftsPage.total).toBe(1);
+
+    expect((await service.list({ page: 1, pageSize: 10, tag: ["no-such-tag"] })).total).toBe(0);
+    expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(3);
+  });
+
+  it("matches products with any of several tags without duplicates", async () => {
+    const [deals, gifts] = [await addTag("Deals"), await addTag("Gifts")];
+    await service.create({ title: "Both", tagIds: [deals.id, gifts.id], images: [] }, authorId);
+    await service.create({ title: "Gift", tagIds: [gifts.id], images: [] }, authorId);
+    await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
+
+    const page = await service.list({ page: 1, pageSize: 10, tag: ["deals", "gifts"] });
+    expect(page.items.map(item => item.title).sort()).toEqual(["Both", "Gift"]);
+    expect(page.total).toBe(2);
+  });
+
+  describe("list tags", () => {
+    const query = { page: 1, pageSize: 10 };
+
+    const createTagged = async () => {
+      const tags = [
+        await addTag("Low", 1, true),
+        await addTag("Top", 9, true),
+        await addTag("Mid", 5, true),
+        await addTag("Fourth", 2, true),
+        await addTag("Hidden", 100),
+      ];
+      await service.create({ title: "Lamp", tagIds: tags.map(tag => tag.id), images: [] }, authorId);
+      await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
+    };
+
+    it("gives the public list only the top three on-card tags as badges", async () => {
+      await createTagged();
+
+      const { items } = await service.list(query);
+      const lamp = items.find(item => item.title === "Lamp")!;
+      expect(lamp.tags.map(tag => tag.name)).toEqual(["Top", "Mid", "Fourth"]);
+      expect(Object.keys(lamp.tags[0]!).sort()).toEqual(["icon", "id", "name", "slug", "tooltip"]);
+      expect(items.find(item => item.title === "Plain")?.tags).toEqual([]);
+    });
+
+    it("gives the admin list every tag as a badge, highest priority first", async () => {
+      await createTagged();
+
+      const { items } = await service.list(query, { forAdmin: true });
+      const lamp = items.find(item => item.title === "Lamp")!;
+      expect(lamp.tags.map(tag => tag.name)).toEqual(["Hidden", "Top", "Mid", "Fourth", "Low"]);
+      expect(lamp.tags[0]).not.toHaveProperty("showOnCards");
+      expect(lamp.tags[0]).not.toHaveProperty("priority");
+      expect(lamp.tags[0]).not.toHaveProperty("description");
+    });
   });
 });
 
 describe("deleteSamples", () => {
   it("returns how many samples were removed", async () => {
-    const sample = await service.create({ title: "Sample", images: [] }, authorId);
-    await service.create({ title: "Real", images: [] }, authorId);
+    const sample = await service.create({ title: "Sample", tagIds: [], images: [] }, authorId);
+    await service.create({ title: "Real", tagIds: [], images: [] }, authorId);
     await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
 
     expect(await service.deleteSamples()).toBe(1);
@@ -166,7 +277,7 @@ describe("seedSamplesOnce", () => {
   });
 
   it("skips a store that already has products and marks it as done", async () => {
-    const real = await service.create({ title: "Real", images: [] }, authorId);
+    const real = await service.create({ title: "Real", tagIds: [], images: [] }, authorId);
 
     await service.seedSamplesOnce(authorId);
     expect(await allProducts()).toHaveLength(1);

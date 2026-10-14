@@ -35,10 +35,10 @@ export default defineConfig<ConfigOptions>({
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"] },
     },
-    // Runs last because it deletes the sample products the public tests rely on
+    // Runs last because admin.spec deletes the sample products the public tests rely on; tags.spec makes its own product
     {
       name: "admin",
-      testMatch: /admin\.spec\.ts$/,
+      testMatch: /(admin|tags)\.spec\.ts$/,
       dependencies: ["public"],
       use: { ...devices["Desktop Chrome"], storageState: ADMIN_STATE },
     },

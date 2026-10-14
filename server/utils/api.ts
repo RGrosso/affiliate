@@ -80,6 +80,16 @@ export function readValidatedQuery<S extends ZodType>(event: H3Event, schema: S)
   return result.data;
 }
 
+/** Reads the `id` route param, throwing `notFoundError()` unless it's a UUID. */
+export function readIdParam(event: H3Event, notFoundError: () => Error): string {
+  const result = z.object({ id: z.uuid() }).safeParse(getRouterParams(event));
+  if (!result.success) {
+    throw notFoundError();
+  }
+
+  return result.data.id;
+}
+
 const codeForStatus = (status: number): ApiErrorCode => {
   switch (status) {
     case 401: return "UNAUTHORIZED";

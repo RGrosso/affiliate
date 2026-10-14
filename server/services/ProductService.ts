@@ -1,6 +1,5 @@
 import type { z } from "#shared/schemas/zod";
-import type { addProductSchema } from "#shared/schemas/products.schema";
-import type { PageQuery } from "#shared/schemas/pagination.schema";
+import type { addProductSchema, ProductListQuery } from "#shared/schemas/products.schema";
 import type { ProductListItem } from "#shared/types/product";
 
 const SEEDED_KEY = "sample_products_seeded";
@@ -9,21 +8,34 @@ type ProductInput = z.output<typeof addProductSchema>;
 
 export class ProductService {
   private readonly products: ProductRepository;
+  private readonly tags: TagRepository;
 
   constructor(private readonly db: DbExecutor) {
     this.products = new ProductRepository(db);
+    this.tags = new TagRepository(db);
   }
 
-  async list(query: PageQuery) {
+  /** Public lists carry only the badges a card shows; admins get every tag. */
+  async list(query: ProductListQuery, { forAdmin = false }: { forAdmin?: boolean } = {}) {
     const [{ items, total }, sampleCount] = await Promise.all([
       this.products.findPage(query),
       this.products.countSamples(),
     ]);
-    const featured = await this.products.findFeaturedImages(items.map(item => item.id));
+    const ids = items.map(item => item.id);
+    const [featured, tags] = await Promise.all([
+      this.products.findFeaturedImages(ids),
+      this.tags.findForProducts(ids),
+    ]);
 
-    const withImages: ProductListItem[] = items.map(item => ({ ...item, image: featured.get(item.id) ?? null }));
+    const listItems: ProductListItem[] = items.map(item => ({
+      ...item,
+      image: featured.get(item.id) ?? null,
+      tags: forAdmin
+        ? sortTagsByPriority(tags.get(item.id) ?? []).map(toTagBadge)
+        : pickCardTags(tags.get(item.id) ?? []),
+    }));
 
-    return { ...toPagedResult(withImages, total, query), sampleCount };
+    return { ...toPagedResult(listItems, total, query), sampleCount };
   }
 
   async get(id: string) {
@@ -32,7 +44,9 @@ export class ProductService {
       throw productNotFound();
     }
 
-    return product;
+    const tags = (await this.tags.findForProducts([id])).get(id) ?? [];
+
+    return { ...product, tags, tagIds: tags.map(tag => tag.id) };
   }
 
   async create(input: ProductInput, authorId: string) {
@@ -40,22 +54,30 @@ export class ProductService {
 
     return this.db.transaction(async (tx) => {
       const products = new ProductRepository(tx);
+      const tags = new TagRepository(tx);
+      await this.assertTagsExist(tags, input.tagIds);
+
       const product = await products.insert({ ...values, authorId });
       await products.insertImages(toImageValues(product.id, input.images));
+      await tags.replaceForProduct(product.id, input.tagIds);
       return product;
     }).catch(rethrowAsDuplicateHandle);
   }
 
-  /** Replaces the fields and images. `isSample` isn't editable, so a sample stays a sample. */
+  /** Replaces the fields, images and tags. `isSample` isn't editable, so a sample stays a sample. */
   async update(id: string, input: ProductInput) {
     const values = toProductValues(input);
 
     const updated = await this.db.transaction(async (tx) => {
       const products = new ProductRepository(tx);
+      const tags = new TagRepository(tx);
+      await this.assertTagsExist(tags, input.tagIds);
+
       const product = await products.update(id, values);
       if (!product) return undefined;
 
       await products.replaceImages(id, toImageValues(id, input.images));
+      await tags.replaceForProduct(id, input.tagIds);
       return product;
     }).catch(rethrowAsDuplicateHandle);
 
@@ -64,6 +86,18 @@ export class ProductService {
     }
 
     return this.get(id);
+  }
+
+  /** Catches a tag deleted since the form loaded, which would otherwise fail on the foreign key. */
+  private async assertTagsExist(tags: TagRepository, tagIds: string[]) {
+    const unique = new Set(tagIds);
+    if (!unique.size) return;
+
+    if ((await tags.findByIds([...unique])).length !== unique.size) {
+      throw apiError("VALIDATION_ERROR", "Please check the highlighted fields and try again", {
+        tagIds: ["One of these tags no longer exists. Please refresh and try again"],
+      });
+    }
   }
 
   deleteSamples() {

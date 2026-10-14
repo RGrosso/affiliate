@@ -9,6 +9,27 @@ test.describe("API", () => {
     expect(await response.json()).toMatchObject({ success: false, code: "UNAUTHORIZED" });
   });
 
+  test("rejects the tag list for logged-out requests with an ApiError", async ({ request }) => {
+    const response = await request.get("/api/tags");
+
+    expect(response.status()).toBe(401);
+    expect(await response.json()).toMatchObject({ success: false, code: "UNAUTHORIZED" });
+  });
+
+  test("returns no products for an unknown tag", async ({ request }) => {
+    const response = await request.get("/api/products?tag=no-such-tag");
+
+    expect(response.status()).toBe(200);
+    expect((await response.json()).data).toMatchObject({ items: [], total: 0 });
+  });
+
+  test("returns no products for several unknown tags", async ({ request }) => {
+    const response = await request.get("/api/products?tag=no-such-tag&tag=also-missing");
+
+    expect(response.status()).toBe(200);
+    expect((await response.json()).data).toMatchObject({ items: [], total: 0 });
+  });
+
   test("pages the product list", async ({ request }) => {
     const list = async (query: string) => {
       const response = await request.get(`/api/products?${query}`);
@@ -31,6 +52,13 @@ test.describe("API", () => {
     const past = await list(`page=${all.total + 1}&pageSize=1`);
     expect(past.items).toEqual([]);
     expect(past.total).toBe(all.total);
+  });
+
+  test("only lets admins ask for every tag on the product list", async ({ request }) => {
+    const response = await request.get("/api/products?allTags=true");
+
+    expect(response.status()).toBe(401);
+    expect(await response.json()).toMatchObject({ success: false, code: "UNAUTHORIZED" });
   });
 
   test("rejects a page size over the maximum", async ({ request }) => {

@@ -1,6 +1,6 @@
-import { asc, count, desc, eq, inArray } from "drizzle-orm";
-import { productImages, products } from "hub:db:schema";
-import type { PageQuery } from "#shared/schemas/pagination.schema";
+import { and, asc, count, desc, eq, exists, inArray } from "drizzle-orm";
+import { productImages, productTags, products, tags } from "hub:db:schema";
+import type { ProductListQuery } from "#shared/schemas/products.schema";
 import type { PgColumn } from "drizzle-orm/pg-core";
 import type { ProductImage, ProductListItem } from "#shared/types/product";
 
@@ -17,7 +17,7 @@ const listColumns = {
   affiliateUrl: products.affiliateUrl,
   isSample: products.isSample,
   createdAt: products.createdAt,
-} satisfies Record<Exclude<keyof ProductListItem, "image">, PgColumn>;
+} satisfies Record<Exclude<keyof ProductListItem, "image" | "tags">, PgColumn>;
 
 export class ProductRepository {
   constructor(private readonly db: DbExecutor) {}
@@ -47,14 +47,22 @@ export class ProductRepository {
   }
 
   /** Newest first. The title breaks ties so pages don't shuffle between requests. */
-  async findPage(query: PageQuery) {
+  async findPage(query: ProductListQuery) {
+    const filter = query.tag?.length
+      ? exists(this.db.select({ one: productTags.productId })
+          .from(productTags)
+          .innerJoin(tags, eq(tags.id, productTags.tagId))
+          .where(and(eq(productTags.productId, products.id), inArray(tags.slug, query.tag))))
+      : undefined;
+
     const [items, [totals]] = await Promise.all([
       this.db.select(listColumns)
         .from(products)
+        .where(filter)
         .orderBy(desc(products.createdAt), asc(products.title), asc(products.id))
         .limit(query.pageSize)
         .offset(pageOffset(query)),
-      this.db.select({ total: count() }).from(products),
+      this.db.select({ total: count() }).from(products).where(filter),
     ]);
 
     return { items, total: totals?.total ?? 0 };

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { tags, productTags } from "hub:db:schema";
 import { createTestDb, insertTestUser, resetDb, type TestDb } from "../../test/setup/db";
 import { ProductRepository, type NewProduct } from "./ProductRepository";
 
@@ -69,6 +70,41 @@ describe("findPage", () => {
   it("returns no items but the total for a page past the end", async () => {
     await repo.insert(product("A"));
     expect(await repo.findPage({ page: 9, pageSize: 10 })).toEqual({ items: [], total: 1 });
+  });
+});
+
+describe("findPage tag filter", () => {
+  const tagged = async () => {
+    const [deals, gifts, other] = await db.insert(tags).values([
+      { name: "Deals", slug: "deals" },
+      { name: "Gifts", slug: "gifts" },
+      { name: "Other", slug: "other" },
+    ]).returning();
+    const a = await repo.insert(product("A", { createdAt: new Date(2026, 0, 3) }));
+    const b = await repo.insert(product("B", { createdAt: new Date(2026, 0, 2) }));
+    const c = await repo.insert(product("C", { createdAt: new Date(2026, 0, 1) }));
+    await db.insert(productTags).values([
+      { productId: a.id, tagId: deals!.id },
+      { productId: a.id, tagId: gifts!.id },
+      { productId: b.id, tagId: gifts!.id },
+      { productId: c.id, tagId: other!.id },
+    ]);
+  };
+
+  it("matches products with any of the tags, once each", async () => {
+    await tagged();
+
+    const result = await repo.findPage({ page: 1, pageSize: 10, tag: ["deals", "gifts"] });
+    expect(result.items.map(item => item.title)).toEqual(["A", "B"]);
+    expect(result.total).toBe(2);
+  });
+
+  it("filters by a single tag and ignores an empty list", async () => {
+    await tagged();
+
+    expect((await repo.findPage({ page: 1, pageSize: 10, tag: ["other"] })).items.map(item => item.title)).toEqual(["C"]);
+    expect((await repo.findPage({ page: 1, pageSize: 10, tag: [] })).total).toBe(3);
+    expect(await repo.findPage({ page: 1, pageSize: 10, tag: ["nope", "none"] })).toEqual({ items: [], total: 0 });
   });
 });
 

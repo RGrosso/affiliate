@@ -1,3 +1,5 @@
+import type { Tag, TagBadge } from "./tag";
+
 export type ProductImage = {
   url: string;
   alt: string | null;
@@ -14,14 +16,16 @@ export type EditableProduct = {
   seoTitle: string | null;
   seoDescription: string | null;
   images: ProductImage[];
+  tagIds: string[];
 };
 
 /** What the admin product API returns: the editable fields plus whether it's a sample. */
 export type AdminProduct = EditableProduct & {
   isSample: boolean;
+  tags: Tag[];
 };
 
-/** A row in the product list API, with its featured image. */
+/** A row in the product list API, with its featured image and tags (highest priority first). Public, so tags are badges only. */
 export type ProductListItem = {
   id: string;
   title: string;
@@ -34,4 +38,5 @@ export type ProductListItem = {
   /** A `Date` on the server, an ISO string once it has come through the API. */
   createdAt: Date | string;
   image: ProductImage | null;
+  tags: TagBadge[];
 };

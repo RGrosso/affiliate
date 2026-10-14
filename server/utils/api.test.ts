@@ -4,7 +4,7 @@ import { Socket } from "node:net";
 import { describe, expect, it } from "vitest";
 import { z } from "#shared/schemas/zod";
 import { pageQuerySchema } from "#shared/schemas/pagination.schema";
-import { apiError, notFound, ok, readValidatedQuery, validationError } from "./api";
+import { apiError, notFound, ok, readIdParam, readValidatedQuery, validationError } from "./api";
 
 describe("readValidatedQuery", () => {
   const eventFor = (search: string) => {
@@ -75,5 +75,24 @@ describe("validationError", () => {
     const schema = z.string().refine(() => false, "Something's not right");
     const error = validationError(schema.safeParse("x").error!);
     expect(error.data?.message).toBe("Something's not right");
+  });
+});
+
+describe("readIdParam", () => {
+  const eventWith = (id: string) => {
+    const req = new IncomingMessage(new Socket());
+    const event = createEvent(req, new ServerResponse(req));
+    event.context.params = { id };
+    return event;
+  };
+
+  it("returns a UUID route param", () => {
+    const id = "00000000-0000-4000-8000-000000000000";
+    expect(readIdParam(eventWith(id), () => notFound())).toBe(id);
+  });
+
+  it("throws the supplied error for anything else", () => {
+    const missing = new Error("missing");
+    expect(() => readIdParam(eventWith("nope"), () => missing)).toThrow(missing);
   });
 });

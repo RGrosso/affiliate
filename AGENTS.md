@@ -42,11 +42,7 @@ The site is UK-based. Always prefer British English and UK formats over US ones.
 
 ## Server code
 
-- New data access goes in a repository in `server/repositories/`. Repositories are the only code that queries `db` with Drizzle.
-- Business rules go in a service in `server/services/`. Services own transactions and build repositories on `tx` inside them.
-- Routes in `server/api/` stay thin: check auth, validate input with `readValidated` or `readValidatedQuery`, call one service method and return `ok(...)`. Never query `db` from a route.
-- New list endpoints validate `?page` and `?pageSize` with `pageQuerySchema` and return `PagedResult<T>`, both from `shared/`.
-- Test repositories and services against `createTestDb()` in `test/setup/db.ts`, not by mocking `db`.
+Read `server/AGENTS.md` before writing or editing anything under `server/`: it covers the repository pattern (route → service → repository) and the tests every server change needs.
 
 ## Shared code (`shared/`)
 

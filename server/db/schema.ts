@@ -1,8 +1,10 @@
-import { pgTable, text, timestamp, pgEnum, uuid, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, pgEnum, uuid, integer, boolean, primaryKey, index } from "drizzle-orm/pg-core";
 import { UserState, userRoles } from "../../shared/types/user";
+import { tagIcons } from "../../shared/types/tag";
 
 export const roleEnum = pgEnum("role", userRoles);
 export const userStateEnum = pgEnum("user_state", UserState);
+export const tagIconEnum = pgEnum("tag_icon", tagIcons);
 
 const timestamps = {
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -43,6 +45,28 @@ export const productImages = pgTable("product_images", {
   position: integer("position").default(0).notNull(),
 });
 
+export const tags = pgTable("tags", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  /** Decides whether a tag already exists, so "Air Fryers" and "air fryers" are the same tag. */
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  tooltip: text("tooltip"),
+  icon: tagIconEnum("icon"),
+  priority: integer("priority"),
+  showOnCards: boolean("show_on_cards").default(false).notNull(),
+  ...timestamps,
+});
+
+export const productTags = pgTable("product_tags", {
+  productId: uuid("product_id").references(() => products.id, { onDelete: "cascade" }).notNull(),
+  tagId: uuid("tag_id").references(() => tags.id, { onDelete: "cascade" }).notNull(),
+}, table => [
+  primaryKey({ columns: [table.productId, table.tagId] }),
+  // The primary key covers lookups by product; this covers filtering products by tag
+  index("product_tags_tag_id_idx").on(table.tagId),
+]);
+
 export const settings = pgTable("settings", {
   key: text("key").primaryKey(),
   value: text("value"),
@@ -52,3 +76,4 @@ export const settings = pgTable("settings", {
 export type UserRow = typeof users.$inferSelect;
 export type ProductRow = typeof products.$inferSelect;
 export type ProductImageRow = typeof productImages.$inferSelect;
+export type TagRow = typeof tags.$inferSelect;

@@ -23,6 +23,18 @@
     </div>
 
     <div class="px-1 flex-1 flex flex-col gap-1">
+      <div
+        v-if="cardTags.length"
+        class="flex flex-wrap gap-1 mb-1"
+      >
+        <CoreTag
+          v-for="tag in cardTags"
+          :key="tag.id"
+          :label="tag.name"
+          :icon="tag.icon"
+          :tooltip="tag.tooltip"
+        />
+      </div>
       <h3 class="text-base font-bold leading-snug text-highlighted line-clamp-2">
         {{ product.title }}
       </h3>
@@ -53,6 +65,7 @@
 
 <script setup lang="ts">
 import type { ProductImage } from "#shared/types/product";
+import type { TagBadge } from "#shared/types/tag";
 
 export type ProductCardData = {
   title: string;
@@ -60,9 +73,12 @@ export type ProductCardData = {
   pricePence: number | null;
   affiliateUrl: string | null;
   image: ProductImage | null;
+  tags?: TagBadge[];
 };
 
-defineProps<{
+const { product } = defineProps<{
   product: ProductCardData;
 }>();
+
+const cardTags = computed(() => (product.tags ?? []).slice(0, MAX_CARD_TAGS));
 </script>

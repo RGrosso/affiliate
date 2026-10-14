@@ -1,5 +1,5 @@
 import { mountSuspended } from "@nuxt/test-utils/runtime";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { CoreButtonBar } from "#components";
 import { expectAccessible } from "~~/test/nuxt/axe";
 
@@ -19,6 +19,23 @@ describe("CoreButtonBar", () => {
     expect(region.attributes("aria-label")).toBe("Unsaved changes");
     expect(region.text()).toContain("Unsaved changes");
     expect(region.find("button").text()).toBe("Save");
+  });
+
+  it("is fixed to the bottom of the viewport and reserves space so content isn't covered", async () => {
+    const wrapper = await mountSuspended(CoreButtonBar, { props: { show: true }, slots });
+    const classes = wrapper.get("[role=region]").classes();
+
+    expect(classes).toEqual(expect.arrayContaining(["fixed", "bottom-0", "inset-x-0", "bg-info-100"]));
+    expect(wrapper.find("[data-test=button-bar-spacer]").exists()).toBe(true);
+  });
+
+  it("removes the bar and its spacer when hidden again", async () => {
+    const wrapper = await mountSuspended(CoreButtonBar, { props: { show: true }, slots });
+
+    await wrapper.setProps({ show: false });
+
+    await vi.waitFor(() => expect(wrapper.find("[role=region]").exists()).toBe(false));
+    expect(wrapper.find("[data-test=button-bar-spacer]").exists()).toBe(false);
   });
 
   it("uses a custom message", async () => {

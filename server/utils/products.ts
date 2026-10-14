@@ -1,36 +1,18 @@
 import type { H3Event } from "h3";
-import { z } from "#shared/schemas/zod";
+import type { z } from "#shared/schemas/zod";
 import type { addProductSchema } from "#shared/schemas/products.schema";
 
 type ProductInput = z.output<typeof addProductSchema>;
 
-const productIdSchema = z.object({
-  id: z.uuid(),
-});
-
 export const productNotFound = () => notFound("We couldn't find that product");
 
-export async function readProductId(event: H3Event): Promise<string> {
-  const result = productIdSchema.safeParse(getRouterParams(event));
-
-  if (!result.success) {
-    throw productNotFound();
-  }
-
-  return result.data.id;
-}
+export const readProductId = (event: H3Event) => readIdParam(event, productNotFound);
 
 /** Turns a unique-handle violation from a product insert or update into a field error. */
-export function rethrowAsDuplicateHandle(error: unknown): never {
-  if (isUniqueViolation(error)) {
-    throw apiError("CONFLICT", "Another product already uses this URL handle", {
-      handle: ["Another product already uses this URL handle"],
-    });
-  }
-  throw error;
-}
+export const rethrowAsDuplicateHandle = (error: unknown): never =>
+  rethrowUniqueViolationAs("handle", "Another product already uses this URL handle")(error);
 
-export function toProductValues({ price, images: _images, handle, ...fields }: ProductInput) {
+export function toProductValues({ price, images: _images, tagIds: _tagIds, handle, ...fields }: ProductInput) {
   const finalHandle = handle || slugify(fields.title);
 
   if (!finalHandle) {

@@ -29,7 +29,10 @@
               label="Description"
               name="description"
             >
-              <div class="rounded-md border border-default overflow-hidden focus-within:ring-2 focus-within:ring-primary">
+              <div
+                class="rounded-md border border-default overflow-hidden focus-within:ring-2 focus-within:ring-primary"
+                @focusin="descriptionTouched = true"
+              >
                 <UEditor
                   v-slot="{ editor }"
                   v-model="state.description"
@@ -365,6 +368,23 @@
             </div>
           </div>
         </UCard>
+
+        <UCard>
+          <template #header>
+            <h2 class="text-sm font-semibold">
+              Tags
+            </h2>
+          </template>
+
+          <UFormField name="tagIds">
+            <TagPicker
+              v-model="state.tagIds"
+              :tags="tags"
+              :creating="creating"
+              @create="addTag"
+            />
+          </UFormField>
+        </UCard>
       </div>
     </div>
 
@@ -425,6 +445,7 @@ const toState = (product?: EditableProduct) => ({
   seoTitle: product?.seoTitle ?? "",
   seoDescription: product?.seoDescription ?? "",
   images: (product?.images ?? []).map(image => ({ ...image })) as { url: string; alt?: string | null }[],
+  tagIds: [...(product?.tagIds ?? [])],
 });
 
 const state = reactive(toState(product));
@@ -442,6 +463,8 @@ const {
   moveTo,
   reset: resetMedia,
 } = useProductMedia(product?.images);
+const { tags, create: createTag } = useTags();
+const creating = ref(false);
 const saving = ref(false);
 const seoOpen = ref(false);
 // When editing, keep the saved handle rather than re-deriving it from the title
@@ -469,10 +492,24 @@ const snapshot = () => JSON.stringify({
   seoTitle: state.seoTitle.trim(),
   seoDescription: state.seoDescription.trim(),
   media: media.value.map(item => [item.url ?? item.key, item.alt.trim()]),
+  tagIds: [...state.tagIds].sort(),
 });
 
 const savedSnapshot = ref(snapshot());
 const isDirty = computed(() => snapshot() !== savedSnapshot.value);
+
+// The editor rewrites the HTML it's given (e.g. wrapping list items in <p>), which would count as an
+// unsaved change on load. Until the user has been in the editor, take its output as the saved version.
+const descriptionTouched = ref(false);
+watch(() => state.description, () => {
+  if (descriptionTouched.value) return;
+  savedSnapshot.value = JSON.stringify({
+    ...JSON.parse(savedSnapshot.value),
+    description: JSON.parse(snapshot()).description,
+  });
+});
+
+const { skip: skipLeavePrompt } = useUnsavedChangesGuard(isDirty);
 
 const saveBarMessage = computed(() => {
   if (hasFailedUploads.value) return "Remove failed uploads before saving";
@@ -524,6 +561,18 @@ function reset(product?: EditableProduct) {
   savedSnapshot.value = snapshot();
 }
 
+async function addTag(name: string) {
+  creating.value = true;
+  try {
+    const tag = await createTag(name);
+    if (!state.tagIds.includes(tag.id)) state.tagIds.push(tag.id);
+  } catch (error) {
+    toast.add({ title: "Couldn't add tag", description: getApiError(error).message, color: "error" });
+  } finally {
+    creating.value = false;
+  }
+}
+
 function cancel() {
   reset(product);
 }
@@ -552,6 +601,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       await $fetch("/api/products", { method: "POST", body });
       toast.add({ title: "Product saved", color: "success" });
       savedSnapshot.value = snapshot();
+      skipLeavePrompt();
       await navigateTo("/admin/products");
     }
   } catch (error) {

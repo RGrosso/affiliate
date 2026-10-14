@@ -1,30 +1,39 @@
 <template>
-  <Transition
-    enter-from-class="opacity-0 translate-y-4"
-    leave-to-class="opacity-0 translate-y-4"
-    enter-active-class="transition duration-200"
-    leave-active-class="transition duration-150"
-  >
+  <div>
+    <!-- The bar is fixed over the page, so reserve its height to keep the last content reachable -->
     <div
       v-if="show"
-      class="sticky bottom-0 z-20 -mx-2 pb-4 pt-2"
-      role="region"
-      :aria-label="message"
+      class="h-20"
+      aria-hidden="true"
+      data-test="button-bar-spacer"
+    />
+    <Transition
+      enter-from-class="translate-y-full"
+      leave-to-class="translate-y-full"
+      enter-active-class="motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out"
+      leave-active-class="motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-in"
     >
-      <div class="flex items-center justify-between gap-4 rounded-md bg-inverted text-inverted px-4 py-2.5 shadow-lg">
-        <span class="text-sm font-medium flex items-center gap-2 min-w-0">
-          <UIcon
-            :name="icon"
-            class="size-5 shrink-0"
-          />
-          <span class="truncate">{{ message }}</span>
-        </span>
-        <div class="flex gap-2 shrink-0">
-          <slot />
-        </div>
+      <div
+        v-if="show"
+        class="fixed inset-x-0 bottom-0 z-40 border-t border-info-300 bg-info-100 text-info-900 dark:border-info-700 dark:bg-info-900 dark:text-info-100 shadow-[0_-4px_12px_rgb(0_0_0/0.08)]"
+        role="region"
+        :aria-label="message"
+      >
+        <CoreContainer class="flex items-center justify-between gap-4 py-3">
+          <span class="text-sm font-medium flex items-center gap-2 min-w-0">
+            <UIcon
+              :name="icon"
+              class="size-5 shrink-0 text-info-700 dark:text-info-200"
+            />
+            <span class="truncate">{{ message }}</span>
+          </span>
+          <div class="flex gap-2 shrink-0">
+            <slot />
+          </div>
+        </CoreContainer>
       </div>
-    </div>
-  </Transition>
+    </Transition>
+  </div>
 </template>
 
 <script setup lang="ts">
