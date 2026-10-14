@@ -32,13 +32,13 @@
 
     <ul
       v-if="chosen.length"
-      class="flex flex-wrap gap-2"
+      class="flex flex-wrap gap-x-5 gap-y-2"
       aria-label="Selected tags"
     >
       <li
         v-for="tag in chosen"
         :key="tag.id"
-        class="inline-flex items-center gap-0.5"
+        class="inline-flex items-center"
       >
         <CoreTag
           :label="tag.name"
@@ -49,6 +49,7 @@
           color="neutral"
           variant="link"
           size="xs"
+          class="p-0.5"
           :aria-label="`Remove ${tag.name}`"
           @click="remove(tag.id)"
         />

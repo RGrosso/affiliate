@@ -28,7 +28,8 @@ Use the core component wherever one exists:
 | `<CoreContainer>` | `UContainer` | Every page-width wrapper; use it in place of `UContainer`. `variant="padded"` adds vertical spacing for a page's main content. `variant="full"` is a full-width band (put the background on it) with page-width content inside, as in the homepage hero. `as` sets the element, e.g. `as="section"`. |
 | `<CoreAlert variant="warning" title="â€¦" />` | `UAlert` | Inline messages. `variant` is `success`, `error`, `warning` or `info` and sets the colour and icon. Also takes `description`, `actions` and an optional `icon` override. |
 | `<CoreTag label="Sample" color="warning" />` | `UBadge` | Small labels on products. `color` defaults to `neutral`. `icon` is a `TagIcon` key shown as the leading icon (mapped in `app/utils/tagIcons.ts`). `tooltip` wraps the badge in a focusable `UTooltip`, which needs `UApp` above it. |
-| `<CoreButtonBar :show="dirty">` | (custom) | The sticky "Unsaved changes" bar on forms; buttons go in the default slot. |
+| `<CoreButtonBar :show="dirty">` | (custom) | The light blue (`info`) "Unsaved changes" bar fixed to the bottom of the viewport. It slides up when `show` is true and is removed when false, and renders a spacer so page content isn't hidden under it. Buttons go in the default slot. |
+| `<CoreConfirmDialog title="…" />` | `UModal` | A yes/no dialog with optional `description`, closing `question`, `confirmLabel`, `cancelLabel` and `color`. Don't mount it by hand: call `useConfirmDialog().confirm({ ... })`, which resolves `true` only when confirmed. |
 | `<CorePagination v-model:page="page" :total="total" :page-size="pageSize" />` | `UPagination` | Page controls under a paginated list. Renders nothing when there is only one page. |
 
 Add a row here when you add a core component.
@@ -38,3 +39,8 @@ Add a row here when you add a core component.
 Every component lives in its own folder named after it, with its test beside it: `core/alert/Alert.vue` and `core/alert/Alert.test.ts`. Nuxt drops the repeated name, so that's still `<CoreAlert>`. Core components also need a story, `core/alert/Alert.stories.ts`, so they show up in Storybook (`pnpm storybook`). `test/unit/component-coverage.test.ts` fails when any of these is missing.
 
 Component tests run in a real browser. Check accessibility with `expectAccessible(wrapper)` from `test/nuxt/axe.ts`, which runs axe in light and dark mode.
+
+## Confirmation and unsaved changes
+
+- Ask the user to confirm with `useConfirmDialog()` from `app/composables/confirmDialog.ts` rather than building a modal.
+- Forms that can lose edits call `useUnsavedChangesGuard(isDirty)` from `app/composables/unsavedChanges.ts`. It prompts on in-app navigation and sets the browser's own prompt on reload or closing the tab. Call the returned `skip()` just before a programmatic navigation after a successful save.

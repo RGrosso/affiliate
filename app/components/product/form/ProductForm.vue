@@ -495,6 +495,8 @@ const snapshot = () => JSON.stringify({
 const savedSnapshot = ref(snapshot());
 const isDirty = computed(() => snapshot() !== savedSnapshot.value);
 
+const { skip: skipLeavePrompt } = useUnsavedChangesGuard(isDirty);
+
 const saveBarMessage = computed(() => {
   if (hasFailedUploads.value) return "Remove failed uploads before saving";
   return product ? "Unsaved changes" : "Unsaved product";
@@ -585,6 +587,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       await $fetch("/api/products", { method: "POST", body });
       toast.add({ title: "Product saved", color: "success" });
       savedSnapshot.value = snapshot();
+      skipLeavePrompt();
       await navigateTo("/admin/products");
     }
   } catch (error) {
