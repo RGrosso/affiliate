@@ -1,5 +1,15 @@
 <template>
   <AdminContainer heading="Tags">
+    <template #actions>
+      <UButton
+        to="/admin/tags/new"
+        color="primary"
+        icon="i-heroicons-plus"
+      >
+        Add tag
+      </UButton>
+    </template>
+
     <div
       v-if="tags.length > 0"
       class="border border-default rounded-md overflow-hidden"
@@ -10,11 +20,15 @@
         :loading="status === 'pending'"
       >
         <template #name-cell="{ row }">
-          <CoreTag
-            :label="row.original.name"
-            :icon="row.original.icon"
-            :tooltip="row.original.tooltip"
-          />
+          <NuxtLink
+            :to="`/admin/tags/${row.original.id}`"
+            class="inline-block rounded-md hover:underline"
+          >
+            <CoreTag
+              :label="row.original.name"
+              :icon="row.original.icon"
+            />
+          </NuxtLink>
         </template>
         <template #priority-cell="{ row }">
           {{ row.original.priority ?? "—" }}
@@ -36,15 +50,15 @@
               color="neutral"
               variant="ghost"
               icon="i-lucide-pencil"
+              :to="`/admin/tags/${row.original.id}`"
               :aria-label="`Edit ${row.original.name}`"
-              @click="editing = row.original"
             />
             <UButton
               color="error"
               variant="ghost"
               icon="i-lucide-trash-2"
               :aria-label="`Delete ${row.original.name}`"
-              @click="deleting = row.original"
+              @click="deleteTag(row.original)"
             />
           </div>
         </template>
@@ -65,75 +79,26 @@
         No tags yet
       </h2>
       <p class="text-sm text-muted max-w-sm">
-        Add tags to products from the product page. They'll appear here so you can add a description, tooltip and icon.
+        Choose Add tag to create one with a description, tooltip and icon, then add it to products from the product page.
       </p>
+      <UButton
+        to="/admin/tags/new"
+        variant="outline"
+        color="neutral"
+        class="mt-4"
+      >
+        Add tag
+      </UButton>
     </div>
-
-    <UModal
-      v-model:open="editOpen"
-      :title="editing ? `Edit ${editing.name}` : 'Edit tag'"
-    >
-      <template #body>
-        <TagForm
-          v-if="editing"
-          :key="editing.id"
-          :tag="editing"
-          @saved="onSaved"
-          @cancel="editing = null"
-        />
-      </template>
-    </UModal>
-
-    <UModal
-      v-model:open="deleteOpen"
-      :title="deleteTitle"
-      :dismissible="!removing"
-    >
-      <template #body>
-        <div
-          v-if="deleting"
-          class="flex gap-3"
-        >
-          <UIcon
-            name="i-heroicons-exclamation-triangle"
-            class="size-6 shrink-0 text-warning"
-          />
-          <p class="text-sm text-muted">
-            {{ deleting.productCount > 0
-              ? `This removes the tag from ${deleting.productCount} ${deleting.productCount === 1 ? "product" : "products"}.`
-              : "It isn't on any products." }}
-            This can't be undone.
-          </p>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2 w-full">
-          <UButton
-            color="neutral"
-            variant="outline"
-            :disabled="removing"
-            @click="deleting = null"
-          >
-            Cancel
-          </UButton>
-          <UButton
-            color="error"
-            :loading="removing"
-            @click="deleteTag"
-          >
-            Delete tag
-          </UButton>
-        </div>
-      </template>
-    </UModal>
   </AdminContainer>
 </template>
 
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
-import type { AdminTag, Tag } from "#shared/types/tag";
+import type { AdminTag } from "#shared/types/tag";
 
 const toast = useToast();
+const { confirm } = useConfirmDialog();
 const { tags, status, remove } = useTags();
 
 const columns: TableColumn<AdminTag>[] = [
@@ -146,38 +111,20 @@ const columns: TableColumn<AdminTag>[] = [
   { id: "actions", header: () => h("span", { class: "sr-only" }, "Actions") },
 ];
 
-const editing = ref<AdminTag | null>(null);
-const deleting = ref<AdminTag | null>(null);
-const removing = ref(false);
+async function deleteTag(tag: AdminTag) {
+  const count = tag.productCount;
+  const confirmed = await confirm({
+    title: `Delete "${tag.name}"?`,
+    description: count > 0
+      ? `This removes the tag from ${count} ${count === 1 ? "product" : "products"}. This can't be undone.`
+      : "It isn't on any products. This can't be undone.",
+    confirmLabel: "Delete tag",
+    color: "error",
+  });
+  if (!confirmed) return;
 
-// The modals are driven by the selected tag, so closing one clears it
-const editOpen = computed({
-  get: () => !!editing.value,
-  set: (open) => {
-    if (!open) editing.value = null;
-  },
-});
-const deleteOpen = computed({
-  get: () => !!deleting.value,
-  set: (open) => {
-    if (!open) deleting.value = null;
-  },
-});
-
-const deleteTitle = computed(() => (deleting.value ? `Delete "${deleting.value.name}"?` : "Delete tag?"));
-
-function onSaved(tag: Tag) {
-  editing.value = null;
-  toast.add({ title: "Tag saved", description: `"${tag.name}" was updated.`, color: "success" });
-}
-
-async function deleteTag() {
-  if (!deleting.value) return;
-
-  removing.value = true;
   try {
-    await remove(deleting.value.id);
-    deleting.value = null;
+    await remove(tag.id);
     toast.add({ title: "Tag deleted", color: "success" });
   } catch (error) {
     toast.add({
@@ -185,8 +132,6 @@ async function deleteTag() {
       description: getApiError(error).message,
       color: "error",
     });
-  } finally {
-    removing.value = false;
   }
 }
 </script>

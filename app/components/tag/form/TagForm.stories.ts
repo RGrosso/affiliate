@@ -4,6 +4,14 @@ import TagForm from "./TagForm.vue";
 const meta = {
   title: "Tag/Form",
   component: TagForm,
+} satisfies Meta<typeof TagForm>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Create: Story = {};
+
+export const Edit: Story = {
   args: {
     tag: {
       id: "tag-1",
@@ -16,12 +24,7 @@ const meta = {
       showOnCards: false,
     },
   },
-} satisfies Meta<typeof TagForm>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
-export const Plain: Story = {};
+};
 
 export const Filled: Story = {
   args: {

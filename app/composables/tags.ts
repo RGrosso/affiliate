@@ -1,6 +1,6 @@
 import type { ApiSuccess } from "#shared/types/api";
 import type { AdminTag, Tag } from "#shared/types/tag";
-import type { UpdateTagInput } from "#shared/schemas/tags.schema";
+import type { CreateTagInput, UpdateTagInput } from "#shared/schemas/tags.schema";
 
 /**
  * The admin's tags, shared by every caller through one fetch key, so a tag added from the product
@@ -21,8 +21,10 @@ export function useTags() {
     if (!nuxtApp.isHydrating) refresh();
   });
 
-  async function create(name: string): Promise<Tag> {
-    const { data: tag } = await $fetch<ApiSuccess<Tag>>("/api/tags", { method: "POST", body: { name } });
+  /** A bare name is enough to add a tag; pass an object to set its details too. */
+  async function create(input: string | CreateTagInput): Promise<Tag> {
+    const body = typeof input === "string" ? { name: input } : input;
+    const { data: tag } = await $fetch<ApiSuccess<Tag>>("/api/tags", { method: "POST", body });
     await refresh();
     return tag;
   }

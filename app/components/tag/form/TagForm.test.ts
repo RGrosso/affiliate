@@ -20,25 +20,45 @@ const tag: Tag = {
 };
 
 const patches = vi.hoisted(() => [] as unknown[]);
+const posts = vi.hoisted(() => [] as unknown[]);
 const conflict = vi.hoisted(() => ({ on: false }));
 
-registerEndpoint("/api/tags", () => ({ success: true, data: [] }));
+const conflictResponse = (event: Parameters<typeof setResponseStatus>[0]) => {
+  setResponseStatus(event, 409);
+  return {
+    success: false,
+    code: "CONFLICT",
+    message: "That tag already exists",
+    fieldErrors: { name: ["A tag with this name already exists"] },
+  };
+};
+
+registerEndpoint("/api/tags", {
+  method: "GET",
+  handler: () => ({ success: true, data: [] }),
+});
+registerEndpoint("/api/tags", {
+  method: "POST",
+  handler: (event) => {
+    posts.push(readJsonBody(event));
+    if (conflict.on) return conflictResponse(event);
+    return { success: true, data: { ...tag, id: "t2", name: "Fresh", slug: "fresh" } };
+  },
+});
 registerEndpoint("/api/tags/t1", {
   method: "PATCH",
   handler: (event) => {
     patches.push(readJsonBody(event));
-    if (conflict.on) {
-      setResponseStatus(event, 409);
-      return {
-        success: false,
-        code: "CONFLICT",
-        message: "That tag already exists",
-        fieldErrors: { name: ["A tag with this name already exists"] },
-      };
-    }
+    if (conflict.on) return conflictResponse(event);
     return { success: true, data: tag };
   },
 });
+
+const button = (wrapper: VueWrapper, label: string) => {
+  const found = wrapper.findAll("button").find(el => el.text() === label);
+  if (!found) throw new Error(`No button labelled "${label}"`);
+  return found;
+};
 
 const field = (wrapper: VueWrapper, label: string) => {
   const labelEl = wrapper.findAll("label").find(el => el.text().replace("*", "").trim() === label);
@@ -49,6 +69,7 @@ const field = (wrapper: VueWrapper, label: string) => {
 describe("TagForm", () => {
   beforeEach(() => {
     patches.length = 0;
+    posts.length = 0;
     conflict.on = false;
   });
 
@@ -88,6 +109,17 @@ describe("TagForm", () => {
     await vi.waitFor(() => expect(wrapper.text()).toContain("The tooltip can be at most 150 characters"));
   });
 
+  it("shows the save bar only once something changes", async () => {
+    const wrapper = await mountInApp(TagForm, { tag });
+    expect(wrapper.text()).not.toContain("Unsaved changes");
+
+    await field(wrapper, "Name").setValue("Top seller");
+    expect(wrapper.text()).toContain("Unsaved changes");
+
+    await field(wrapper, "Name").setValue("Bestseller");
+    expect(wrapper.text()).not.toContain("Unsaved changes");
+  });
+
   it("sends the edited tag and emits saved", async () => {
     const wrapper = await mountInApp(TagForm, { tag });
 
@@ -98,6 +130,42 @@ describe("TagForm", () => {
     await vi.waitFor(() => expect(wrapper.emitted("saved")).toHaveLength(1));
     expect(patches).toEqual([{ name: "Top seller", description: null, tooltip: null, icon: "trophy", priority: 5, showOnCards: true }]);
     expect(wrapper.emitted("saved")![0]).toEqual([tag]);
+    await vi.waitFor(() => expect(wrapper.text()).not.toContain("Unsaved changes"));
+  });
+
+  it("creates a tag when there isn't one to edit", async () => {
+    const wrapper = await mountInApp(TagForm);
+    expect(wrapper.text()).toContain("Tag name");
+
+    await field(wrapper, "Name").setValue("Fresh");
+    expect(wrapper.text()).toContain("Unsaved tag");
+    await field(wrapper, "Description").setValue("Just in");
+    await wrapper.get("form").trigger("submit");
+
+    await vi.waitFor(() => expect(wrapper.emitted("saved")).toHaveLength(1));
+    expect(posts).toEqual([{ name: "Fresh", description: "Just in", tooltip: null, icon: null, priority: null, showOnCards: false }]);
+    expect(patches).toEqual([]);
+    expect(wrapper.emitted("saved")![0]).toMatchObject([{ id: "t2", name: "Fresh" }]);
+  });
+
+  it("asks for a name when creating without one", async () => {
+    const wrapper = await mountInApp(TagForm);
+
+    await wrapper.get("form").trigger("submit");
+
+    await vi.waitFor(() => expect(wrapper.text()).toContain("Please give the tag a name"));
+    expect(posts).toEqual([]);
+  });
+
+  it("puts a duplicate name error on the name field when creating", async () => {
+    conflict.on = true;
+    const wrapper = await mountInApp(TagForm);
+
+    await field(wrapper, "Name").setValue("Bestseller");
+    await wrapper.get("form").trigger("submit");
+
+    await vi.waitFor(() => expect(wrapper.text()).toContain("A tag with this name already exists"));
+    expect(wrapper.emitted("saved")).toBeUndefined();
   });
 
   it("puts a duplicate name error on the name field", async () => {
@@ -110,15 +178,24 @@ describe("TagForm", () => {
     expect(wrapper.emitted("saved")).toBeUndefined();
   });
 
-  it("emits cancel", async () => {
+  it("puts the edits back when cancelled", async () => {
     const wrapper = await mountInApp(TagForm, { tag });
 
-    await wrapper.findAll("button").find(button => button.text() === "Cancel")!.trigger("click");
+    await field(wrapper, "Name").setValue("Top seller");
+    await button(wrapper, "Cancel").trigger("click");
 
-    expect(wrapper.emitted("cancel")).toHaveLength(1);
+    expect(field(wrapper, "Name").element.value).toBe("Bestseller");
+    expect(wrapper.text()).not.toContain("Unsaved changes");
   });
 
   it("is accessible", async () => {
     await expectAccessible(await mountInApp(TagForm, { tag }));
+  });
+
+  it("is accessible when creating", async () => {
+    const wrapper = await mountInApp(TagForm);
+    await field(wrapper, "Name").setValue("Fresh");
+
+    await expectAccessible(wrapper);
   });
 });
