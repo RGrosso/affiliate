@@ -30,7 +30,7 @@ function safeHref(href: string | undefined): string | undefined {
 function keepElementsAndText(node: Node) {
   if (node.type !== DOCUMENT_NODE && node.type !== ELEMENT_NODE) return node;
 
-  node.children = node.children.filter(child => child.type === ELEMENT_NODE || child.type === TEXT_NODE);
+  node.children = node.children.filter((child: Node) => child.type === ELEMENT_NODE || child.type === TEXT_NODE);
   for (const child of node.children) {
     if (child.type !== ELEMENT_NODE) continue;
 
