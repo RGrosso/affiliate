@@ -12,6 +12,7 @@ export type EditableProduct = {
   description: string | null;
   pricePence: number | null;
   retailer: string | null;
+  brand: string | null;
   affiliateUrl: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
@@ -38,5 +39,22 @@ export type ProductListItem = {
   /** A `Date` on the server, an ISO string once it has come through the API. */
   createdAt: Date | string;
   image: ProductImage | null;
+  tags: TagBadge[];
+};
+
+/** A product's public page. Every tag is included as a badge, and the description is sanitised HTML. */
+export type ProductDetail = {
+  id: string;
+  title: string;
+  handle: string;
+  description: string | null;
+  brand: string | null;
+  pricePence: number | null;
+  retailer: string | null;
+  affiliateUrl: string | null;
+  isSample: boolean;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  images: ProductImage[];
   tags: TagBadge[];
 };

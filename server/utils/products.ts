@@ -1,12 +1,22 @@
 import type { H3Event } from "h3";
-import type { z } from "#shared/schemas/zod";
-import type { addProductSchema } from "#shared/schemas/products.schema";
+import { z } from "#shared/schemas/zod";
+import { HANDLE_PATTERN, type addProductSchema } from "#shared/schemas/products.schema";
 
 type ProductInput = z.output<typeof addProductSchema>;
 
 export const productNotFound = () => notFound("We couldn't find that product");
 
 export const readProductId = (event: H3Event) => readIdParam(event, productNotFound);
+
+/** A malformed handle can't match a product, so it's a 404 rather than a validation error. */
+export function readProductHandle(event: H3Event): string {
+  const result = z.object({ handle: z.string().max(100).regex(HANDLE_PATTERN) }).safeParse(getRouterParams(event));
+  if (!result.success) {
+    throw productNotFound();
+  }
+
+  return result.data.handle;
+}
 
 /** Turns a unique-handle violation from a product insert or update into a field error. */
 export const rethrowAsDuplicateHandle = (error: unknown): never =>

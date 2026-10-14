@@ -35,15 +35,27 @@ export class ProductRepository {
     const product = await this.findById(id);
     if (!product) return undefined;
 
-    const images = await this.db.select({
+    return { ...product, images: await this.findImages(id) };
+  }
+
+  async findByHandleWithImages(handle: string) {
+    const [product] = await this.db.select()
+      .from(products)
+      .where(eq(products.handle, handle))
+      .limit(1);
+    if (!product) return undefined;
+
+    return { ...product, images: await this.findImages(product.id) };
+  }
+
+  private findImages(productId: string): Promise<ProductImage[]> {
+    return this.db.select({
       url: productImages.url,
       alt: productImages.alt,
     })
       .from(productImages)
-      .where(eq(productImages.productId, id))
+      .where(eq(productImages.productId, productId))
       .orderBy(asc(productImages.position));
-
-    return { ...product, images };
   }
 
   /** Newest first. The title breaks ties so pages don't shuffle between requests. */

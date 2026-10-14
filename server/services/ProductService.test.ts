@@ -65,6 +65,48 @@ describe("get", () => {
   });
 });
 
+describe("getByHandle", () => {
+  const addTag = (name: string, priority: number | null = null, showOnCards = false) =>
+    new TagRepository(db).insert({ name, slug: slugify(name), priority, showOnCards, tooltip: `${name} tip` });
+
+  it("returns the public product with its images, brand and every tag as a badge", async () => {
+    const [low, top, hidden] = [await addTag("Low", 1, true), await addTag("Top", 9, true), await addTag("Hidden", 5)];
+    await service.create({
+      title: "Moon Lamp",
+      brand: "Luna",
+      retailer: "Lamp Shop",
+      price: 19.99,
+      tagIds: [low.id, top.id, hidden.id],
+      images: [{ url: "/a.jpg", alt: "Front" }, { url: "/b.jpg" }],
+    }, authorId);
+
+    const product = await service.getByHandle("moon-lamp");
+
+    expect(product).toMatchObject({ title: "Moon Lamp", brand: "Luna", retailer: "Lamp Shop", pricePence: 1999, isSample: false });
+    expect(product.images).toEqual([{ url: "/a.jpg", alt: "Front" }, { url: "/b.jpg", alt: null }]);
+    expect(product.tags.map(tag => tag.name)).toEqual(["Top", "Hidden", "Low"]);
+    expect(Object.keys(product.tags[0]!).sort()).toEqual(["icon", "id", "name", "slug", "tooltip"]);
+    expect(product).not.toHaveProperty("authorId");
+  });
+
+  it("sanitises the description", async () => {
+    await service.create({
+      title: "Lamp",
+      description: "<p onclick=\"x()\">Bright</p><script>alert(1)</script>",
+      tagIds: [],
+      images: [],
+    }, authorId);
+
+    expect((await service.getByHandle("lamp")).description).toBe("<p>Bright</p>");
+  });
+
+  it("throws a 404 for an unknown handle", async () => {
+    const error = await rejection(service.getByHandle("no-such-product"));
+    expect(error.statusCode).toBe(404);
+    expect(error.data).toMatchObject({ code: "NOT_FOUND" });
+  });
+});
+
 describe("list", () => {
   it("is empty with no pages when there are no products", async () => {
     expect(await service.list({ page: 1, pageSize: 2 })).toEqual({
