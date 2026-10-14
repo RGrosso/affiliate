@@ -60,7 +60,7 @@
 
         <div
           v-if="product.affiliateUrl"
-          class="space-y-2 pt-2 border-t border-default"
+          class="pt-2 border-t border-default"
         >
           <UButton
             :to="product.affiliateUrl"
@@ -74,9 +74,6 @@
             :ui="{ label: 'flex-1 text-center' }"
             class="font-bold py-3.5 mt-3"
           />
-          <p class="text-sm text-dimmed">
-            We may earn a commission, at no cost to you.
-          </p>
         </div>
 
         <section

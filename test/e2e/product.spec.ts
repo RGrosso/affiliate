@@ -26,7 +26,7 @@ test.describe("product page", () => {
     const buy = page.getByRole("link", { name: "Buy at Kitchen Supply Co." });
     await expect(buy).toHaveAttribute("rel", "sponsored noopener noreferrer");
     await expect(buy).toHaveAttribute("target", "_blank");
-    await expect(page.getByText("We may earn a commission, at no cost to you.")).toBeVisible();
+    await expect(page.getByText("We may earn a commission, at no cost to you.")).toHaveCount(0);
   });
 
   test("switches the main image from the thumbnails", async ({ page, goto }) => {
