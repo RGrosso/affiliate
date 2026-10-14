@@ -31,6 +31,12 @@ export default defineNuxtConfig({
     db: "postgresql",
     blob: true,
   },
+  typescript: {
+    // Type-check the standalone Node scripts too (run with `node`, outside the app)
+    nodeTsConfig: {
+      include: ["../scripts/**/*"],
+    },
+  },
   eslint: {
     config: {
       stylistic: {

@@ -31,11 +31,11 @@ To finish setting it up:
 
 The same flow applies to any user whose password is empty (`NULL`). Logging in as that user sends them to `/setup` to choose a password first.
 
-To start again from scratch, stop the dev server and run `pnpm dev:reset`. It deletes the `.data/` folder and starts the dev server, which re-runs the migrations and seeds the admin again with no password. The sample products come back on the next admin login. It refuses to run with `NODE_ENV=production`.
+To start again from scratch, stop the dev server and run `pnpm dev:reset`, then `pnpm dev`. The reset deletes the `.data/` folder. The next dev server start re-runs the migrations and seeds the admin again with no password. The sample products come back on the next admin login. It refuses to run with `NODE_ENV=production`.
 
 ## Sample products
 
-The first time an admin logs in (or finishes setup), 20 example products with square placeholder images are added so the store isn't empty. A warning on **Admin → Products** lets you delete all of them in one go. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so deleting them won't bring them back. If the store already has products, no samples are added. The sample data lives in `server/utils/sampleProducts.ts`.
+The first time an admin logs in (or finishes setup), 24 example products with square placeholder images are added so the store isn't empty. A warning on **Admin → Products** lets you delete all of them in one go. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so deleting them won't bring them back. If the store already has products, no samples are added. The sample data lives in `server/utils/sampleProducts.ts`.
 
 Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
 

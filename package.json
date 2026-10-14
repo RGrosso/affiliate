@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "dev:reset": "node scripts/reset-dev-data.ts && nuxt dev",
+    "dev:reset": "node scripts/reset-dev-data.ts",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
