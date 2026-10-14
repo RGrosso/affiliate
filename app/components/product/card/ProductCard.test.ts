@@ -7,9 +7,8 @@ import { mountInApp } from "~~/test/nuxt/mount";
 
 const product = {
   title: "Moon Lamp",
-  retailer: "Gadget Hub",
+  handle: "moon-lamp",
   pricePence: 2499,
-  affiliateUrl: "https://example.com/moon-lamp",
   image: { url: "/images/moon-lamp.jpg", alt: "A glowing moon lamp" },
 };
 
@@ -18,12 +17,17 @@ function makeBadge(name: string, overrides: Partial<TagBadge> = {}): TagBadge {
 }
 
 describe("ProductCard", () => {
-  it("shows the title, retailer and price", async () => {
+  it("shows the title and price", async () => {
     const wrapper = await mountSuspended(ProductCard, { props: { product } });
 
     expect(wrapper.get("h3").text()).toBe("Moon Lamp");
-    expect(wrapper.text()).toContain("Gadget Hub");
     expect(wrapper.text()).toContain("£24.99");
+  });
+
+  it("hides the price when there isn't one", async () => {
+    const wrapper = await mountSuspended(ProductCard, { props: { product: { ...product, pricePence: null } } });
+
+    expect(wrapper.text()).not.toContain("£");
   });
 
   it("drops .00 from whole-pound prices", async () => {
@@ -33,22 +37,14 @@ describe("ProductCard", () => {
     expect(wrapper.text()).not.toContain("£42.00");
   });
 
-  it("links out to the retailer as a sponsored link in a new tab", async () => {
+  it("links the title to the product page, with no outbound retailer link", async () => {
     const wrapper = await mountSuspended(ProductCard, { props: { product } });
-    const link = wrapper.get("a");
+    const links = wrapper.findAll("a");
 
-    expect(link.text()).toBe("View");
-    expect(link.attributes()).toMatchObject({
-      href: "https://example.com/moon-lamp",
-      target: "_blank",
-      rel: "sponsored noopener noreferrer",
-    });
-  });
-
-  it("has no link when there's no affiliate URL", async () => {
-    const wrapper = await mountSuspended(ProductCard, { props: { product: { ...product, affiliateUrl: null } } });
-
-    expect(wrapper.find("a").exists()).toBe(false);
+    expect(links).toHaveLength(1);
+    expect(links[0]!.text()).toBe("Moon Lamp");
+    expect(links[0]!.attributes("href")).toBe("/products/moon-lamp");
+    expect(links[0]!.attributes("target")).toBeUndefined();
   });
 
   it("uses the image alt text, falling back to the title", async () => {
