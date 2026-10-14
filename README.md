@@ -181,7 +181,7 @@ The page reads from a public route:
 
 The description comes from the rich text editor as HTML. This route sanitises it with `sanitiseRichText` (`server/utils/richText.ts`), keeping only the formatting the editor supports, so the page can render it.
 
-The homepage shows products in a horizontal row that scrolls at every width, with arrow buttons on large screens. It loads 10 products, then 10 more each time the row nears its end until every product is in, and finishes with a **View all** card. Arrows that have nothing to scroll to are hidden. That links to `/collections/all`, a placeholder until collections exist.
+The homepage shows products in a horizontal row that scrolls at every width, with arrow buttons on large screens. It loads 10 products, then 10 more each time the row nears its end until every product is in, and finishes with a **View all** card, which links to `/collections/all`, a placeholder until collections exist. Arrows that have nothing to scroll to are hidden.
 
 ## Testing
 
