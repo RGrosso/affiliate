@@ -35,6 +35,7 @@ definePageMeta({
   layout: false,
   middleware: ["admin-role"],
   minimalHeader: true,
+  hideFooter: true,
 });
 
 const route = useRoute();

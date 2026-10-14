@@ -72,12 +72,6 @@
         >
           {{ error ? "We couldn't load products right now. Please try again later." : "New finds are on the way. Check back soon!" }}
         </p>
-        <p
-          v-if="items.length"
-          class="text-sm text-dimmed"
-        >
-          We may earn a commission, at no cost to you.
-        </p>
       </section>
     </CoreContainer>
   </div>

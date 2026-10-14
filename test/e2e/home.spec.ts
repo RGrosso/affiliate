@@ -11,7 +11,17 @@ test.describe("homepage", () => {
     const row = page.getByRole("list", { name: "Trending right now" });
     await expect(row.locator("h3")).toHaveCount(10);
     await expect(page.getByText(/^£[\d,]+(\.\d{2})?$/).first()).toBeVisible();
-    await expect(page.getByText("We may earn a commission, at no cost to you.")).toBeVisible();
+  });
+
+  test("has a footer with the commission notice, but not on the login page", async ({ page, goto }) => {
+    await goto("/", { waitUntil: "hydration" });
+
+    const footer = page.getByRole("contentinfo");
+    await expect(footer).toContainText("We may earn a commission, at no cost to you.");
+    await expect(page.getByText("We may earn a commission, at no cost to you.")).toHaveCount(1);
+
+    await goto("/login", { waitUntil: "hydration" });
+    await expect(page.getByRole("contentinfo")).toHaveCount(0);
   });
 
   test("loads a second page as the row scrolls, then ends with View all", async ({ page, goto }) => {
