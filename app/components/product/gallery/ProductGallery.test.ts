@@ -52,6 +52,12 @@ describe("ProductGallery", () => {
     expect(hidden.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("can be focused, so the arrow keys work without picking a button first", async () => {
+    const wrapper = await mountGallery();
+
+    expect(wrapper.get("section").attributes("tabindex")).toBe("0");
+  });
+
   it("steps through the images with the arrows and keys, wrapping round", async () => {
     const wrapper = await mountGallery();
 

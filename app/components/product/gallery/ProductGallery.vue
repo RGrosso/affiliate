@@ -1,7 +1,8 @@
 <template>
   <section
     :aria-label="`Images of ${title}`"
-    class="flex flex-col lg:flex-row gap-3"
+    tabindex="0"
+    class="flex flex-col lg:flex-row gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
     @keydown.left="show(current - 1)"
     @keydown.right="show(current + 1)"
   >
