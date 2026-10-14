@@ -1,7 +1,7 @@
 import { expect, test } from "@nuxt/test-utils/playwright";
 
 // A seeded sample product, so these run before admin.spec deletes the samples
-const PRODUCT = "/products/cast-iron-skillet-12";
+const PRODUCT = "/product/cast-iron-skillet-12";
 
 test.describe("product page", () => {
   test("shows the product's details, tags and breadcrumbs", async ({ page, goto }) => {
@@ -54,7 +54,7 @@ test.describe("product page", () => {
   });
 
   test("returns a 404 for an unknown product", async ({ page }) => {
-    const response = await page.goto("/products/no-such-product");
+    const response = await page.goto("/product/no-such-product");
 
     expect(response?.status()).toBe(404);
   });

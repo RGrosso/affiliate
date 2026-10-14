@@ -37,7 +37,7 @@
       <h3 class="text-base font-bold leading-snug text-highlighted line-clamp-2">
         <!-- The whole card is clickable through this link's ::after, without nesting the tags inside a link -->
         <NuxtLink
-          :to="`/products/${product.handle}`"
+          :to="`/product/${product.handle}`"
           class="after:absolute after:inset-0 after:rounded-md focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary group-hover:underline"
         >
           {{ product.title }}

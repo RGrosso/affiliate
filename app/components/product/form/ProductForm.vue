@@ -531,12 +531,12 @@ const saveBarMessage = computed(() => {
   return product ? "Unsaved changes" : "Unsaved product";
 });
 
-const urlPrefix = computed(() => `${requestUrl.host}/products/`);
+const urlPrefix = computed(() => `${requestUrl.host}/product/`);
 
 const seoPreview = computed(() => ({
   title: state.seoTitle || state.title,
   description: state.seoDescription || plainDescription.value.slice(0, 320),
-  url: `${requestUrl.origin}/products/${state.handle || slugify(state.title)}`,
+  url: `${requestUrl.origin}/product/${state.handle || slugify(state.title)}`,
 }));
 
 const toolbarItems: EditorToolbarItem[][] = [

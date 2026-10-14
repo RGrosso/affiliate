@@ -37,7 +37,7 @@ test.describe("managing products", () => {
   });
 
   test("shows the brand and retailer on the product's page", async ({ page, goto }) => {
-    await goto("/products/e2e-moon-lamp", { waitUntil: "hydration" });
+    await goto("/product/e2e-moon-lamp", { waitUntil: "hydration" });
 
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("E2E Moon Lamp");
     await expect(page.getByText("by Luna")).toBeVisible();

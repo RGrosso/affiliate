@@ -167,7 +167,7 @@ Product routes change as follows:
 
 ## Product pages
 
-Each product has a public page at `/products/<handle>`. The handle is built from the title when the product is created (lowercase, with hyphens), stays fixed after that, and can be changed in the admin form. Product cards link to this page rather than straight to the retailer.
+Each product has a public page at `/product/<handle>`. The handle is built from the title when the product is created (lowercase, with hyphens), stays fixed after that, and can be changed in the admin form. Product cards link to this page rather than straight to the retailer.
 
 The page shows an image gallery, every tag on the product (not just the on-card ones), the brand, the price, a **Buy at {retailer}** button that opens the affiliate link in a new tab, and the description. It also sets the SEO title and description (falling back to the title and description) and adds schema.org `Product` structured data.
 

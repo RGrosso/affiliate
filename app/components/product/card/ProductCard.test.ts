@@ -43,7 +43,7 @@ describe("ProductCard", () => {
 
     expect(links).toHaveLength(1);
     expect(links[0]!.text()).toBe("Moon Lamp");
-    expect(links[0]!.attributes("href")).toBe("/products/moon-lamp");
+    expect(links[0]!.attributes("href")).toBe("/product/moon-lamp");
     expect(links[0]!.attributes("target")).toBeUndefined();
   });
 
