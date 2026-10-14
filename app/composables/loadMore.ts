@@ -1,16 +1,10 @@
 import type { ApiSuccess } from "#shared/types/api";
 import type { PagedResult } from "#shared/types/pagination";
 
-type LoadMoreOptions = {
-  pageSize: number;
-  /** Stop after this many pages, even if the list has more. */
-  maxPages?: number;
-};
-
 /** A list that starts with one page (fetched during SSR) and appends the next page on `loadMore()`. */
 export async function useLoadMore<T extends { id: string | number }>(
   url: string,
-  { pageSize, maxPages = Infinity }: LoadMoreOptions
+  { pageSize }: { pageSize: number }
 ) {
   const request = useFetch<ApiSuccess<PagedResult<T>>>(url, {
     query: { page: 1, pageSize },
@@ -25,16 +19,19 @@ export async function useLoadMore<T extends { id: string | number }>(
   const failed = ref(false);
 
   const items = computed(() => {
-    const first = data.value?.data.items ?? [];
     // Products added between pages shift later pages along, which would repeat an item
-    const seen = new Set(first.map(item => item.id));
-    return [...first, ...more.value.filter(item => !seen.has(item.id))];
+    const seen = new Set<T["id"]>();
+    return [...(data.value?.data.items ?? []), ...more.value].filter((item) => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
   });
 
   const canLoadMore = computed(() =>
     status.value === "success"
     && !failed.value
-    && page.value < Math.min(data.value?.data.totalPages ?? 0, maxPages)
+    && page.value < (data.value?.data.totalPages ?? 0)
   );
 
   async function loadMore() {

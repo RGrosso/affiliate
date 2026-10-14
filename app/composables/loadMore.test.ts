@@ -5,17 +5,20 @@ import { useLoadMore } from "./loadMore";
 
 const ALL = Array.from({ length: 25 }, (_, i) => ({ id: i + 1 }));
 let failPage: number | null = null;
+// Pretends a product was added at the top after page 1 loaded, so later pages start one item earlier
+let shifted = false;
 
 registerEndpoint("/api/load-more", (event) => {
   const query = getQuery(event);
   const page = Number(query.page);
   const pageSize = Number(query.pageSize);
   if (page === failPage) throw new Error("Down");
+  const start = (page - 1) * pageSize - (shifted && page > 2 ? 1 : 0);
 
   return {
     success: true,
     data: {
-      items: ALL.slice((page - 1) * pageSize, page * pageSize),
+      items: ALL.slice(start, start + pageSize),
       page,
       pageSize,
       total: ALL.length,
@@ -33,6 +36,7 @@ async function loaded(options: Parameters<typeof useLoadMore>[1]) {
 describe("useLoadMore", () => {
   beforeEach(() => {
     failPage = null;
+    shifted = false;
     clearNuxtData();
   });
 
@@ -56,12 +60,15 @@ describe("useLoadMore", () => {
     expect(list.items.value).toHaveLength(25);
   });
 
-  it("stops at the page limit", async () => {
-    const list = await loaded({ pageSize: 10, maxPages: 2 });
+  it("doesn't repeat an item when a later page overlaps an earlier one", async () => {
+    const list = await loaded({ pageSize: 10 });
 
     await list.loadMore();
-    expect(list.items.value).toHaveLength(20);
-    expect(list.canLoadMore.value).toBe(false);
+    shifted = true;
+    await list.loadMore();
+
+    const ids = list.items.value.map(item => item.id);
+    expect(ids).toEqual(ALL.map(item => item.id));
   });
 
   it("stops loading more after a page fails", async () => {
