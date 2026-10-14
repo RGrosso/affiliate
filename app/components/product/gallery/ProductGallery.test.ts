@@ -42,6 +42,16 @@ describe("ProductGallery", () => {
     expect(thumbs(wrapper)[0]!.classes()).toContain("grayscale");
   });
 
+  it("slides the strip of images to the chosen one, hiding the others from screen readers", async () => {
+    const wrapper = await mountGallery();
+
+    await wrapper.get("button[aria-label='Next image']").trigger("click");
+
+    expect(wrapper.get("[data-main]").element.parentElement!.style.transform).toBe("translateX(-100%)");
+    const hidden = wrapper.findAll("img[aria-hidden='true']").filter(img => img.attributes("alt") === "");
+    expect(hidden.length).toBeGreaterThanOrEqual(2);
+  });
+
   it("steps through the images with the arrows and keys, wrapping round", async () => {
     const wrapper = await mountGallery();
 
