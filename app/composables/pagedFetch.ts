@@ -6,9 +6,10 @@ type PagedFetchOptions = {
   pageSize?: number;
   /**
    * Extra query params, such as a filter. Changing any of them resets to page 1.
+   * An array is sent as a repeated key (`?tag=a&tag=b`).
    * To keep a filter in the URL, derive it from the route query (e.g. `() => ({ tag: route.query.tag })`).
    */
-  query?: MaybeRefOrGetter<Record<string, string | number | undefined>>;
+  query?: MaybeRefOrGetter<Record<string, string | number | string[] | undefined>>;
 };
 
 export async function usePagedFetch<T, Extra extends object = object>(
@@ -43,10 +44,12 @@ export async function usePagedFetch<T, Extra extends object = object>(
 
   watch(page, () => refresh());
 
-  watch(extraQuery, () => {
+  // Compared by value: a getter that builds a fresh array on every route change would otherwise look changed
+  // when only the page did, and send the user back to page 1.
+  watch(() => JSON.stringify(extraQuery.value), () => {
     if (page.value === 1) refresh();
     else page.value = 1;
-  }, { deep: true });
+  });
 
   // A stale link or a delete can leave the page past the end, which would look like an empty list
   watch(data, (result) => {

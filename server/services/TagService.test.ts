@@ -38,6 +38,28 @@ describe("create", () => {
     expect(created).toMatchObject({ name: "Air Fryers", slug: "air-fryers", showOnCards: false, priority: null });
   });
 
+  it("saves any details sent with the name", async () => {
+    const created = await service.create(createTagSchema.parse({
+      name: "Hot Deals",
+      description: "Reduced this week",
+      tooltip: "Reduced",
+      icon: "flame",
+      priority: 5,
+      showOnCards: true,
+    }));
+
+    expect(created).toMatchObject({
+      name: "Hot Deals",
+      slug: "hot-deals",
+      description: "Reduced this week",
+      tooltip: "Reduced",
+      icon: "flame",
+      priority: 5,
+      showOnCards: true,
+    });
+    expect(await service.list()).toMatchObject([{ id: created.id, icon: "flame", showOnCards: true }]);
+  });
+
   it("rejects a name that makes an existing slug as a conflict on the name field", async () => {
     await service.create({ name: "Air Fryers" });
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "./zod";
-import { addProductSchema } from "./products.schema";
+import { addProductSchema, productListQuerySchema } from "./products.schema";
 
 function fieldErrors(input: unknown) {
   const result = addProductSchema.safeParse(input);
@@ -45,5 +45,26 @@ describe("addProductSchema", () => {
   it("allows at most 10 images", () => {
     const images = Array.from({ length: 11 }, (_, i) => ({ url: `/images/${i}.jpg` }));
     expect(fieldErrors({ title: "A", images }).images).toEqual(["You can add up to 10 images"]);
+  });
+});
+
+describe("productListQuerySchema", () => {
+  const tagErrors = (tag: unknown) => {
+    const result = productListQuerySchema.safeParse({ tag });
+    if (result.success) throw new Error("Expected validation to fail");
+    return z.flattenError(result.error).fieldErrors.tag;
+  };
+
+  it("turns a single tag into a one-item list and keeps a list as it is", () => {
+    expect(productListQuerySchema.parse({ tag: " deals " }).tag).toEqual(["deals"]);
+    expect(productListQuerySchema.parse({ tag: ["a", "b"] }).tag).toEqual(["a", "b"]);
+    expect(productListQuerySchema.parse({}).tag).toBeUndefined();
+  });
+
+  it("rejects blank, overlong and too many tags", () => {
+    expect(tagErrors("")).toEqual(["Please choose a tag from the list"]);
+    expect(tagErrors(["a", " "])).toEqual(["Please choose a tag from the list"]);
+    expect(tagErrors("x".repeat(101))).toEqual(["The tag can be at most 100 characters"]);
+    expect(tagErrors(Array.from({ length: 21 }, (_, i) => `t${i}`))).toEqual(["You can filter by up to 20 tags"]);
   });
 });

@@ -5,13 +5,15 @@ import { effectScope } from "vue";
 import { usePagedFetch } from "./pagedFetch";
 
 const ALL = Array.from({ length: 45 }, (_, i) => ({ id: i + 1 }));
-const requests = vi.hoisted(() => [] as { page: number; pageSize: number; colour?: string }[]);
+const requests = vi.hoisted(() => [] as { page: number; pageSize: number; colour?: string; tag?: string[] }[]);
 
 registerEndpoint("/api/things", (event) => {
   const query = getQuery(event);
   const page = Number(query.page);
   const pageSize = Number(query.pageSize);
-  requests.push({ page, pageSize, ...(query.colour ? { colour: String(query.colour) } : {}) });
+  requests.push({ page, pageSize, ...(query.colour ? { colour: String(query.colour) } : {}),
+    ...(query.tag ? { tag: [query.tag].flat().map(String) } : {}),
+  });
   return {
     success: true,
     data: {
@@ -95,5 +97,28 @@ describe("usePagedFetch", () => {
     await vi.waitFor(() => expect(requests).toHaveLength(1));
 
     expect(requests).toEqual([{ page: 1, pageSize: 20, colour: "blue" }]);
+  });
+
+  it("sends an array filter as repeated keys and resets to page 1 when it changes", async () => {
+    await useRouter().replace({ query: { page: "2" } });
+    const tags = ref(["a", "b"]);
+    const paged = await pagedFetch("/api/things", { pageSize: 20, query: () => ({ tag: [...tags.value] }) });
+    requests.length = 0;
+
+    tags.value = ["a", "b", "c"];
+    await vi.waitFor(() => expect(paged.page.value).toBe(1));
+    await vi.waitFor(() => expect(requests).toHaveLength(1));
+
+    expect(requests).toEqual([{ page: 1, pageSize: 20, tag: ["a", "b", "c"] }]);
+  });
+
+  it("keeps the page when an array filter is rebuilt with the same values", async () => {
+    await useRouter().replace({ query: { page: "2" } });
+    const paged = await pagedFetch("/api/things", { pageSize: 20, query: () => ({ tag: ["a"] }) });
+
+    await useRouter().replace({ query: { page: "3" } });
+    await vi.waitFor(() => expect(paged.items.value).toHaveLength(5));
+
+    expect(paged.page.value).toBe(3);
   });
 });

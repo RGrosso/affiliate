@@ -15,8 +15,8 @@ export class TagService {
     return this.tags.findAll();
   }
 
-  create({ name }: CreateTagData) {
-    return this.tags.insert({ name, slug: slugify(name) }).catch(rethrowAsDuplicateTag);
+  create({ name, ...details }: CreateTagData) {
+    return this.tags.insert({ ...details, name, slug: slugify(name) }).catch(rethrowAsDuplicateTag);
   }
 
   async update(id: string, { name, ...rest }: UpdateTagData) {

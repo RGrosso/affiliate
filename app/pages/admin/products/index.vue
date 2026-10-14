@@ -28,7 +28,8 @@
       v-model="tagFilter"
       :items="tagItems"
       value-key="value"
-      placeholder="Filter by tag"
+      multiple
+      placeholder="Filter by tags"
       icon="i-lucide-tags"
       clear
       searchable
@@ -102,16 +103,16 @@
     </div>
 
     <div
-      v-else-if="status !== 'pending' && tagFilter"
+      v-else-if="status !== 'pending' && tagFilter.length"
       class="bg-default text-default border border-default rounded-md p-12 text-center flex flex-col items-center justify-center gap-4 shadow-sm"
     >
       <p class="text-sm text-muted">
-        No products have this tag.
+        {{ tagFilter.length > 1 ? "No products have these tags." : "No products have this tag." }}
       </p>
       <UButton
         variant="outline"
         color="neutral"
-        @click="tagFilter = undefined"
+        @click="tagFilter = []"
       >
         Clear filter
       </UButton>
@@ -202,14 +203,14 @@ const { tags } = useTags();
 
 const tagItems = computed(() => tags.value.map(tag => ({ label: tag.name, value: tag.slug })));
 
-const tagFilter = computed<string | undefined>({
+const tagFilter = computed<string[]>({
   get() {
-    const value = Array.isArray(route.query.tag) ? route.query.tag[0] : route.query.tag;
-    return value || undefined;
+    const value = route.query.tag;
+    return [value ?? []].flat().filter((slug): slug is string => !!slug);
   },
-  set(slug) {
+  set(slugs) {
     const { tag: _tag, page: _page, ...rest } = route.query;
-    router.replace({ query: slug ? { ...rest, tag: slug } : rest });
+    router.replace({ query: slugs.length ? { ...rest, tag: slugs } : rest });
   },
 });
 

@@ -13,6 +13,18 @@ describe("createTagSchema", () => {
     expect(createTagSchema.parse({ name: "  Air Fryers " })).toEqual({ name: "Air Fryers" });
   });
 
+  it("accepts every detail and validates them like an update", () => {
+    const details = { description: "Cheap", tooltip: "Reduced", icon: "flame", priority: 3, showOnCards: true };
+    expect(createTagSchema.parse({ name: "Deals", ...details })).toEqual({ name: "Deals", ...details });
+    expect(createTagSchema.parse({ name: "Deals", description: "", tooltip: "" })).toMatchObject({ description: null, tooltip: null });
+    expect(fieldErrors(createTagSchema, { name: "Deals", icon: "rocket" }).icon).toEqual(["Please choose one of the icons"]);
+    expect(fieldErrors(createTagSchema, { name: "Deals", priority: 1.5 }).priority).toEqual(["The priority must be a whole number"]);
+  });
+
+  it("still requires a name", () => {
+    expect(fieldErrors(createTagSchema, { tooltip: "Reduced" }).name).toEqual(["Please give the tag a name"]);
+  });
+
   it("asks for a name with letters or numbers", () => {
     expect(fieldErrors(createTagSchema, { name: " " }).name).toEqual(["Please give the tag a name"]);
     expect(fieldErrors(createTagSchema, { name: "!!!" }).name).toEqual(["Please use at least one letter or number in the tag name"]);

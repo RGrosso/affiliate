@@ -23,6 +23,13 @@ test.describe("API", () => {
     expect((await response.json()).data).toMatchObject({ items: [], total: 0 });
   });
 
+  test("returns no products for several unknown tags", async ({ request }) => {
+    const response = await request.get("/api/products?tag=no-such-tag&tag=also-missing");
+
+    expect(response.status()).toBe(200);
+    expect((await response.json()).data).toMatchObject({ items: [], total: 0 });
+  });
+
   test("pages the product list", async ({ request }) => {
     const list = async (query: string) => {
       const response = await request.get(`/api/products?${query}`);

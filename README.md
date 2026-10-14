@@ -155,13 +155,13 @@ Tag routes are admin only:
 | Method | Path | What it does |
 | --- | --- | --- |
 | `GET` | `/api/tags` | Lists tags, each with a `productCount` |
-| `POST` | `/api/tags` | Creates a tag from `{ name }` |
+| `POST` | `/api/tags` | Creates a tag from `{ name }` plus any of the optional details (description, tooltip, icon, priority, showOnCards) |
 | `PATCH` | `/api/tags/:id` | Updates a tag |
 | `DELETE` | `/api/tags/:id` | Deletes a tag and its product links |
 
 Product routes change as follows:
 
-- `GET /api/products?tag=<slug>` filters the list. Each item now includes `tags`, highest priority first.
+- `GET /api/products?tag=<slug>` filters the list. Repeat it (`?tag=a&tag=b`, up to 20) to filter by several tags: a product matches if it has any of them. Each item now includes `tags`, highest priority first.
 - Product create and update accept `tagIds`. If a tag no longer exists, the response is a `VALIDATION_ERROR` on `tagIds`.
 
 ## Testing

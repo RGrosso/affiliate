@@ -55,8 +55,21 @@ export const addProductSchema = z.object({
 export type AddProductInput = z.input<typeof addProductSchema>;
 
 export const productListQuerySchema = pageQuerySchema.extend({
-  /** A tag slug. */
-  tag: z.string().trim().max(100, "The tag can be at most 100 characters").optional(),
+  /** Tag slugs. A product matches if it has any of them. A repeated `?tag=` arrives as an array, a single one as a string. */
+  tag: z.preprocess(
+    value => (typeof value === "string" ? [value] : value),
+    z
+      .array(
+        z
+          .string()
+          .trim()
+          .min(1, "Please choose a tag from the list")
+          .max(100, "The tag can be at most 100 characters"),
+        { error: "Please choose tags from the list" }
+      )
+      .max(20, "You can filter by up to 20 tags")
+      .optional()
+  ),
   /** Admin only: every tag on each product, not just the ones shown on cards. */
   allTags: z.stringbool({ error: "allTags must be true or false" }).optional(),
 });

@@ -175,16 +175,27 @@ describe("tags", () => {
     await service.create({ title: "Also tagged", tagIds: [deals.id], images: [] }, authorId);
     await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
 
-    const dealsPage = await service.list({ page: 1, pageSize: 1, tag: "deals" });
+    const dealsPage = await service.list({ page: 1, pageSize: 1, tag: ["deals"] });
     expect(dealsPage).toMatchObject({ total: 2, totalPages: 2 });
     expect(dealsPage.items).toHaveLength(1);
 
-    const giftsPage = await service.list({ page: 1, pageSize: 10, tag: "gifts" });
+    const giftsPage = await service.list({ page: 1, pageSize: 10, tag: ["gifts"] });
     expect(giftsPage.items.map(item => item.id)).toEqual([tagged.id]);
     expect(giftsPage.total).toBe(1);
 
-    expect((await service.list({ page: 1, pageSize: 10, tag: "no-such-tag" })).total).toBe(0);
+    expect((await service.list({ page: 1, pageSize: 10, tag: ["no-such-tag"] })).total).toBe(0);
     expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(3);
+  });
+
+  it("matches products with any of several tags without duplicates", async () => {
+    const [deals, gifts] = [await addTag("Deals"), await addTag("Gifts")];
+    await service.create({ title: "Both", tagIds: [deals.id, gifts.id], images: [] }, authorId);
+    await service.create({ title: "Gift", tagIds: [gifts.id], images: [] }, authorId);
+    await service.create({ title: "Plain", tagIds: [], images: [] }, authorId);
+
+    const page = await service.list({ page: 1, pageSize: 10, tag: ["deals", "gifts"] });
+    expect(page.items.map(item => item.title).sort()).toEqual(["Both", "Gift"]);
+    expect(page.total).toBe(2);
   });
 
   describe("list tags", () => {

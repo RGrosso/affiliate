@@ -13,13 +13,8 @@ const tagName = z
   // The slug decides whether a tag already exists, so it can't be empty
   .refine(name => slugify(name) !== "", "Please use at least one letter or number in the tag name");
 
-export const createTagSchema = z.object({
-  name: tagName,
-});
-
 // No defaults: a PATCH changes only the fields it sends, so a missing field must stay missing
-export const updateTagSchema = z.object({
-  name: tagName.optional(),
+const tagDetails = {
   description: z.preprocess(
     emptyToNull,
     z.string().trim().max(500, "The description can be at most 500 characters").nullable().optional()
@@ -37,6 +32,16 @@ export const updateTagSchema = z.object({
     .nullable()
     .optional(),
   showOnCards: z.boolean().optional(),
+};
+
+export const createTagSchema = z.object({
+  name: tagName,
+  ...tagDetails,
+});
+
+export const updateTagSchema = z.object({
+  name: tagName.optional(),
+  ...tagDetails,
 });
 
 export type CreateTagInput = z.input<typeof createTagSchema>;

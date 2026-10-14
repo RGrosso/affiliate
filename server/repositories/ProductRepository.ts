@@ -48,11 +48,11 @@ export class ProductRepository {
 
   /** Newest first. The title breaks ties so pages don't shuffle between requests. */
   async findPage(query: ProductListQuery) {
-    const filter = query.tag
+    const filter = query.tag?.length
       ? exists(this.db.select({ one: productTags.productId })
           .from(productTags)
           .innerJoin(tags, eq(tags.id, productTags.tagId))
-          .where(and(eq(productTags.productId, products.id), eq(tags.slug, query.tag))))
+          .where(and(eq(productTags.productId, products.id), inArray(tags.slug, query.tag))))
       : undefined;
 
     const [items, [totals]] = await Promise.all([
