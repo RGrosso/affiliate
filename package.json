@@ -25,6 +25,8 @@
     "@nuxt/eslint": "1.17.0",
     "@nuxt/fonts": "0.14.0",
     "@nuxt/ui": "^4.11.3",
+    "@vueuse/core": "^15.0.0",
+    "@vueuse/nuxt": "^15.0.0",
     "drizzle-kit": "^0.31.11",
     "drizzle-orm": "^0.45.4",
     "nuxt": "^4.6.1",
