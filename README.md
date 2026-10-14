@@ -31,7 +31,7 @@ To finish setting it up:
 
 The same flow applies to any user whose password is empty (`NULL`). Logging in as that user sends them to `/setup` to choose a password first.
 
-To start again from scratch, stop the dev server and delete the `.data/` folder. The admin will be seeded again on the next `pnpm dev`.
+To start again from scratch, stop the dev server and run `pnpm dev:reset`. It deletes the `.data/` folder and starts the dev server, which re-runs the migrations and seeds the admin again with no password. The sample products come back on the next admin login. It refuses to run with `NODE_ENV=production`.
 
 ## Sample products
 
