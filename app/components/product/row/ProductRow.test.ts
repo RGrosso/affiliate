@@ -48,11 +48,10 @@ describe("ProductRow", () => {
     expect(viewAll.attributes("href")).toBe("/collections/all");
   });
 
-  it("has labelled scroll buttons that are disabled at the start", async () => {
+  it("hides the left scroll button at the start", async () => {
     const wrapper = await mountRow();
 
-    const left = wrapper.get("button[aria-label='Scroll Trending left']");
-    expect(left.attributes("disabled")).toBeDefined();
+    expect(wrapper.get("button[aria-label='Scroll Trending left']").classes()).toContain("invisible");
     expect(wrapper.find("button[aria-label='Scroll Trending right']").exists()).toBe(true);
   });
 

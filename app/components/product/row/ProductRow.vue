@@ -13,7 +13,7 @@
             square
             class="rounded-full"
             :aria-label="`Scroll ${label} left`"
-            :disabled="arrivedState.left"
+            :class="{ invisible: arrivedState.left }"
             @click="scrollByPage(-1)"
           />
           <UButton
@@ -23,7 +23,7 @@
             square
             class="rounded-full"
             :aria-label="`Scroll ${label} right`"
-            :disabled="arrivedState.right"
+            :class="{ invisible: arrivedState.right }"
             @click="scrollByPage(1)"
           />
         </div>

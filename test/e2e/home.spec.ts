@@ -48,11 +48,22 @@ test.describe("homepage", () => {
 
     const row = page.getByRole("list", { name: "Trending right now" });
     const left = page.getByRole("button", { name: "Scroll Trending right now left" });
-    await expect(left).toBeDisabled();
+    const right = page.getByRole("button", { name: "Scroll Trending right now right" });
+    await row.scrollIntoViewIfNeeded();
+    await expect(left).toBeHidden();
 
-    await page.getByRole("button", { name: "Scroll Trending right now right" }).click();
+    await right.click();
     await expect.poll(() => row.evaluate(el => el.scrollLeft)).toBeGreaterThan(0);
-    await expect(left).toBeEnabled();
+    await expect(left).toBeVisible();
+
+    // Once everything has loaded and the row is at its end, there's nothing more to scroll to
+    await expect(async () => {
+      await row.evaluate((el) => {
+        el.scrollLeft = el.scrollWidth;
+      });
+      await expect(row.getByRole("link", { name: "View all" })).toBeVisible({ timeout: 1000 });
+      await expect(right).toBeHidden({ timeout: 1000 });
+    }).toPass();
   });
 
   test("links each card to its product page, not out to the retailer", async ({ page, goto }) => {
