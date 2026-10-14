@@ -15,6 +15,15 @@ export class TagService {
     return this.tags.findAll();
   }
 
+  async get(id: string) {
+    const tag = await this.tags.findById(id);
+    if (!tag) {
+      throw tagNotFound();
+    }
+
+    return tag;
+  }
+
   create({ name, ...details }: CreateTagData) {
     return this.tags.insert({ ...details, name, slug: slugify(name) }).catch(rethrowAsDuplicateTag);
   }

@@ -155,6 +155,7 @@ Tag routes are admin only:
 | Method | Path | What it does |
 | --- | --- | --- |
 | `GET` | `/api/tags` | Lists tags, each with a `productCount` |
+| `GET` | `/api/tags/:id` | Returns one tag, or a 404 if it doesn't exist |
 | `POST` | `/api/tags` | Creates a tag from `{ name }` plus any of the optional details (description, tooltip, icon, priority, showOnCards) |
 | `PATCH` | `/api/tags/:id` | Updates a tag |
 | `DELETE` | `/api/tags/:id` | Deletes a tag and its product links |
