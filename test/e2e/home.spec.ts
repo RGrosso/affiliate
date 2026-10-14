@@ -24,7 +24,7 @@ test.describe("homepage", () => {
     await expect(page.getByRole("contentinfo")).toHaveCount(0);
   });
 
-  test("loads a second page as the row scrolls, then ends with View all", async ({ page, goto }) => {
+  test("loads more as the row scrolls, then ends with View all", async ({ page, goto }) => {
     await goto("/", { waitUntil: "hydration" });
 
     const row = page.getByRole("list", { name: "Trending right now" });
@@ -37,10 +37,16 @@ test.describe("homepage", () => {
     });
     await expect(row.locator("h3")).toHaveCount(20);
 
-    await row.evaluate((el) => {
-      el.scrollLeft = el.scrollWidth;
-    });
+    // Keeps loading until every product is in, then ends with View all
+    await expect(async () => {
+      await row.evaluate((el) => {
+        el.scrollLeft = el.scrollWidth;
+      });
+      await expect(row.getByRole("link", { name: "View all" })).toBeVisible({ timeout: 1000 });
+    }).toPass();
     await expect(row.getByRole("link", { name: "View all" })).toHaveAttribute("href", "/collections/all");
+    const { total } = (await (await page.request.get("/api/products?pageSize=1")).json()).data;
+    await expect(row.locator("h3")).toHaveCount(total);
   });
 
   test("scrolls the row with the arrow buttons", async ({ page, goto }) => {
@@ -74,7 +80,7 @@ test.describe("homepage", () => {
 
     const first = row.locator("h3 a").first();
     const href = await first.getAttribute("href");
-    expect(href).toMatch(/^\/products\/[a-z0-9-]+$/);
+    expect(href).toMatch(/^\/product\/[a-z0-9-]+$/);
 
     await first.click();
     await expect(page).toHaveURL(href!);

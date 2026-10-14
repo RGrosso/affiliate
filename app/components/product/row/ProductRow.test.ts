@@ -48,11 +48,11 @@ describe("ProductRow", () => {
     expect(viewAll.attributes("href")).toBe("/collections/all");
   });
 
-  it("hides the left scroll button at the start", async () => {
+  // The arrows themselves are covered in the e2e tests, which have a real page width to scroll in
+  it("leaves out the scroll buttons when every card fits", async () => {
     const wrapper = await mountRow();
 
-    expect(wrapper.get("button[aria-label='Scroll Trending left']").classes()).toContain("invisible");
-    expect(wrapper.find("button[aria-label='Scroll Trending right']").exists()).toBe(true);
+    expect(wrapper.find("button[aria-label^='Scroll Trending']").exists()).toBe(false);
   });
 
   it("is accessible", async () => {

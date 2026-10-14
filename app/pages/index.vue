@@ -83,5 +83,5 @@ import type { ProductListItem } from "#shared/types/product";
 // Collections don't exist yet; this placeholder is where "View all" will lead
 const VIEW_ALL = "/collections/all";
 
-const { items, status, error, loadingMore, canLoadMore, loadMore } = await useLoadMore<ProductListItem>("/api/products", { pageSize: 10, maxPages: 2 });
+const { items, status, error, loadingMore, canLoadMore, loadMore } = await useLoadMore<ProductListItem>("/api/products", { pageSize: 10 });
 </script>

@@ -3,9 +3,14 @@
     <div class="flex flex-wrap justify-between items-end gap-3">
       <slot name="header" />
 
-      <div class="flex items-center gap-3">
+      <!-- ml-auto keeps the actions on the right when they wrap under the header -->
+      <div class="ml-auto flex items-center gap-3">
         <slot name="actions" />
-        <div class="hidden lg:flex gap-2">
+        <!-- Left out when everything fits, so the actions sit at the far right -->
+        <div
+          v-if="scrollable"
+          class="hidden lg:flex gap-2"
+        >
           <UButton
             icon="i-heroicons-chevron-left"
             color="neutral"
@@ -111,6 +116,7 @@ const showViewAll = computed(() => !loading && !loadingMore && !canLoadMore && p
 const scroller = useTemplateRef("scroller");
 const { arrivedState } = useScroll(scroller);
 const reducedMotion = usePreferredReducedMotion();
+const scrollable = computed(() => !(arrivedState.left && arrivedState.right));
 
 useInfiniteScroll(scroller, () => emit("loadMore"), {
   direction: "right",
