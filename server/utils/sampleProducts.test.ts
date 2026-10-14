@@ -3,7 +3,7 @@ import { HANDLE_PATTERN } from "#shared/schemas/products.schema";
 import { sampleProducts } from "./sampleProducts";
 
 describe("sampleProducts", () => {
-  // The homepage row shows up to two pages of 10, so the samples should fill it
+  // Enough to fill the homepage row past one load of 10, so its scrolling and loading can be tried out
   it("has at least 20 products", () => {
     expect(sampleProducts.length).toBeGreaterThanOrEqual(20);
   });
