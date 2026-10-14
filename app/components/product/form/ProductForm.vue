@@ -29,7 +29,10 @@
               label="Description"
               name="description"
             >
-              <div class="rounded-md border border-default overflow-hidden focus-within:ring-2 focus-within:ring-primary">
+              <div
+                class="rounded-md border border-default overflow-hidden focus-within:ring-2 focus-within:ring-primary"
+                @focusin="descriptionTouched = true"
+              >
                 <UEditor
                   v-slot="{ editor }"
                   v-model="state.description"
@@ -494,6 +497,17 @@ const snapshot = () => JSON.stringify({
 
 const savedSnapshot = ref(snapshot());
 const isDirty = computed(() => snapshot() !== savedSnapshot.value);
+
+// The editor rewrites the HTML it's given (e.g. wrapping list items in <p>), which would count as an
+// unsaved change on load. Until the user has been in the editor, take its output as the saved version.
+const descriptionTouched = ref(false);
+watch(() => state.description, () => {
+  if (descriptionTouched.value) return;
+  savedSnapshot.value = JSON.stringify({
+    ...JSON.parse(savedSnapshot.value),
+    description: JSON.parse(snapshot()).description,
+  });
+});
 
 const { skip: skipLeavePrompt } = useUnsavedChangesGuard(isDirty);
 

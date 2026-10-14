@@ -100,6 +100,21 @@ describe("ProductForm", () => {
     expect(wrapper.get("[role=region]").attributes("aria-label")).toBe("Unsaved changes");
   });
 
+  it.each([
+    ["a new product", undefined],
+    ["a plain description", product],
+    ["a list in the description", { ...product, description: "<p>Glows.</p><ul><li>Warm light</li><li>USB-C</li></ul>" }],
+    ["no description", { ...product, description: null }],
+    ["tags and images", { ...product, tagIds: [SALE_ID], images: [{ url: "/a.jpg", alt: null }] }],
+  ])("doesn't show the save bar before anything changes, for %s", async (_, initial) => {
+    const wrapper = await mountForm(initial ? { product: initial } : {});
+
+    // The editor and tag list settle after mounting, so give them time to report their values
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    expect(wrapper.find("[role=region]").exists()).toBe(false);
+  });
+
   it("has a Tags card, even when the product has no images", async () => {
     const wrapper = await mountForm({ product });
 
