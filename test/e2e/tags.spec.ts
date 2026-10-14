@@ -102,3 +102,53 @@ test.describe("managing tags", () => {
     await expect(page.getByText("E2E New")).toHaveCount(0);
   });
 });
+
+test.describe("tag product counts", () => {
+  let productId: string;
+
+  test.beforeAll(async ({ playwright, baseURL }) => {
+    const { ADMIN_STATE } = await import("./config");
+    const request = await playwright.request.newContext({ baseURL, storageState: ADMIN_STATE });
+    const product = await request.post("/api/products", { data: { title: "E2E Count Lamp" } });
+    expect(product.ok()).toBe(true);
+    productId = (await product.json()).data.id;
+    expect((await request.post("/api/tags", { data: { name: "E2E Count" } })).ok()).toBe(true);
+    await request.dispose();
+  });
+
+  // The Tags page is visited first, so the app already holds its list when the product changes
+  test("updates when tags are added to and removed from a product", async ({ page, goto }) => {
+    const countLink = () => page.getByRole("row", { name: /E2E Count/ }).getByRole("link");
+    const openTagsPage = async () => {
+      await page.getByRole("link", { name: "Tags", exact: true }).click();
+      await expect(page).toHaveURL(/\/admin\/tags$/);
+    };
+    const openProduct = async () => {
+      await page.getByRole("link", { name: "Products", exact: true }).click();
+      await page.getByRole("link", { name: "E2E Count Lamp" }).click();
+      await expect(page).toHaveURL(new RegExp(`/admin/products/${productId}$`));
+    };
+
+    await goto("/admin/tags", { waitUntil: "hydration" });
+    await expect(countLink()).toHaveText("0");
+
+    await openProduct();
+    await page.getByRole("button", { name: "Tags", exact: true }).click();
+    await page.getByPlaceholder("Search or add tags").fill("E2E Count");
+    await page.getByRole("option", { name: "E2E Count", exact: true }).click();
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(toasts(page)).toContainText("Product saved");
+
+    await openTagsPage();
+    await expect(countLink()).toHaveText("1");
+
+    await openProduct();
+    await page.getByRole("button", { name: "Remove E2E Count" }).click();
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(toasts(page).last()).toContainText("Product saved");
+
+    await openTagsPage();
+    await expect(countLink()).toHaveText("0");
+  });
+});

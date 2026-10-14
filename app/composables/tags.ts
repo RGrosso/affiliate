@@ -14,6 +14,13 @@ export function useTags() {
 
   const tags = computed(() => data.value?.data ?? []);
 
+  // The shared list is reused on client-side navigation, so product counts changed by saving a
+  // product would never reload. Hydration keeps the server's copy to avoid a mismatch.
+  const nuxtApp = useNuxtApp();
+  onMounted(() => {
+    if (!nuxtApp.isHydrating) refresh();
+  });
+
   async function create(name: string): Promise<Tag> {
     const { data: tag } = await $fetch<ApiSuccess<Tag>>("/api/tags", { method: "POST", body: { name } });
     await refresh();
