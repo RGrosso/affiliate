@@ -114,7 +114,9 @@ const skeletonCount = computed(() => (loading ? 5 : loadingMore ? 2 : 0));
 const showViewAll = computed(() => !loading && !loadingMore && !canLoadMore && products.length > 0);
 
 const scroller = useTemplateRef("scroller");
-const { arrivedState } = useScroll(scroller);
+// The ends are only measured on scroll by default, so cards loading in or a resize would leave the arrows stale
+const { arrivedState, measure } = useScroll(scroller, { observe: { mutation: true } });
+useResizeObserver(scroller, () => measure());
 const reducedMotion = usePreferredReducedMotion();
 const scrollable = computed(() => !(arrivedState.left && arrivedState.right));
 

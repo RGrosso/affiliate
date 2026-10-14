@@ -1,5 +1,5 @@
 import { mountSuspended } from "@nuxt/test-utils/runtime";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ProductRow } from "#components";
 import { expectAccessible } from "~~/test/nuxt/axe";
 
@@ -53,6 +53,20 @@ describe("ProductRow", () => {
     const wrapper = await mountRow();
 
     expect(wrapper.find("button[aria-label^='Scroll Trending']").exists()).toBe(false);
+  });
+
+  it("shows the scroll buttons once cards arrive that don't fit", async () => {
+    const wrapper = await mountSuspended(ProductRow, {
+      props: { label: "Trending", products: [], viewAllTo: "/collections/all" },
+      attachTo: document.body,
+    });
+    expect(wrapper.find("button[aria-label^='Scroll Trending']").exists()).toBe(false);
+
+    const many = Array.from({ length: 12 }, (_, i) => ({ ...products[0]!, id: `m${i}`, handle: `m-${i}` }));
+    await wrapper.setProps({ products: many });
+
+    await vi.waitUntil(() => wrapper.find("button[aria-label='Scroll Trending right']").exists());
+    wrapper.unmount();
   });
 
   it("is accessible", async () => {
