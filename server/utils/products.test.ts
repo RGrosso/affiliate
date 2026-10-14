@@ -28,6 +28,10 @@ describe("toProductValues", () => {
     expect(toProductValues({ title: "Moon Lamp", handle: "lamp", tagIds: [], images: [] }).handle).toBe("lamp");
   });
 
+  it("keeps the brand", () => {
+    expect(toProductValues({ title: "Moon Lamp", brand: "Luna", tagIds: [], images: [] }).brand).toBe("Luna");
+  });
+
   it("leaves images, tags and price out of the row", () => {
     const values = toProductValues({ title: "Moon Lamp", price: 1, tagIds: [], images: [{ url: "/a.jpg" }] });
     expect(values).not.toHaveProperty("images");

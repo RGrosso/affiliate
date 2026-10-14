@@ -215,6 +215,19 @@
             </UFormField>
 
             <UFormField
+              label="Brand"
+              name="brand"
+              help="Who makes it, if that's different from the shop that sells it"
+            >
+              <UInput
+                v-model="state.brand"
+                placeholder="Lodge"
+                icon="i-heroicons-sparkles"
+                class="w-full"
+              />
+            </UFormField>
+
+            <UFormField
               label="Price"
               name="price"
               help="Optional. Shown as a guide; the retailer's price may change."
@@ -441,6 +454,7 @@ const toState = (product?: EditableProduct) => ({
   handle: product?.handle ?? "",
   price: product?.pricePence == null ? null : product.pricePence / 100,
   retailer: product?.retailer ?? "",
+  brand: product?.brand ?? "",
   affiliateUrl: product?.affiliateUrl ?? "",
   seoTitle: product?.seoTitle ?? "",
   seoDescription: product?.seoDescription ?? "",
@@ -488,6 +502,7 @@ const snapshot = () => JSON.stringify({
   handle: state.handle,
   price: state.price ?? null,
   retailer: state.retailer.trim(),
+  brand: state.brand.trim(),
   affiliateUrl: state.affiliateUrl.trim(),
   seoTitle: state.seoTitle.trim(),
   seoDescription: state.seoDescription.trim(),
