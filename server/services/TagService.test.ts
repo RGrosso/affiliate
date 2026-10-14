@@ -77,6 +77,21 @@ describe("list", () => {
   });
 });
 
+describe("get", () => {
+  it("returns the tag", async () => {
+    const { id } = await service.create({ name: "Deals", tooltip: "Cheap" });
+
+    expect(await service.get(id)).toMatchObject({ id, name: "Deals", slug: "deals", tooltip: "Cheap" });
+  });
+
+  it("throws a 404 for an unknown tag", async () => {
+    const error = await rejection(service.get(unknownId));
+
+    expect(error.statusCode).toBe(404);
+    expect(error.data).toMatchObject({ code: "NOT_FOUND", message: "We couldn't find that tag" });
+  });
+});
+
 describe("update", () => {
   it("saves the details and re-slugs on rename", async () => {
     const { id } = await service.create({ name: "Deals" });

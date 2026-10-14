@@ -81,6 +81,14 @@ describe("useTags", () => {
     expect(calls.list).toBe(listed + 1);
   });
 
+  it("creates a tag with its details", async () => {
+    const { create } = tagsComposable();
+
+    await create({ name: "New", icon: "star", showOnCards: true });
+
+    expect(calls.bodies).toEqual([{ name: "New", icon: "star", showOnCards: true }]);
+  });
+
   it("updates a tag with a PATCH", async () => {
     const { update } = tagsComposable();
 

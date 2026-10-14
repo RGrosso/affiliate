@@ -25,6 +25,7 @@ Read `app/APP.md` before building or styling UI: it covers the site name, theme 
   - `bug/<short-description>` for fixing something that's broken.
   - `feature/<short-description>` for everything else.
 - Keep `<short-description>` short and concise: lowercase words separated by hyphens, 20 characters at most (e.g. `feature/sample-products`, `bug/login-redirect`).
+- Before saying a task is done or ready, commit all your changes in logical chunks and push the branch. Don't leave work uncommitted or unpushed.
 - Never merge into `main` yourself. Every change goes through a pull request, and another person must approve it before it's merged.
 
 ## Locale: English (GB)
