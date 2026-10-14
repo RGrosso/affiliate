@@ -165,6 +165,24 @@ Product routes change as follows:
 - `GET /api/products?tag=<slug>` filters the list. Repeat it (`?tag=a&tag=b`, up to 20) to filter by several tags: a product matches if it has any of them. Each item now includes `tags`, highest priority first.
 - Product create and update accept `tagIds`. If a tag no longer exists, the response is a `VALIDATION_ERROR` on `tagIds`.
 
+## Product pages
+
+Each product has a public page at `/products/<handle>`. The handle is built from the title when the product is created (lowercase, with hyphens), stays fixed after that, and can be changed in the admin form. Product cards link to this page rather than straight to the retailer.
+
+The page shows an image gallery, every tag on the product (not just the on-card ones), the brand, the price, a **Buy at {retailer}** button that opens the affiliate link in a new tab, and the description. It also sets the SEO title and description (falling back to the title and description) and adds schema.org `Product` structured data.
+
+Products have an optional **brand** (who makes it) alongside the **retailer** (the shop the affiliate link goes to).
+
+The page reads from a public route:
+
+| Method | Path | What it does |
+| --- | --- | --- |
+| `GET` | `/api/products/handle/:handle` | Returns the product with its images and every tag as a badge, or a 404 |
+
+The description comes from the rich text editor as HTML. This route sanitises it with `sanitiseRichText` (`server/utils/richText.ts`), keeping only the formatting the editor supports, so the page can render it.
+
+The homepage shows products in a horizontal row that scrolls at every width, with arrow buttons on large screens. It loads 10 products, then 10 more as the row nears its end (up to 2 pages), and finishes with a **View all** card. That links to `/collections/all`, a placeholder until collections exist.
+
 ## Testing
 
 | Command | What it runs |

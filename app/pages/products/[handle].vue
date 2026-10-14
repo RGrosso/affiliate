@@ -70,10 +70,10 @@
             size="xl"
             block
             trailing-icon="i-heroicons-arrow-top-right-on-square"
+            :label="product.retailer ? `Buy at ${product.retailer}` : 'Buy now'"
+            :ui="{ label: 'flex-1 text-center' }"
             class="font-bold py-3.5 mt-3"
-          >
-            {{ product.retailer ? `Buy at ${product.retailer}` : "Buy now" }}
-          </UButton>
+          />
           <p class="text-sm text-dimmed">
             We may earn a commission, at no cost to you.
           </p>

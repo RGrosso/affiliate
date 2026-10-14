@@ -11,6 +11,8 @@ test.describe("managing products", () => {
     await page.getByLabel("Title", { exact: true }).fill("E2E Moon Lamp");
     await page.getByLabel("Price", { exact: true }).fill("24.99");
     await page.getByLabel("Retailer", { exact: true }).fill("Gadget Hub");
+    await page.getByLabel("Brand", { exact: true }).fill("Luna");
+    await page.getByLabel("Affiliate URL", { exact: true }).fill("https://example.com/moon-lamp");
     await page.getByRole("button", { name: "Save" }).click();
 
     await expect(page).toHaveURL(/\/admin\/products$/);
@@ -32,6 +34,14 @@ test.describe("managing products", () => {
     // Newest products come first, so the edited one is among the featured cards
     await expect(page.getByRole("heading", { name: "E2E Moon Lamp" })).toBeVisible();
     await expect(page.getByText("£30", { exact: true })).toBeVisible();
+  });
+
+  test("shows the brand and retailer on the product's page", async ({ page, goto }) => {
+    await goto("/products/e2e-moon-lamp", { waitUntil: "hydration" });
+
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("E2E Moon Lamp");
+    await expect(page.getByText("by Luna")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Buy at Gadget Hub" })).toHaveAttribute("href", "https://example.com/moon-lamp");
   });
 
   test("deletes all sample products and keeps the admin's own", async ({ page, goto }) => {
