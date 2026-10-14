@@ -560,10 +560,6 @@ const toolbarItems: EditorToolbarItem[][] = [
   ],
 ];
 
-function htmlToText(html: string | null | undefined) {
-  return (html ?? "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
-}
-
 function isHttpUrl(value: string | null | undefined): value is string {
   return !!value && /^https?:\/\/\S+\.\S+/.test(value);
 }
