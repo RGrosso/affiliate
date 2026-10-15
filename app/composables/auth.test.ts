@@ -9,7 +9,7 @@ const server = vi.hoisted(() => ({
   logoutCalls: 0,
 }));
 
-const addToast = vi.hoisted(() => vi.fn());
+const addToast = vi.hoisted(() => vi.fn<(toast: { title?: string; color?: string }) => void>());
 mockNuxtImport("useToast", () => () => ({ add: addToast }));
 
 registerEndpoint("/api/_auth/session", () => server.session);

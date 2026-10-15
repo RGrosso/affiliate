@@ -6,7 +6,7 @@ import { expectAccessible } from "~~/test/nuxt/axe";
 const auth = vi.hoisted(() => ({
   user: { value: null as { username: string } | null },
   isAdmin: { value: false },
-  logout: vi.fn(),
+  logout: vi.fn<() => Promise<void>>(),
 }));
 
 mockNuxtImport("useAuth", () => () => ({
@@ -32,7 +32,7 @@ describe("Header", () => {
 
   it("offers a log in link when logged out", async () => {
     const wrapper = await mountSuspended(Header);
-    const login = wrapper.findAll("a").find(link => link.text() === "Log in");
+    const login = wrapper.findAll("a").find((link) => link.text() === "Log in");
 
     expect(login?.attributes("href")).toBe("/login");
   });
@@ -42,7 +42,7 @@ describe("Header", () => {
     const wrapper = await mountSuspended(Header);
 
     expect(wrapper.text()).toContain("admin");
-    expect(wrapper.findAll("a").some(link => link.text() === "Log in")).toBe(false);
+    expect(wrapper.findAll("a").some((link) => link.text() === "Log in")).toBe(false);
   });
 
   it("shows only the logo, colour mode and account menu on minimal pages such as /admin", async () => {

@@ -19,17 +19,15 @@ describe("readValidatedQuery", () => {
   });
 
   it("throws a validation error with field messages", () => {
-    try {
-      readValidatedQuery(eventFor("?pageSize=500"), pageQuerySchema);
-    } catch (error) {
-      expect((error as { statusCode: number }).statusCode).toBe(400);
-      expect((error as { data: unknown }).data).toMatchObject({
-        code: "VALIDATION_ERROR",
-        fieldErrors: { pageSize: ["The page size can be at most 100"] },
-      });
-      return;
-    }
-    throw new Error("Expected the query to be rejected");
+    expect(() => readValidatedQuery(eventFor("?pageSize=500"), pageQuerySchema)).toThrow(
+      expect.objectContaining({
+        statusCode: 400,
+        data: expect.objectContaining({
+          code: "VALIDATION_ERROR",
+          fieldErrors: { pageSize: ["The page size can be at most 100"] },
+        }),
+      })
+    );
   });
 });
 
