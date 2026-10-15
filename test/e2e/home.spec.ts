@@ -32,14 +32,14 @@ test.describe("homepage", () => {
 
     // The row only loads more while it's on screen
     await row.scrollIntoViewIfNeeded();
-    await row.evaluate((el) => {
+    await row.evaluate(el => {
       el.scrollLeft = el.scrollWidth;
     });
     await expect(row.locator("h3")).toHaveCount(20);
 
     // Keeps loading until every product is in, then ends with View all
     await expect(async () => {
-      await row.evaluate((el) => {
+      await row.evaluate(el => {
         el.scrollLeft = el.scrollWidth;
       });
       await expect(row.getByRole("link", { name: "View all" })).toBeVisible({ timeout: 1000 });
@@ -64,7 +64,7 @@ test.describe("homepage", () => {
 
     // Once everything has loaded and the row is at its end, there's nothing more to scroll to
     await expect(async () => {
-      await row.evaluate((el) => {
+      await row.evaluate(el => {
         el.scrollLeft = el.scrollWidth;
       });
       await expect(row.getByRole("link", { name: "View all" })).toBeVisible({ timeout: 1000 });

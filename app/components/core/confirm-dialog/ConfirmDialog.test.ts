@@ -11,8 +11,7 @@ const props = {
 };
 
 // UModal teleports its content to <body>
-const button = (label: string) =>
-  [...document.body.querySelectorAll("button")].find(el => el.textContent?.trim() === label);
+const button = (label: string) => [...document.body.querySelectorAll("button")].find(el => el.textContent?.trim() === label);
 
 const mounted: { unmount: () => void }[] = [];
 

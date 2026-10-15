@@ -1,6 +1,6 @@
 import { blob, ensureBlob } from "hub:blob";
 
-export default defineApiHandler(async (event) => {
+export default defineApiHandler(async event => {
   await requireAdmin(event);
 
   const form = await readFormData(event);

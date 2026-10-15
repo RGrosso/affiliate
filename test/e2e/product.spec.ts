@@ -44,12 +44,12 @@ test.describe("product page", () => {
   test("adds Product structured data for search engines", async ({ page, goto }) => {
     await goto(PRODUCT, { waitUntil: "hydration" });
 
-    const jsonLd = JSON.parse(await page.locator("script[type='application/ld+json']").textContent() ?? "{}");
+    const jsonLd = JSON.parse((await page.locator("script[type='application/ld+json']").textContent()) ?? "{}");
     expect(jsonLd).toMatchObject({
       "@type": "Product",
-      "name": "Cast Iron Skillet, 12-inch",
-      "brand": { name: "Ironhearth" },
-      "offers": { price: "34.99", priceCurrency: "GBP" },
+      name: "Cast Iron Skillet, 12-inch",
+      brand: { name: "Ironhearth" },
+      offers: { price: "34.99", priceCurrency: "GBP" },
     });
   });
 

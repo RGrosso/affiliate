@@ -1,4 +1,4 @@
-export default defineApiHandler(async (event) => {
+export default defineApiHandler(async event => {
   await requireAdmin(event);
 
   const deleted = await new ProductService(db).deleteSamples();

@@ -175,9 +175,9 @@ Products have an optional **brand** (who makes it) alongside the **retailer** (t
 
 The page reads from a public route:
 
-| Method | Path | What it does |
-| --- | --- | --- |
-| `GET` | `/api/products/handle/:handle` | Returns the product with its images and every tag as a badge, or a 404 |
+| Method | Path                           | What it does                                                           |
+| ------ | ------------------------------ | ---------------------------------------------------------------------- |
+| `GET`  | `/api/products/handle/:handle` | Returns the product with its images and every tag as a badge, or a 404 |
 
 The description comes from the rich text editor as HTML. This route sanitises it with `sanitiseRichText` (`server/utils/richText.ts`), keeping only the formatting the editor supports, so the page can render it.
 

@@ -92,7 +92,13 @@ import type { ProductCardData } from "../card/ProductCard.vue";
 // About 1.4 cards on a phone, then 2.5, 3.3 and 5 across on wider screens (gap-5 is 1.25rem)
 const ITEM_CLASS = "shrink-0 snap-start w-[70%] sm:w-[40%] md:w-[30%] lg:w-[calc((100%-5rem)/5)]";
 
-const { label, products, loading = false, loadingMore = false, canLoadMore = false } = defineProps<{
+const {
+  label,
+  products,
+  loading = false,
+  loadingMore = false,
+  canLoadMore = false,
+} = defineProps<{
   label: string;
   products: (ProductCardData & { id: string })[];
   viewAllTo: string;

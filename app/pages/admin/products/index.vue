@@ -16,12 +16,16 @@
       variant="warning"
       title="You're viewing sample products"
       :description="`These ${sampleCount} products are here to show how your store looks. Delete them before you go live.`"
-      :actions="[{
-        label: 'Delete sample products',
-        color: 'warning',
-        variant: 'solid',
-        onClick: () => { confirmOpen = true; },
-      }]"
+      :actions="[
+        {
+          label: 'Delete sample products',
+          color: 'warning',
+          variant: 'solid',
+          onClick: () => {
+            confirmOpen = true;
+          },
+        },
+      ]"
     />
 
     <USelectMenu
@@ -52,7 +56,7 @@
             :alt="row.original.image.alt ?? row.original.title"
             class="size-10 max-w-none shrink-0 aspect-square object-cover rounded-md border border-default"
             loading="lazy"
-          >
+          />
           <div
             v-else
             class="size-10 shrink-0 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"
@@ -128,12 +132,8 @@
           class="w-6 h-6"
         />
       </div>
-      <h2 class="text-sm font-semibold mb-1">
-        First step: add your products
-      </h2>
-      <p class="text-sm text-muted max-w-sm mb-4">
-        Write descriptions, add affiliate links, and upload product images to start sharing items on your site.
-      </p>
+      <h2 class="text-sm font-semibold mb-1">First step: add your products</h2>
+      <p class="text-sm text-muted max-w-sm mb-4">Write descriptions, add affiliate links, and upload product images to start sharing items on your site.</p>
       <NuxtLink to="/admin/add-product">
         <UButton
           variant="outline"
@@ -214,7 +214,15 @@ const tagFilter = computed<string[]>({
   },
 });
 
-const { data, items: products, total, page, pageSize, status, refresh } = await usePagedFetch<ProductListItem, { sampleCount: number }>("/api/products", {
+const {
+  data,
+  items: products,
+  total,
+  page,
+  pageSize,
+  status,
+  refresh,
+} = await usePagedFetch<ProductListItem, { sampleCount: number }>("/api/products", {
   query: () => ({ tag: tagFilter.value, allTags: "true" }),
 });
 

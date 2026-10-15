@@ -8,7 +8,7 @@ let failPage: number | null = null;
 // Pretends a product was added at the top after page 1 loaded, so later pages start one item earlier
 let shifted = false;
 
-registerEndpoint("/api/load-more", (event) => {
+registerEndpoint("/api/load-more", event => {
   const query = getQuery(event);
   const page = Number(query.page);
   const pageSize = Number(query.pageSize);

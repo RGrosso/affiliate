@@ -23,10 +23,7 @@ export class ProductRepository {
   constructor(private readonly db: DbExecutor) {}
 
   async findById(id: string) {
-    const [product] = await this.db.select()
-      .from(products)
-      .where(eq(products.id, id))
-      .limit(1);
+    const [product] = await this.db.select().from(products).where(eq(products.id, id)).limit(1);
 
     return product;
   }
@@ -39,20 +36,18 @@ export class ProductRepository {
   }
 
   async findByHandleWithImages(handle: string) {
-    const [product] = await this.db.select()
-      .from(products)
-      .where(eq(products.handle, handle))
-      .limit(1);
+    const [product] = await this.db.select().from(products).where(eq(products.handle, handle)).limit(1);
     if (!product) return undefined;
 
     return { ...product, images: await this.findImages(product.id) };
   }
 
   private findImages(productId: string): Promise<ProductImage[]> {
-    return this.db.select({
-      url: productImages.url,
-      alt: productImages.alt,
-    })
+    return this.db
+      .select({
+        url: productImages.url,
+        alt: productImages.alt,
+      })
       .from(productImages)
       .where(eq(productImages.productId, productId))
       .orderBy(asc(productImages.position));
@@ -61,14 +56,18 @@ export class ProductRepository {
   /** Newest first. The title breaks ties so pages don't shuffle between requests. */
   async findPage(query: ProductListQuery) {
     const filter = query.tag?.length
-      ? exists(this.db.select({ one: productTags.productId })
-          .from(productTags)
-          .innerJoin(tags, eq(tags.id, productTags.tagId))
-          .where(and(eq(productTags.productId, products.id), inArray(tags.slug, query.tag))))
+      ? exists(
+          this.db
+            .select({ one: productTags.productId })
+            .from(productTags)
+            .innerJoin(tags, eq(tags.id, productTags.tagId))
+            .where(and(eq(productTags.productId, products.id), inArray(tags.slug, query.tag)))
+        )
       : undefined;
 
     const [items, [totals]] = await Promise.all([
-      this.db.select(listColumns)
+      this.db
+        .select(listColumns)
         .from(products)
         .where(filter)
         .orderBy(desc(products.createdAt), asc(products.title), asc(products.id))
@@ -85,11 +84,12 @@ export class ProductRepository {
     const featured = new Map<string, ProductImage>();
     if (!productIds.length) return featured;
 
-    const images = await this.db.select({
-      productId: productImages.productId,
-      url: productImages.url,
-      alt: productImages.alt,
-    })
+    const images = await this.db
+      .select({
+        productId: productImages.productId,
+        url: productImages.url,
+        alt: productImages.alt,
+      })
       .from(productImages)
       .where(inArray(productImages.productId, productIds))
       .orderBy(asc(productImages.position));
@@ -104,9 +104,7 @@ export class ProductRepository {
   }
 
   async countSamples() {
-    const [result] = await this.db.select({ count: count() })
-      .from(products)
-      .where(eq(products.isSample, true));
+    const [result] = await this.db.select({ count: count() }).from(products).where(eq(products.isSample, true));
 
     return result?.count ?? 0;
   }
@@ -123,17 +121,11 @@ export class ProductRepository {
 
   /** Skips handles that are already taken, so only the rows actually inserted come back. */
   insertSamples(values: NewProduct[]) {
-    return this.db.insert(products)
-      .values(values)
-      .onConflictDoNothing({ target: products.handle })
-      .returning({ id: products.id, handle: products.handle });
+    return this.db.insert(products).values(values).onConflictDoNothing({ target: products.handle }).returning({ id: products.id, handle: products.handle });
   }
 
   async update(id: string, values: Partial<NewProduct>) {
-    const [product] = await this.db.update(products)
-      .set(values)
-      .where(eq(products.id, id))
-      .returning({ id: products.id });
+    const [product] = await this.db.update(products).set(values).where(eq(products.id, id)).returning({ id: products.id });
 
     return product;
   }
@@ -151,9 +143,7 @@ export class ProductRepository {
 
   /** Images go with them through the product_images ON DELETE CASCADE foreign key. */
   async deleteSamples() {
-    const deleted = await this.db.delete(products)
-      .where(eq(products.isSample, true))
-      .returning({ id: products.id });
+    const deleted = await this.db.delete(products).where(eq(products.isSample, true)).returning({ id: products.id });
 
     return deleted.length;
   }

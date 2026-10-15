@@ -12,4 +12,6 @@ export const toTagBadge = ({ id, name, slug, icon, tooltip }: Tag): TagBadge => 
 
 /** The tags a product card shows: only those marked to show on cards, highest priority first. */
 export const pickCardTags = (tags: readonly Tag[]): TagBadge[] =>
-  sortTagsByPriority(tags.filter(tag => tag.showOnCards)).slice(0, MAX_CARD_TAGS).map(toTagBadge);
+  sortTagsByPriority(tags.filter(tag => tag.showOnCards))
+    .slice(0, MAX_CARD_TAGS)
+    .map(toTagBadge);

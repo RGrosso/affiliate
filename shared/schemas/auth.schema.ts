@@ -22,12 +22,9 @@ export const passwordSchema = z
   .regex(/\d/, "Add at least one number (0–9)")
   .regex(/[^A-Za-z0-9]/, "Add at least one symbol, such as ! @ # $ % or &");
 
-const confirmPasswordSchema = z
-  .string({ error: "Please type your password again" })
-  .min(1, "Please type your password again");
+const confirmPasswordSchema = z.string({ error: "Please type your password again" }).min(1, "Please type your password again");
 
-const passwordsMatch = (data: { password: string; confirmPassword: string }) =>
-  data.password === data.confirmPassword;
+const passwordsMatch = (data: { password: string; confirmPassword: string }) => data.password === data.confirmPassword;
 
 const passwordsMatchError = {
   message: "The passwords don't match",

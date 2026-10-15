@@ -7,13 +7,11 @@ import { usePagedFetch } from "./pagedFetch";
 const ALL = Array.from({ length: 45 }, (_, i) => ({ id: i + 1 }));
 const requests = vi.hoisted(() => [] as { page: number; pageSize: number; colour?: string; tag?: string[] }[]);
 
-registerEndpoint("/api/things", (event) => {
+registerEndpoint("/api/things", event => {
   const query = getQuery(event);
   const page = Number(query.page);
   const pageSize = Number(query.pageSize);
-  requests.push({ page, pageSize, ...(query.colour ? { colour: String(query.colour) } : {}),
-    ...(query.tag ? { tag: [query.tag].flat().map(String) } : {}),
-  });
+  requests.push({ page, pageSize, ...(query.colour ? { colour: String(query.colour) } : {}), ...(query.tag ? { tag: [query.tag].flat().map(String) } : {}) });
   return {
     success: true,
     data: {
@@ -30,8 +28,7 @@ registerEndpoint("/api/things", (event) => {
 // Outside a component nothing stops the composable's watchers, so earlier tests would keep
 // fetching on later route changes. Each test gets a scope that's stopped afterwards.
 let scope = effectScope();
-const pagedFetch = (...args: Parameters<typeof usePagedFetch>) =>
-  scope.run(() => usePagedFetch<{ id: number }, { extra: string }>(...args))!;
+const pagedFetch = (...args: Parameters<typeof usePagedFetch>) => scope.run(() => usePagedFetch<{ id: number }, { extra: string }>(...args))!;
 
 describe("usePagedFetch", () => {
   afterEach(() => scope.stop());

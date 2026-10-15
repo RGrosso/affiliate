@@ -12,10 +12,7 @@ type PagedFetchOptions = {
   query?: MaybeRefOrGetter<Record<string, string | number | string[] | undefined>>;
 };
 
-export async function usePagedFetch<T, Extra extends object = object>(
-  url: string,
-  options: PagedFetchOptions = {}
-) {
+export async function usePagedFetch<T, Extra extends object = object>(url: string, options: PagedFetchOptions = {}) {
   const route = useRoute();
   const router = useRouter();
 
@@ -46,16 +43,23 @@ export async function usePagedFetch<T, Extra extends object = object>(
 
   // Compared by value: a getter that builds a fresh array on every route change would otherwise look changed
   // when only the page did, and send the user back to page 1.
-  watch(() => JSON.stringify(extraQuery.value), () => {
-    if (page.value === 1) refresh();
-    else page.value = 1;
-  });
+  watch(
+    () => JSON.stringify(extraQuery.value),
+    () => {
+      if (page.value === 1) refresh();
+      else page.value = 1;
+    }
+  );
 
   // A stale link or a delete can leave the page past the end, which would look like an empty list
-  watch(data, (result) => {
-    const last = result?.data.totalPages ?? 0;
-    if (last > 0 && page.value > last) page.value = last;
-  }, { immediate: true });
+  watch(
+    data,
+    result => {
+      const last = result?.data.totalPages ?? 0;
+      if (last > 0 && page.value > last) page.value = last;
+    },
+    { immediate: true }
+  );
 
   const paged = {
     data: computed(() => data.value?.data),

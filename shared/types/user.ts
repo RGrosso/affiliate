@@ -3,7 +3,7 @@ export enum UserState {
   Pending = "pending",
   Active = "active",
   Disabled = "disabled",
-  Deleted = "deleted"
+  Deleted = "deleted",
 }
 
 export const userRoles = ["admin", "editor", "user"] as const;

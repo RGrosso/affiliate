@@ -36,7 +36,7 @@ const meta = {
   title: "Product/ProductCard",
   component: ProductCard,
   args: { product },
-  decorators: [() => ({ template: "<div class=\"max-w-64\"><story /></div>" })],
+  decorators: [() => ({ template: '<div class="max-w-64"><story /></div>' })],
 } satisfies Meta<typeof ProductCard>;
 
 export default meta;
@@ -54,7 +54,7 @@ export const MoreThanThreeTags: Story = {
 };
 
 export const Grid: Story = {
-  decorators: [() => ({ template: "<div class=\"max-w-4xl\"><story /></div>" })],
+  decorators: [() => ({ template: '<div class="max-w-4xl"><story /></div>' })],
   render: () => ({
     components: { ProductCard },
     setup: () => ({
@@ -65,6 +65,6 @@ export const Grid: Story = {
         { ...product, title: "Plain Notebook", pricePence: 450 },
       ],
     }),
-    template: "<div class=\"grid grid-cols-2 lg:grid-cols-4 gap-5\"><ProductCard v-for=\"p in products\" :key=\"p.title\" :product=\"p\" /></div>",
+    template: '<div class="grid grid-cols-2 lg:grid-cols-4 gap-5"><ProductCard v-for="p in products" :key="p.title" :product="p" /></div>',
   }),
 };

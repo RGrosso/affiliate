@@ -8,7 +8,10 @@ export const tagIconEnum = pgEnum("tag_icon", tagIcons);
 
 const timestamps = {
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 };
 
 export const users = pgTable("users", {
@@ -33,13 +36,17 @@ export const products = pgTable("products", {
   seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
   isSample: boolean("is_sample").default(false).notNull(),
-  authorId: uuid("author_id").references(() => users.id).notNull(),
+  authorId: uuid("author_id")
+    .references(() => users.id)
+    .notNull(),
   ...timestamps,
 });
 
 export const productImages = pgTable("product_images", {
   id: uuid("id").primaryKey().defaultRandom(),
-  productId: uuid("product_id").references(() => products.id, { onDelete: "cascade" }).notNull(),
+  productId: uuid("product_id")
+    .references(() => products.id, { onDelete: "cascade" })
+    .notNull(),
   url: text("url").notNull(),
   alt: text("alt"),
   /** 0 is the featured image. */
@@ -59,19 +66,30 @@ export const tags = pgTable("tags", {
   ...timestamps,
 });
 
-export const productTags = pgTable("product_tags", {
-  productId: uuid("product_id").references(() => products.id, { onDelete: "cascade" }).notNull(),
-  tagId: uuid("tag_id").references(() => tags.id, { onDelete: "cascade" }).notNull(),
-}, table => [
-  primaryKey({ columns: [table.productId, table.tagId] }),
-  // The primary key covers lookups by product; this covers filtering products by tag
-  index("product_tags_tag_id_idx").on(table.tagId),
-]);
+export const productTags = pgTable(
+  "product_tags",
+  {
+    productId: uuid("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    tagId: uuid("tag_id")
+      .references(() => tags.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  table => [
+    primaryKey({ columns: [table.productId, table.tagId] }),
+    // The primary key covers lookups by product; this covers filtering products by tag
+    index("product_tags_tag_id_idx").on(table.tagId),
+  ]
+);
 
 export const settings = pgTable("settings", {
   key: text("key").primaryKey(),
   value: text("value"),
-  updatedAt: timestamp("updated_at").defaultNow().notNull().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 export type UserRow = typeof users.$inferSelect;

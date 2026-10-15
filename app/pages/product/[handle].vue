@@ -134,9 +134,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
   { label: product.value?.title ?? "", class: "text-toned" },
 ]);
 
-const seoDescription = computed(() =>
-  metaDescription(product.value?.seoDescription, product.value?.description) || undefined
-);
+const seoDescription = computed(() => metaDescription(product.value?.seoDescription, product.value?.description) || undefined);
 
 useSeoMeta({
   title: () => product.value?.seoTitle || product.value?.title,
@@ -148,10 +146,12 @@ useSeoMeta({
 });
 
 useHead({
-  script: [{
-    type: "application/ld+json",
-    // Escaping `<` stops a title or description from closing the script tag early
-    innerHTML: () => product.value ? JSON.stringify(productJsonLd(product.value)).replace(/</g, "\\u003c") : "",
-  }],
+  script: [
+    {
+      type: "application/ld+json",
+      // Escaping `<` stops a title or description from closing the script tag early
+      innerHTML: () => (product.value ? JSON.stringify(productJsonLd(product.value)).replace(/</g, "\\u003c") : ""),
+    },
+  ],
 });
 </script>

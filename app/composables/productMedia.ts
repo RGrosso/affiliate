@@ -34,9 +34,7 @@ export function useProductMedia(initial?: ProductImage[]) {
   const isUploading = computed(() => media.value.some(item => item.status === "uploading"));
   const hasFailedUploads = computed(() => media.value.some(item => item.status === "error"));
   const uploadedImages = computed<ProductImage[]>(() =>
-    media.value
-      .filter(item => item.status === "done" && item.url)
-      .map(item => ({ url: item.url!, alt: item.alt.trim() || null }))
+    media.value.filter(item => item.status === "done" && item.url).map(item => ({ url: item.url!, alt: item.alt.trim() || null }))
   );
   // The first uploaded image is the one saved as featured
   const featured = computed(() => media.value.find(item => item.status === "done"));

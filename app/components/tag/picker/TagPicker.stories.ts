@@ -32,7 +32,7 @@ const meta = {
   render: args => ({
     components: { TagPicker },
     setup: () => ({ args, selected: ref(args.modelValue) }),
-    template: "<div class=\"max-w-xs\"><TagPicker v-model=\"selected\" :tags=\"args.tags\" :creating=\"args.creating\" /></div>",
+    template: '<div class="max-w-xs"><TagPicker v-model="selected" :tags="args.tags" :creating="args.creating" /></div>',
   }),
 } satisfies Meta<typeof TagPicker>;
 
