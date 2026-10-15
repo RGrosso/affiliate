@@ -12,7 +12,7 @@ const meta = {
       const icon = ref<TagIcon | null>(args.modelValue ?? null);
       return { icon };
     },
-    template: "<div class=\"w-64\"><TagIconSelect v-model=\"icon\" /></div>",
+    template: '<div class="w-64"><TagIconSelect v-model="icon" /></div>',
   }),
 } satisfies Meta<typeof TagIconSelect>;
 

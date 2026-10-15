@@ -83,11 +83,14 @@ describe("findPage", () => {
 
 describe("findPage tag filter", () => {
   const tagged = async () => {
-    const [deals, gifts, other] = await db.insert(tags).values([
-      { name: "Deals", slug: "deals" },
-      { name: "Gifts", slug: "gifts" },
-      { name: "Other", slug: "other" },
-    ]).returning();
+    const [deals, gifts, other] = await db
+      .insert(tags)
+      .values([
+        { name: "Deals", slug: "deals" },
+        { name: "Gifts", slug: "gifts" },
+        { name: "Other", slug: "other" },
+      ])
+      .returning();
     const a = await repo.insert(product("A", { createdAt: new Date(2026, 0, 3) }));
     const b = await repo.insert(product("B", { createdAt: new Date(2026, 0, 2) }));
     const c = await repo.insert(product("C", { createdAt: new Date(2026, 0, 1) }));

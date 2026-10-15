@@ -39,7 +39,7 @@
             :alt="row.original.image.alt ?? row.original.title"
             class="size-10 max-w-none shrink-0 aspect-square object-cover rounded-md border border-default"
             loading="lazy"
-          >
+          />
           <div
             v-else
             class="size-10 shrink-0 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"
@@ -108,12 +108,8 @@
           class="w-6 h-6"
         />
       </div>
-      <h2 class="text-sm font-semibold mb-1">
-        First step: add your products
-      </h2>
-      <p class="text-sm text-muted max-w-sm mb-4">
-        Write descriptions, add affiliate links, and upload product images to start sharing items on your site.
-      </p>
+      <h2 class="text-sm font-semibold mb-1">First step: add your products</h2>
+      <p class="text-sm text-muted max-w-sm mb-4">Write descriptions, add affiliate links, and upload product images to start sharing items on your site.</p>
       <NuxtLink to="/admin/add-product">
         <UButton
           variant="outline"
@@ -155,7 +151,13 @@ const tagFilter = computed<string[]>({
   },
 });
 
-const { items: products, total, page, pageSize, status } = await usePagedFetch<ProductListItem>("/api/products", {
+const {
+  items: products,
+  total,
+  page,
+  pageSize,
+  status,
+} = await usePagedFetch<ProductListItem>("/api/products", {
   query: () => ({ tag: tagFilter.value, allTags: "true" }),
 });
 

@@ -15,14 +15,8 @@ const tagName = z
 
 // No defaults: a PATCH changes only the fields it sends, so a missing field must stay missing
 const tagDetails = {
-  description: z.preprocess(
-    emptyToNull,
-    z.string().trim().max(500, "The description can be at most 500 characters").nullable().optional()
-  ),
-  tooltip: z.preprocess(
-    emptyToNull,
-    z.string().trim().max(150, "The tooltip can be at most 150 characters").nullable().optional()
-  ),
+  description: z.preprocess(emptyToNull, z.string().trim().max(500, "The description can be at most 500 characters").nullable().optional()),
+  tooltip: z.preprocess(emptyToNull, z.string().trim().max(150, "The tooltip can be at most 150 characters").nullable().optional()),
   icon: z.enum(tagIcons, { error: "Please choose one of the icons" }).nullable().optional(),
   priority: z
     .number({ error: "The priority must be a number" })

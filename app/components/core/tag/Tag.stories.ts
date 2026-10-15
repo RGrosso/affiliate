@@ -28,7 +28,7 @@ export const AllColours: Story = {
   render: () => ({
     components: { Tag },
     setup: () => ({ colours: ["neutral", "primary", "secondary", "success", "info", "warning", "error"] as const }),
-    template: "<div class=\"flex gap-2\"><Tag v-for=\"colour in colours\" :key=\"colour\" :label=\"colour\" :color=\"colour\" /></div>",
+    template: '<div class="flex gap-2"><Tag v-for="colour in colours" :key="colour" :label="colour" :color="colour" /></div>',
   }),
 };
 
@@ -44,6 +44,6 @@ export const AllIcons: Story = {
   render: () => ({
     components: { Tag },
     setup: () => ({ icons: tagIcons, labels: tagIconLabels }),
-    template: "<div class=\"flex flex-wrap gap-2\"><Tag v-for=\"icon in icons\" :key=\"icon\" :label=\"labels[icon]\" :icon=\"icon\" /></div>",
+    template: '<div class="flex flex-wrap gap-2"><Tag v-for="icon in icons" :key="icon" :label="labels[icon]" :icon="icon" /></div>',
   }),
 };

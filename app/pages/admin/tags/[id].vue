@@ -85,9 +85,10 @@ async function deleteTag() {
   const count = products?.total.value ?? 0;
   const confirmed = await confirm({
     title: `Delete "${tag.value.name}"?`,
-    description: count > 0
-      ? `This removes the tag from ${count} ${count === 1 ? "product" : "products"}. This can't be undone.`
-      : "It isn't on any products. This can't be undone.",
+    description:
+      count > 0
+        ? `This removes the tag from ${count} ${count === 1 ? "product" : "products"}. This can't be undone.`
+        : "It isn't on any products. This can't be undone.",
     confirmLabel: "Delete tag",
     color: "error",
   });

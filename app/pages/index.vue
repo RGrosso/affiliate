@@ -7,15 +7,9 @@
     >
       <div class="py-12 sm:py-16 grid gap-10 lg:grid-cols-[1.2fr_1fr] items-center">
         <div class="flex flex-col items-start gap-5">
-          <span class="rounded-md bg-secondary-100 text-secondary-900 text-sm font-bold px-3 py-1.5">
-            No idea what to get? Same.
-          </span>
-          <h1 class="text-4xl sm:text-6xl leading-[0.98]">
-            Gifts for people (and pets) who are impossible to buy for
-          </h1>
-          <p class="text-lg text-band-muted max-w-xl">
-            Silly, clever and genuinely good presents, hand-picked from shops across the internet.
-          </p>
+          <span class="rounded-md bg-secondary-100 text-secondary-900 text-sm font-bold px-3 py-1.5"> No idea what to get? Same. </span>
+          <h1 class="text-4xl sm:text-6xl leading-[0.98]">Gifts for people (and pets) who are impossible to buy for</h1>
+          <p class="text-lg text-band-muted max-w-xl">Silly, clever and genuinely good presents, hand-picked from shops across the internet.</p>
           <UButton
             to="/products"
             label="Browse"
@@ -30,7 +24,7 @@
           width="480"
           height="400"
           class="w-full max-w-md mx-auto"
-        >
+        />
       </div>
     </CoreContainer>
 
@@ -47,12 +41,8 @@
         >
           <template #header>
             <div>
-              <h2 class="text-3xl sm:text-4xl">
-                Trending right now
-              </h2>
-              <p class="mt-1">
-                From mildly useful to absolutely bonkers.
-              </p>
+              <h2 class="text-3xl sm:text-4xl">Trending right now</h2>
+              <p class="mt-1">From mildly useful to absolutely bonkers.</p>
             </div>
           </template>
           <template #actions>

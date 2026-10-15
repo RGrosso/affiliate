@@ -55,16 +55,16 @@ The site is UK-based. Copy is in British English, prices are in pounds sterling 
 
 ## Project structure
 
-| Path | What's in it |
-| --- | --- |
-| `app/` | Pages, components, composables and route middleware (Vue) |
-| `server/api/` | API routes |
-| `server/services/` | Business rules and transactions, one class per area (e.g. `ProductService`) |
-| `server/repositories/` | The only code that queries the database with Drizzle (e.g. `ProductRepository`) |
-| `server/utils/` | Server helpers, auto-imported: API responses, auth, pure helpers |
-| `server/db/` | Drizzle schema, migrations and dev seed SQL |
-| `shared/types/` | Types used by both client and server (`ApiResponse`, `UserState`, `PagedResult`, …) |
-| `shared/schemas/` | Zod validation schemas used by both forms and API routes |
+| Path                   | What's in it                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `app/`                 | Pages, components, composables and route middleware (Vue)                           |
+| `server/api/`          | API routes                                                                          |
+| `server/services/`     | Business rules and transactions, one class per area (e.g. `ProductService`)         |
+| `server/repositories/` | The only code that queries the database with Drizzle (e.g. `ProductRepository`)     |
+| `server/utils/`        | Server helpers, auto-imported: API responses, auth, pure helpers                    |
+| `server/db/`           | Drizzle schema, migrations and dev seed SQL                                         |
+| `shared/types/`        | Types used by both client and server (`ApiResponse`, `UserState`, `PagedResult`, …) |
+| `shared/schemas/`      | Zod validation schemas used by both forms and API routes                            |
 
 ## Server structure
 
@@ -112,12 +112,12 @@ On the client, `usePagedFetch` (in `app/composables/pagedFetch.ts`) keeps the cu
 
 Each user has a `role` (`admin`, `editor`, `user`) and a `state`:
 
-| State | Meaning |
-| --- | --- |
-| `active` | Can log in. If `password` is `NULL`, they must set one at `/setup` first. |
-| `pending` | Reserved for future approval or confirmation flows; can't log in yet. |
-| `disabled` | Can't log in. |
-| `deleted` | Treated as if the account doesn't exist. |
+| State      | Meaning                                                                   |
+| ---------- | ------------------------------------------------------------------------- |
+| `active`   | Can log in. If `password` is `NULL`, they must set one at `/setup` first. |
+| `pending`  | Reserved for future approval or confirmation flows; can't log in yet.     |
+| `disabled` | Can't log in.                                                             |
+| `deleted`  | Treated as if the account doesn't exist.                                  |
 
 ## Database
 
@@ -151,13 +151,13 @@ In the admin:
 
 Tag routes are admin only:
 
-| Method | Path | What it does |
-| --- | --- | --- |
-| `GET` | `/api/tags` | Lists tags, each with a `productCount` |
-| `GET` | `/api/tags/:id` | Returns one tag, or a 404 if it doesn't exist |
-| `POST` | `/api/tags` | Creates a tag from `{ name }` plus any of the optional details (description, tooltip, icon, priority, showOnCards) |
-| `PATCH` | `/api/tags/:id` | Updates a tag |
-| `DELETE` | `/api/tags/:id` | Deletes a tag and its product links |
+| Method   | Path            | What it does                                                                                                       |
+| -------- | --------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/tags`     | Lists tags, each with a `productCount`                                                                             |
+| `GET`    | `/api/tags/:id` | Returns one tag, or a 404 if it doesn't exist                                                                      |
+| `POST`   | `/api/tags`     | Creates a tag from `{ name }` plus any of the optional details (description, tooltip, icon, priority, showOnCards) |
+| `PATCH`  | `/api/tags/:id` | Updates a tag                                                                                                      |
+| `DELETE` | `/api/tags/:id` | Deletes a tag and its product links                                                                                |
 
 Product routes change as follows:
 
@@ -174,9 +174,9 @@ Products have an optional **brand** (who makes it) alongside the **retailer** (t
 
 The page reads from a public route:
 
-| Method | Path | What it does |
-| --- | --- | --- |
-| `GET` | `/api/products/handle/:handle` | Returns the product with its images and every tag as a badge, or a 404 |
+| Method | Path                           | What it does                                                           |
+| ------ | ------------------------------ | ---------------------------------------------------------------------- |
+| `GET`  | `/api/products/handle/:handle` | Returns the product with its images and every tag as a badge, or a 404 |
 
 The description comes from the rich text editor as HTML. This route sanitises it with `sanitiseRichText` (`server/utils/richText.ts`), keeping only the formatting the editor supports, so the page can render it.
 
@@ -184,17 +184,19 @@ The homepage shows products in a horizontal row that scrolls at every width, wit
 
 ## Testing
 
-| Command | What it runs |
-| --- | --- |
-| `pnpm test` | Unit tests (Node) and component tests (headless Chromium, with accessibility checks) |
-| `pnpm test:types` | Type check of the app, server and tests |
-| `pnpm test:e2e` | Playwright end-to-end tests against a dev server with its own database (`.data-e2e/`), so your `.data/` is untouched |
-| `pnpm lint:check` | ESLint without fixing (`pnpm lint` fixes) |
-| `pnpm storybook` | Storybook for the core components on `http://localhost:6006` |
+| Command           | What it runs                                                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm test`       | Unit tests (Node) and component tests (headless Chromium, with accessibility checks)                                        |
+| `pnpm test:types` | Type check of the app, server and tests                                                                                     |
+| `pnpm test:e2e`   | Playwright end-to-end tests against a dev server with its own database (`.data-e2e/`), so your `.data/` is untouched        |
+| `pnpm lint:check` | Oxlint and an Oxfmt format check through Vite+ (`vp lint && vp fmt --check`), without fixing. `pnpm lint` fixes and formats |
+| `pnpm storybook`  | Storybook for the core components on `http://localhost:6006`                                                                |
 
 Repository and service tests run against an in-memory PGlite database with the real migrations applied (`createTestDb()` in `test/setup/db.ts`), so they don't mock the database.
 
 The first time, install the test browser with `pnpm exec playwright install chromium`. CI runs all of these on every pull request.
+
+Linting, formatting and the Vitest config all live in `vite.config.ts`. `pnpm install` sets up a pre-commit hook (`.vite-hooks/pre-commit`) that lints and formats staged files with `vp staged`. In VS Code, install the recommended Oxc extension to format on save.
 
 ## Production
 

@@ -13,15 +13,11 @@
       v-if="!minimal"
       #top
     >
-      <div class="bg-band-strong text-white text-sm font-semibold text-center px-4 py-2.5">
-        Gift ideas for humans, hounds and everything in between
-      </div>
+      <div class="bg-band-strong text-white text-sm font-semibold text-center px-4 py-2.5">Gift ideas for humans, hounds and everything in between</div>
     </template>
 
     <template #title>
-      <span class="font-display font-bold text-3xl tracking-tight text-primary">
-        {{ SITE_NAME }}<span class="text-action">.</span>
-      </span>
+      <span class="font-display font-bold text-3xl tracking-tight text-primary"> {{ SITE_NAME }}<span class="text-action">.</span> </span>
     </template>
 
     <HeaderSearch v-if="!minimal" />
@@ -108,11 +104,13 @@ const { user, isAdmin, logout } = useAuth();
 const dropdownItems = computed<DropdownMenuItem[][]>(() => [
   [
     ...(isAdmin.value
-      ? [{
-          label: "Admin Dashboard",
-          icon: "i-heroicons-squares-2x2",
-          to: "/admin",
-        }]
+      ? [
+          {
+            label: "Admin Dashboard",
+            icon: "i-heroicons-squares-2x2",
+            to: "/admin",
+          },
+        ]
       : []),
     {
       label: "Logout",

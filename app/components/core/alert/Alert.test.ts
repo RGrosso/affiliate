@@ -40,7 +40,7 @@ describe("CoreAlert", () => {
   });
 
   it("runs an action when it's clicked", async () => {
-    const onClick = vi.fn();
+    const onClick = vi.fn<() => void>();
     const wrapper = await mountSuspended(CoreAlert, {
       props: { variant: "warning", title: "Title", actions: [{ label: "Delete", onClick }] },
     });

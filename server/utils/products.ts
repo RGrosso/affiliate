@@ -19,8 +19,7 @@ export function readProductHandle(event: H3Event): string {
 }
 
 /** Turns a unique-handle violation from a product insert or update into a field error. */
-export const rethrowAsDuplicateHandle = (error: unknown): never =>
-  rethrowUniqueViolationAs("handle", "Another product already uses this URL handle")(error);
+export const rethrowAsDuplicateHandle = (error: unknown): never => rethrowUniqueViolationAs("handle", "Another product already uses this URL handle")(error);
 
 export function toProductValues({ price, images: _images, tagIds: _tagIds, handle, ...fields }: ProductInput) {
   const finalHandle = handle || slugify(fields.title);

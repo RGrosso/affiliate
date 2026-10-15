@@ -138,13 +138,14 @@ const state = reactive(toState(tag));
 const saving = ref(false);
 
 // Compared with the last saved version, so saving makes the form clean and the leave prompt stays quiet
-const snapshot = () => JSON.stringify({
-  ...state,
-  name: state.name.trim(),
-  description: state.description.trim(),
-  tooltip: state.tooltip.trim(),
-  priority: state.priority ?? null,
-});
+const snapshot = () =>
+  JSON.stringify({
+    ...state,
+    name: state.name.trim(),
+    description: state.description.trim(),
+    tooltip: state.tooltip.trim(),
+    priority: state.priority ?? null,
+  });
 
 const savedSnapshot = ref(snapshot());
 const isDirty = computed(() => snapshot() !== savedSnapshot.value);

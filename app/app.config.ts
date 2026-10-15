@@ -34,7 +34,8 @@ export default defineAppConfig({
         {
           color: "warning",
           variant: "solid",
-          class: "bg-sunny-400 hover:bg-sunny-300 active:bg-sunny-300 disabled:bg-sunny-400 aria-disabled:bg-sunny-400 text-sunny-900 focus-visible:outline-sunny-400",
+          class:
+            "bg-sunny-400 hover:bg-sunny-300 active:bg-sunny-300 disabled:bg-sunny-400 aria-disabled:bg-sunny-400 text-sunny-900 focus-visible:outline-sunny-400",
         },
       ],
     },

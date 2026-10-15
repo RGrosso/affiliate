@@ -6,8 +6,28 @@ type Node = Parameters<typeof walkSync>[0];
 
 // What the product description editor can produce. Anything else is unwrapped, keeping its text
 const RICH_TEXT_ELEMENTS = [
-  "p", "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "pre", "code",
-  "ul", "ol", "li", "strong", "b", "em", "i", "u", "s", "a",
+  "p",
+  "br",
+  "hr",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "blockquote",
+  "pre",
+  "code",
+  "ul",
+  "ol",
+  "li",
+  "strong",
+  "b",
+  "em",
+  "i",
+  "u",
+  "s",
+  "a",
 ];
 
 const SAFE_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
@@ -18,7 +38,7 @@ function safeHref(href: string | undefined): string | undefined {
   if (!href) return undefined;
   try {
     const url = new URL(href.trim());
-    return SAFE_PROTOCOLS.has(url.protocol) && !url.href.includes("\"") ? url.href : undefined;
+    return SAFE_PROTOCOLS.has(url.protocol) && !url.href.includes('"') ? url.href : undefined;
   } catch {
     return undefined;
   }
