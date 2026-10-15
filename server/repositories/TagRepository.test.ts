@@ -58,7 +58,7 @@ describe("findAll", () => {
 
 describe("findById and findByIds", () => {
   it("returns plain tag rows without timestamps", async () => {
-    const created = await repo.insert(tag("Deals", { priority: 3, icon: "flame", showOnCards: true }));
+    const created = await repo.insert(tag("Deals", { priority: 3, icon: "flame", showOnCards: true, showInFilter: true }));
 
     const found = await repo.findById(created.id);
     expect(found).toEqual({
@@ -70,6 +70,7 @@ describe("findById and findByIds", () => {
       icon: "flame",
       priority: 3,
       showOnCards: true,
+      showInFilter: true,
     });
     expect(await repo.findById(unknownId)).toBeUndefined();
   });

@@ -14,6 +14,7 @@ const tag: AdminTag = {
   icon: null,
   priority: null,
   showOnCards: false,
+  showInFilter: false,
   productCount: 2,
 };
 

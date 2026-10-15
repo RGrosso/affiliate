@@ -32,6 +32,7 @@ describe("pickCardTags", () => {
     icon: null,
     priority,
     showOnCards,
+    showInFilter: false,
   });
 
   it("keeps up to three tags shown on cards, highest priority first", () => {

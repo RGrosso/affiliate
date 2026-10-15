@@ -13,6 +13,7 @@ const tag = (id: string, name: string, icon: Tag["icon"] = null): Tag => ({
   icon,
   priority: null,
   showOnCards: true,
+  showInFilter: false,
 });
 
 const tags = [tag("t2", "Sale", "percent"), tag("t1", "Bestseller", "trophy"), tag("t3", "Eco")];

@@ -2,7 +2,7 @@ import { asc, count, eq, inArray } from "drizzle-orm";
 import { productTags, tags } from "hub:db:schema";
 import type { AdminTag, Tag } from "#shared/types/tag";
 
-export type NewTag = Pick<typeof tags.$inferInsert, "name" | "slug" | "description" | "tooltip" | "icon" | "priority" | "showOnCards">;
+export type NewTag = Pick<typeof tags.$inferInsert, "name" | "slug" | "description" | "tooltip" | "icon" | "priority" | "showOnCards" | "showInFilter">;
 
 const tagColumns = {
   id: tags.id,
@@ -13,6 +13,7 @@ const tagColumns = {
   icon: tags.icon,
   priority: tags.priority,
   showOnCards: tags.showOnCards,
+  showInFilter: tags.showInFilter,
 } satisfies Record<keyof Tag, unknown>;
 
 export class TagRepository {

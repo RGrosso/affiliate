@@ -32,6 +32,7 @@ const tagDetails = {
     .nullable()
     .optional(),
   showOnCards: z.boolean().optional(),
+  showInFilter: z.boolean().optional(),
 };
 
 export const createTagSchema = z.object({

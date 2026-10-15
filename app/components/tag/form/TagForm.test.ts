@@ -17,6 +17,7 @@ const tag: Tag = {
   icon: "trophy",
   priority: 5,
   showOnCards: true,
+  showInFilter: false,
 };
 
 const patches = vi.hoisted(() => [] as unknown[]);
@@ -128,9 +129,23 @@ describe("TagForm", () => {
     await wrapper.get("form").trigger("submit");
 
     await vi.waitFor(() => expect(wrapper.emitted("saved")).toHaveLength(1));
-    expect(patches).toEqual([{ name: "Top seller", description: null, tooltip: null, icon: "trophy", priority: 5, showOnCards: true }]);
+    expect(patches).toEqual([{ name: "Top seller", description: null, tooltip: null, icon: "trophy", priority: 5, showOnCards: true, showInFilter: false }]);
     expect(wrapper.emitted("saved")![0]).toEqual([tag]);
     await vi.waitFor(() => expect(wrapper.text()).not.toContain("Unsaved changes"));
+  });
+
+  it("sends the show in filter switch", async () => {
+    const wrapper = await mountInApp(TagForm, { tag });
+    const filterSwitch = wrapper.findAll<HTMLButtonElement>("button[role=switch]").find(el => el.attributes("aria-labelledby") !== undefined
+      && wrapper.get(`[id="${el.attributes("aria-labelledby")}"]`).text() === "Show in filter");
+    expect(filterSwitch?.attributes("aria-checked")).toBe("false");
+
+    await filterSwitch!.trigger("click");
+    expect(wrapper.text()).toContain("Unsaved changes");
+    await wrapper.get("form").trigger("submit");
+
+    await vi.waitFor(() => expect(wrapper.emitted("saved")).toHaveLength(1));
+    expect(patches).toMatchObject([{ showOnCards: true, showInFilter: true }]);
   });
 
   it("creates a tag when there isn't one to edit", async () => {
@@ -143,7 +158,7 @@ describe("TagForm", () => {
     await wrapper.get("form").trigger("submit");
 
     await vi.waitFor(() => expect(wrapper.emitted("saved")).toHaveLength(1));
-    expect(posts).toEqual([{ name: "Fresh", description: "Just in", tooltip: null, icon: null, priority: null, showOnCards: false }]);
+    expect(posts).toEqual([{ name: "Fresh", description: "Just in", tooltip: null, icon: null, priority: null, showOnCards: false, showInFilter: false }]);
     expect(patches).toEqual([]);
     expect(wrapper.emitted("saved")![0]).toMatchObject([{ id: "t2", name: "Fresh" }]);
   });

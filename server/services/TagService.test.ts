@@ -35,7 +35,7 @@ describe("create", () => {
   it("trims the name and builds the slug from it", async () => {
     const created = await service.create(createTagSchema.parse({ name: "  Air Fryers " }));
 
-    expect(created).toMatchObject({ name: "Air Fryers", slug: "air-fryers", showOnCards: false, priority: null });
+    expect(created).toMatchObject({ name: "Air Fryers", slug: "air-fryers", showOnCards: false, showInFilter: false, priority: null });
   });
 
   it("saves any details sent with the name", async () => {
@@ -46,6 +46,7 @@ describe("create", () => {
       icon: "flame",
       priority: 5,
       showOnCards: true,
+      showInFilter: true,
     }));
 
     expect(created).toMatchObject({
@@ -56,6 +57,7 @@ describe("create", () => {
       icon: "flame",
       priority: 5,
       showOnCards: true,
+      showInFilter: true,
     });
     expect(await service.list()).toMatchObject([{ id: created.id, icon: "flame", showOnCards: true }]);
   });
@@ -96,16 +98,16 @@ describe("update", () => {
   it("saves the details and re-slugs on rename", async () => {
     const { id } = await service.create({ name: "Deals" });
 
-    const updated = await service.update(id, { ...edit("Hot Deals"), tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true });
-    expect(updated).toMatchObject({ id, name: "Hot Deals", slug: "hot-deals", tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true });
+    const updated = await service.update(id, { ...edit("Hot Deals"), tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true, showInFilter: true });
+    expect(updated).toMatchObject({ id, name: "Hot Deals", slug: "hot-deals", tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true, showInFilter: true });
   });
 
   it("changes only the fields that are sent", async () => {
     const { id } = await service.create({ name: "Deals" });
-    await service.update(id, { icon: "flame", priority: 4, showOnCards: true });
+    await service.update(id, { icon: "flame", priority: 4, showOnCards: true, showInFilter: true });
 
     const updated = await service.update(id, { tooltip: "Reduced" });
-    expect(updated).toMatchObject({ name: "Deals", slug: "deals", tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true });
+    expect(updated).toMatchObject({ name: "Deals", slug: "deals", tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true, showInFilter: true });
   });
 
   it("returns the tag unchanged for an empty update", async () => {

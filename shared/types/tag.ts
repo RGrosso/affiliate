@@ -13,6 +13,7 @@ export type Tag = {
   /** Higher shows first. `null` counts as 0. */
   priority: number | null;
   showOnCards: boolean;
+  showInFilter: boolean;
 };
 
 /** Just what a badge needs, so public responses don't carry admin-only details. */
