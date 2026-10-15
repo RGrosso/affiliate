@@ -1,6 +1,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { tags, productTags } from "hub:db:schema";
 import { createTestDb, insertTestUser, resetDb, type TestDb } from "../../test/setup/db";
+import {
+  STORED_RULES_VERSION,
+  StoredRetailerOperator,
+  StoredRuleMatch,
+  StoredRuleType,
+  StoredTagOperator,
+  type StoredCollectionRules
+} from "../utils/storedCollectionRules";
 import { ProductRepository, type NewProduct } from "./ProductRepository";
 
 let db: TestDb;
@@ -124,6 +132,59 @@ describe("findFeaturedImages", () => {
 
   it("returns an empty map for no ids", async () => {
     expect((await repo.findFeaturedImages([])).size).toBe(0);
+  });
+});
+
+describe("findPage with rules", () => {
+  // A: Etsy, gifts. B: Amazon, gifts. C: Etsy, no tags.
+  const catalogue = async () => {
+    const [gifts] = await db.insert(tags).values([{ name: "Gifts", slug: "gifts" }]).returning();
+    const a = await repo.insert(product("A", { retailer: "Etsy", createdAt: new Date(2026, 0, 3) }));
+    const b = await repo.insert(product("B", { retailer: "Amazon", createdAt: new Date(2026, 0, 2) }));
+    await repo.insert(product("C", { retailer: "Etsy", createdAt: new Date(2026, 0, 1) }));
+    await db.insert(productTags).values([
+      { productId: a.id, tagId: gifts!.id },
+      { productId: b.id, tagId: gifts!.id },
+    ]);
+    return gifts!.id;
+  };
+
+  const rules = (...items: StoredCollectionRules["rules"]): StoredCollectionRules =>
+    ({ version: STORED_RULES_VERSION, match: StoredRuleMatch.All, rules: items });
+  const retailerIs = (retailer: string) =>
+    ({ type: StoredRuleType.Retailer, operator: StoredRetailerOperator.Is, retailer });
+  const hasTag = (tagId: string) => ({ type: StoredRuleType.Tag, operator: StoredTagOperator.Has, tagId });
+
+  const titles = (page: { items: { title: string }[] }) => page.items.map(item => item.title);
+
+  it("combines rules with the tag filter", async () => {
+    await catalogue();
+
+    const result = await repo.findPage({ page: 1, pageSize: 10, tag: ["gifts"] }, { rules: rules(retailerIs("Etsy")) });
+    expect(titles(result)).toEqual(["A"]);
+    expect(result.total).toBe(1);
+  });
+
+  it("reports a total that ignores pagination but respects the rules", async () => {
+    const gifts = await catalogue();
+
+    const first = await repo.findPage({ page: 1, pageSize: 1 }, { rules: rules(hasTag(gifts)) });
+    const second = await repo.findPage({ page: 2, pageSize: 1 }, { rules: rules(hasTag(gifts)) });
+    expect(titles(first)).toEqual(["A"]);
+    expect(titles(second)).toEqual(["B"]);
+    expect([first.total, second.total]).toEqual([2, 2]);
+  });
+
+  it("returns an empty page when nothing matches", async () => {
+    await catalogue();
+
+    expect(await repo.findPage({ page: 1, pageSize: 10 }, { rules: rules(retailerIs("Argos")) })).toEqual({ items: [], total: 0 });
+  });
+
+  it("treats null rules like no rules", async () => {
+    await catalogue();
+
+    expect((await repo.findPage({ page: 1, pageSize: 10 }, { rules: null })).total).toBe(3);
   });
 });
 

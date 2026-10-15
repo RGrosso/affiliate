@@ -13,7 +13,8 @@ type StoredRuleOfType<T extends StoredRuleType> = Extract<StoredCollectionRuleIt
 
 const combine: Record<StoredRuleMatch, (conditions: SQL[]) => SQL | undefined> = {
   [StoredRuleMatch.All]: conditions => and(...conditions),
-  [StoredRuleMatch.Any]: conditions => or(...conditions),
+  // `or()` of nothing is no condition at all, which would match every product
+  [StoredRuleMatch.Any]: conditions => (conditions.length ? or(...conditions) : sql`false`),
 };
 
 function hasTag(tagId: string) {
