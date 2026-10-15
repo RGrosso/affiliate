@@ -21,21 +21,31 @@ export class ProductService {
       this.products.findPage(query),
       this.products.countSamples(),
     ]);
+    const listItems = await this.toListItems(items, { forAdmin });
+
+    return { ...toPagedResult(listItems, total, query), sampleCount };
+  }
+
+  /** Adds each product's featured image and tags to the rows a list query returns. */
+  async toListItems(items: Awaited<ReturnType<ProductRepository["findPage"]>>["items"], { forAdmin = false }: { forAdmin?: boolean } = {}) {
     const ids = items.map(item => item.id);
     const [featured, tags] = await Promise.all([
       this.products.findFeaturedImages(ids),
       this.tags.findForProducts(ids),
     ]);
 
-    const listItems: ProductListItem[] = items.map(item => ({
+    return items.map((item): ProductListItem => ({
       ...item,
       image: featured.get(item.id) ?? null,
       tags: forAdmin
         ? sortTagsByPriority(tags.get(item.id) ?? []).map(toTagBadge)
         : pickCardTags(tags.get(item.id) ?? []),
     }));
+  }
 
-    return { ...toPagedResult(listItems, total, query), sampleCount };
+  /** The distinct retailers products link to. */
+  findRetailers() {
+    return this.products.findRetailers();
   }
 
   async get(id: string) {
