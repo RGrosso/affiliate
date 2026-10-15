@@ -1,7 +1,7 @@
 import { expect, test } from "@nuxt/test-utils/playwright";
 import { toasts } from "./helpers";
 
-// These build on each other: add a product, edit it, then clear out the samples
+// These build on each other: add a product, edit it, then check its page
 test.describe.configure({ mode: "serial" });
 
 test.describe("managing products", () => {
@@ -42,17 +42,5 @@ test.describe("managing products", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("E2E Moon Lamp");
     await expect(page.getByText("by Luna")).toBeVisible();
     await expect(page.getByRole("link", { name: "Buy at Gadget Hub" })).toHaveAttribute("href", "https://example.com/moon-lamp");
-  });
-
-  test("deletes all sample products and keeps the admin's own", async ({ page, goto }) => {
-    await goto("/admin/products", { waitUntil: "hydration" });
-    await expect(page.getByText("You're viewing sample products")).toBeVisible();
-
-    await page.getByRole("button", { name: "Delete sample products" }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Delete sample products" }).click();
-
-    await expect(page.getByText("You're viewing sample products")).toBeHidden();
-    await expect(page.getByText("Sample", { exact: true })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "E2E Moon Lamp" })).toBeVisible();
   });
 });

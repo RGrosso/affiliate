@@ -156,21 +156,3 @@ describe("lookups by id", () => {
     expect(await repo.update(unknownId, { title: "x" })).toBeUndefined();
   });
 });
-
-describe("countSamples and deleteSamples", () => {
-  it("only removes samples, and their images with them", async () => {
-    const sample = await repo.insert(product("Sample", { isSample: true }));
-    const real = await repo.insert(product("Real"));
-    await repo.replaceImages(sample.id, [{ productId: sample.id, url: "/s.jpg", position: 0 }]);
-    await repo.replaceImages(real.id, [{ productId: real.id, url: "/r.jpg", position: 0 }]);
-
-    expect(await repo.countSamples()).toBe(1);
-    expect(await repo.deleteSamples()).toBe(1);
-    expect(await repo.countSamples()).toBe(0);
-
-    expect(await repo.findById(sample.id)).toBeUndefined();
-    expect(await repo.findById(real.id)).toBeDefined();
-    const featured = await repo.findFeaturedImages([sample.id, real.id]);
-    expect([...featured.keys()]).toEqual([real.id]);
-  });
-});

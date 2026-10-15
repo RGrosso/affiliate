@@ -35,7 +35,7 @@ export default defineConfig<ConfigOptions>({
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"] },
     },
-    // Runs last because admin.spec deletes the sample products the public tests rely on; tags.spec makes its own product
+    // Runs last because it changes the shared product data
     {
       name: "admin",
       testMatch: /(admin|tags)\.spec\.ts$/,
