@@ -22,14 +22,9 @@
 
       <div class="flex flex-col gap-5">
         <div
-          v-if="product.isSample || product.tags.length"
+          v-if="product.tags.length"
           class="flex flex-wrap gap-1.5"
         >
-          <CoreTag
-            v-if="product.isSample"
-            label="Sample"
-            color="warning"
-          />
           <CoreTag
             v-for="tag in product.tags"
             :key="tag.id"
