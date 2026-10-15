@@ -19,7 +19,7 @@ export const tagColumns = {
 export class TagRepository {
   constructor(private readonly db: DbExecutor) {}
 
-  findAll(): Promise<AdminTag[]> {
+  findAll(): Promise<Omit<AdminTag, "collections">[]> {
     return this.db.select({ ...tagColumns, productCount: count(productTags.productId) })
       .from(tags)
       .leftJoin(productTags, eq(productTags.tagId, tags.id))

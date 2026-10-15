@@ -179,7 +179,6 @@ describe("findPage sorting", () => {
   });
 });
 
-
 describe("collection scope", () => {
   const manualCollection = async (productIds: string[]) => {
     const [collection] = await db.insert(collections).values({
