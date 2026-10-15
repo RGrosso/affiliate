@@ -35,7 +35,7 @@ To start again from scratch, stop the dev server and run `pnpm dev:reset`, then 
 
 ## Sample products
 
-The first time an admin logs in (or finishes setup), 24 example products with square placeholder images are added so the store isn't empty. A warning on **Admin → Products** lets you delete all of them in one go. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so deleting them won't bring them back. If the store already has products, no samples are added. The sample data lives in `server/utils/sampleProducts.ts`.
+The first time an admin logs in (or finishes setup), 24 example products with square placeholder images are added so the store isn't empty. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so they don't come back once they're gone, for example after you remove them from the database. If the store already has products, no samples are added. The sample data lives in `server/utils/sampleProducts.ts`.
 
 Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
 
@@ -91,7 +91,7 @@ On the server, return `ok(data, message?)` and throw `apiError(code, message)` o
 
 On the client, `getApiError(err)` turns a failed `$fetch` into an `ApiError`, and `toFormErrors(error.fieldErrors)` maps it onto a `UForm`.
 
-List endpoints are paginated by offset. They take `?page` (1 or more, default 1) and `?pageSize` (1 to 100, default 20), validated by `pageQuerySchema` in `shared/schemas/pagination.schema.ts`. Their `data` is a `PagedResult<T>` from `shared/types/pagination.ts`. `GET /api/products` also returns `sampleCount`. For example, `GET /api/products?page=2&pageSize=20` returns:
+List endpoints are paginated by offset. They take `?page` (1 or more, default 1) and `?pageSize` (1 to 100, default 20), validated by `pageQuerySchema` in `shared/schemas/pagination.schema.ts`. Their `data` is a `PagedResult<T>` from `shared/types/pagination.ts`. For example, `GET /api/products?page=2&pageSize=20` returns:
 
 ```json
 {
@@ -101,8 +101,7 @@ List endpoints are paginated by offset. They take `?page` (1 or more, default 1)
     "page": 2,
     "pageSize": 20,
     "total": 45,
-    "totalPages": 3,
-    "sampleCount": 20
+    "totalPages": 3
   }
 }
 ```

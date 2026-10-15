@@ -103,14 +103,6 @@ export class ProductRepository {
     return featured;
   }
 
-  async countSamples() {
-    const [result] = await this.db.select({ count: count() })
-      .from(products)
-      .where(eq(products.isSample, true));
-
-    return result?.count ?? 0;
-  }
-
   async count() {
     const [result] = await this.db.select({ count: count() }).from(products);
     return result?.count ?? 0;
@@ -147,14 +139,5 @@ export class ProductRepository {
   async replaceImages(productId: string, images: NewProductImage[]) {
     await this.db.delete(productImages).where(eq(productImages.productId, productId));
     await this.insertImages(images);
-  }
-
-  /** Images go with them through the product_images ON DELETE CASCADE foreign key. */
-  async deleteSamples() {
-    const deleted = await this.db.delete(products)
-      .where(eq(products.isSample, true))
-      .returning({ id: products.id });
-
-    return deleted.length;
   }
 }

@@ -11,19 +11,6 @@
       </NuxtLink>
     </template>
 
-    <CoreAlert
-      v-if="sampleCount > 0"
-      variant="warning"
-      title="You're viewing sample products"
-      :description="`These ${sampleCount} products are here to show how your store looks. Delete them before you go live.`"
-      :actions="[{
-        label: 'Delete sample products',
-        color: 'warning',
-        variant: 'solid',
-        onClick: () => { confirmOpen = true; },
-      }]"
-    />
-
     <USelectMenu
       v-model="tagFilter"
       :items="tagItems"
@@ -151,51 +138,12 @@
       :page-size="pageSize"
       class="mt-4 flex justify-end"
     />
-
-    <UModal
-      v-model:open="confirmOpen"
-      :title="`Delete ${sampleCount} sample products?`"
-      :dismissible="!deleting"
-    >
-      <template #body>
-        <div class="flex gap-3">
-          <UIcon
-            name="i-heroicons-exclamation-triangle"
-            class="size-6 shrink-0 text-warning"
-          />
-          <p class="text-sm text-muted">
-            This permanently removes every sample product and its images. Products you've added yourself won't be affected. This can't be undone.
-          </p>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2 w-full">
-          <UButton
-            color="neutral"
-            variant="outline"
-            :disabled="deleting"
-            @click="confirmOpen = false"
-          >
-            Cancel
-          </UButton>
-          <UButton
-            color="error"
-            :loading="deleting"
-            @click="deleteSamples"
-          >
-            Delete sample products
-          </UButton>
-        </div>
-      </template>
-    </UModal>
   </AdminContainer>
 </template>
 
 <script setup lang="ts">
 import type { TableColumn } from "@nuxt/ui";
 import type { ProductListItem } from "#shared/types/product";
-
-const toast = useToast();
 
 const route = useRoute();
 const router = useRouter();
@@ -214,11 +162,9 @@ const tagFilter = computed<string[]>({
   },
 });
 
-const { data, items: products, total, page, pageSize, status, refresh } = await usePagedFetch<ProductListItem, { sampleCount: number }>("/api/products", {
+const { items: products, total, page, pageSize, status } = await usePagedFetch<ProductListItem>("/api/products", {
   query: () => ({ tag: tagFilter.value, allTags: "true" }),
 });
-
-const sampleCount = computed(() => data.value?.sampleCount ?? 0);
 
 const columns: TableColumn<ProductListItem>[] = [
   // An empty-string header renders a text node the server HTML lacks, causing a hydration mismatch
@@ -228,29 +174,4 @@ const columns: TableColumn<ProductListItem>[] = [
   { id: "tags", header: "Tags" },
   { accessorKey: "createdAt", header: "Added" },
 ];
-
-const confirmOpen = ref(false);
-const deleting = ref(false);
-
-async function deleteSamples() {
-  deleting.value = true;
-  try {
-    const { data: result } = await $fetch("/api/products/samples", { method: "DELETE" });
-    confirmOpen.value = false;
-    toast.add({
-      title: "Sample products deleted",
-      description: `${result.deleted} sample products were removed.`,
-      color: "success",
-    });
-    await refresh();
-  } catch (error) {
-    toast.add({
-      title: "Couldn't delete sample products",
-      description: getApiError(error).message,
-      color: "error",
-    });
-  } finally {
-    deleting.value = false;
-  }
-}
 </script>

@@ -115,11 +115,10 @@ describe("list", () => {
       pageSize: 2,
       total: 0,
       totalPages: 0,
-      sampleCount: 0,
     });
   });
 
-  it("pages the products with their featured image and counts the samples", async () => {
+  it("pages the products with their featured image", async () => {
     const withImage = await service.create(
       { title: "A", tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/a2.jpg" }] },
       authorId
@@ -129,7 +128,7 @@ describe("list", () => {
     await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
 
     const paged = await service.list({ page: 1, pageSize: 2 });
-    expect(paged).toMatchObject({ page: 1, pageSize: 2, total: 3, totalPages: 2, sampleCount: 1 });
+    expect(paged).toMatchObject({ page: 1, pageSize: 2, total: 3, totalPages: 2 });
     expect(paged.items).toHaveLength(2);
 
     const { items } = await service.list({ page: 1, pageSize: 10 });
@@ -278,17 +277,6 @@ describe("tags", () => {
   });
 });
 
-describe("deleteSamples", () => {
-  it("returns how many samples were removed", async () => {
-    const sample = await service.create({ title: "Sample", tagIds: [], images: [] }, authorId);
-    await service.create({ title: "Real", tagIds: [], images: [] }, authorId);
-    await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
-
-    expect(await service.deleteSamples()).toBe(1);
-    expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(1);
-  });
-});
-
 describe("seedSamplesOnce", () => {
   const imageTotal = sampleProducts.reduce((sum, sample) => sum + sample.imageCount, 0);
   const allProducts = () => db.select().from(products);
@@ -312,7 +300,7 @@ describe("seedSamplesOnce", () => {
 
   it("does not bring the samples back after they are deleted", async () => {
     await service.seedSamplesOnce(authorId);
-    await service.deleteSamples();
+    await db.delete(products);
     await service.seedSamplesOnce(authorId);
 
     expect(await allProducts()).toHaveLength(0);

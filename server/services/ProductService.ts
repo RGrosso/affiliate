@@ -17,10 +17,7 @@ export class ProductService {
 
   /** Public lists carry only the badges a card shows; admins get every tag. */
   async list(query: ProductListQuery, { forAdmin = false }: { forAdmin?: boolean } = {}) {
-    const [{ items, total }, sampleCount] = await Promise.all([
-      this.products.findPage(query),
-      this.products.countSamples(),
-    ]);
+    const { items, total } = await this.products.findPage(query);
     const ids = items.map(item => item.id);
     const [featured, tags] = await Promise.all([
       this.products.findFeaturedImages(ids),
@@ -35,7 +32,7 @@ export class ProductService {
         : pickCardTags(tags.get(item.id) ?? []),
     }));
 
-    return { ...toPagedResult(listItems, total, query), sampleCount };
+    return toPagedResult(listItems, total, query);
   }
 
   async get(id: string) {
@@ -124,10 +121,6 @@ export class ProductService {
         tagIds: ["One of these tags no longer exists. Please refresh and try again"],
       });
     }
-  }
-
-  deleteSamples() {
-    return this.products.deleteSamples();
   }
 
   /**

@@ -1,6 +1,6 @@
 import { expect, test } from "@nuxt/test-utils/playwright";
 
-// A seeded sample product, so these run before admin.spec deletes the samples
+// A seeded sample product
 const PRODUCT = "/product/cast-iron-skillet-12";
 
 test.describe("product page", () => {
