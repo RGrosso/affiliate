@@ -8,6 +8,9 @@ export default defineNuxtConfig({
       hub: { dir: ".data-e2e" },
     },
   },
+  $production: {
+    runtimeConfig: { seedSamples: false },
+  },
   devtools: { enabled: true },
   app: {
     head: {
@@ -19,6 +22,10 @@ export default defineNuxtConfig({
     theme: {
       colors: ["primary", "secondary", "action", "success", "info", "warning", "error", "neutral"],
     },
+  },
+  runtimeConfig: {
+    // Turned off for production builds below; NUXT_SEED_SAMPLES=true or false overrides it
+    seedSamples: true,
   },
   compatibilityDate: "2025-07-15",
   nitro: {

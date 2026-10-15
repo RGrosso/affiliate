@@ -8,9 +8,12 @@ rmSync(".data-e2e", { recursive: true, force: true });
 
 // Run Nuxt's CLI with node directly rather than through pnpm and a shell, so stopping this process
 // stops the dev server too instead of leaving it holding the port
-const server = spawn(process.execPath, ["node_modules/nuxt/bin/nuxt.mjs", "dev", "--envName", "e2e", "--port", String(E2E_PORT), "--no-fork"], {
-  stdio: "inherit",
-});
+const server = spawn(
+  process.execPath,
+  ["node_modules/nuxt/bin/nuxt.mjs", "dev", "--envName", "e2e", "--port", String(E2E_PORT), "--no-fork"],
+  // The tests rely on the samples, even if NUXT_SEED_SAMPLES=false is set in the shell
+  { stdio: "inherit", env: { ...process.env, NUXT_SEED_SAMPLES: "true" } }
+);
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => server.kill(signal));

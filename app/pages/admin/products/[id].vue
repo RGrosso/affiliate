@@ -16,7 +16,7 @@
         v-if="product.isSample"
         variant="warning"
         title="This is a sample product"
-        description="It was added to show how your store looks. You can edit it, but it's still a sample: it keeps its Sample badge and is removed when you delete all sample products from the Products page."
+        description="It's example data added in development to show how your store looks."
       />
 
       <ProductForm

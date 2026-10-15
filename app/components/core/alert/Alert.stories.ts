@@ -23,13 +23,12 @@ export const Success: Story = {
   args: { variant: "success", title: "Product saved", description: "Your changes are live." },
 };
 
-/** Sample products warning from Admin → Products, with an action button. */
 export const Warning: Story = {
   args: {
     variant: "warning",
-    title: "You're viewing sample products",
-    description: "These 20 products are here to show how your store looks. Delete them before you go live.",
-    actions: [{ label: "Delete sample products", color: "warning", variant: "solid" }],
+    title: "This product has no affiliate link",
+    description: "Visitors can't buy it until you add one.",
+    actions: [{ label: "Add a link", color: "warning", variant: "solid" }],
   },
 };
 
