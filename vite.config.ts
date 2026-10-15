@@ -86,6 +86,8 @@ export default defineConfig({
     singleQuote: false,
     printWidth: 160,
     trailingComma: "es5",
+    arrowParens: "avoid",
+    singleAttributePerLine: true,
     ignorePatterns: ["pnpm-lock.yaml", "drizzle/**", "patches/**"],
   },
   staged: {
