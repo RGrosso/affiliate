@@ -10,16 +10,6 @@ catalogs:
     vite: npm:@voidzero-dev/vite-plus-core@1.2.0
     vite-plus: 1.2.0
     vitest: 5.0.4
-minimumReleaseAgeExclude:
-  - "@vitest/browser-playwright@5.0.5"
-  - "@vitest/browser@5.0.5"
-  - "@vitest/coverage-v8@5.0.5"
-  - "@vitest/mocker@5.0.5"
-  - "@vitest/pretty-format@5.0.5"
-  - "@vitest/spy@5.0.5"
-  - "@vitest/ui@5.0.5"
-  - "@vitest/utils@5.0.5"
-  - vitest@5.0.5
 overrides:
   unrun: 0.2.39
   vite@*: catalog:vite-plus
