@@ -45,6 +45,9 @@ export type StoredCollectionRule = StoredTagRule | StoredRetailerRule;
 export type StoredCollectionRuleItem = StoredCollectionRule | StoredRuleSubgroup;
 export type StoredCollectionRules = z.infer<typeof storedRulesV1>;
 
+/** The JSON key holding a tag's id, for queries that look inside `collections.rules`. The `satisfies` fails if the key is renamed. */
+export const STORED_TAG_ID_KEY = "tagId" satisfies keyof StoredTagRule;
+
 /** Validates JSON read from the database. Upgrade older versions to the latest shape here. */
 export function parseStoredRules(value: unknown): StoredCollectionRules {
   const version = typeof value === "object" && value !== null && "version" in value ? value.version : undefined;

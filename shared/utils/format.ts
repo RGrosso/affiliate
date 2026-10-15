@@ -62,6 +62,13 @@ export function formatDateTime(value: string | number | Date): string {
   return dateTimeFormatter.format(new Date(value));
 }
 
+const listFormatter = new Intl.ListFormat(LOCALE, { style: "long", type: "conjunction" });
+
+/** Joins names into a sentence: "A", "A and B", "A, B and C". */
+export function formatList(items: readonly string[]): string {
+  return listFormatter.format(items);
+}
+
 export function formatYear(value: string | number | Date): string {
   return yearFormatter.format(new Date(value));
 }

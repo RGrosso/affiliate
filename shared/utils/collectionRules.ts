@@ -51,6 +51,12 @@ export function describeRules(rules: CollectionRules, tagNames: TagNames): strin
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+/** The distinct tag ids the rules refer to, in the order they first appear. */
+export function collectTagIds(rules: CollectionRules): string[] {
+  const conditions = rules.rules.flatMap(item => (item.type === RuleType.Group ? item.rules : [item]));
+  return [...new Set(conditions.flatMap(rule => (rule.type === RuleType.Tag ? [rule.tagId] : [])))];
+}
+
 /** Counts conditions across subgroups; a group itself isn't one. */
 export function countConditions(rules: CollectionRules): number {
   return rules.rules.reduce((total, item) => total + (item.type === RuleType.Group ? item.rules.length : 1), 0);

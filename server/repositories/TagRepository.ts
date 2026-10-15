@@ -4,7 +4,7 @@ import type { AdminTag, Tag } from "#shared/types/tag";
 
 export type NewTag = Pick<typeof tags.$inferInsert, "name" | "slug" | "description" | "tooltip" | "icon" | "priority" | "showOnCards" | "showInFilter">;
 
-const tagColumns = {
+export const tagColumns = {
   id: tags.id,
   name: tags.name,
   slug: tags.slug,

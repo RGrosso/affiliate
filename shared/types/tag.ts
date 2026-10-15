@@ -20,5 +20,7 @@ export type Tag = {
 export type TagBadge = Pick<Tag, "id" | "name" | "slug" | "icon" | "tooltip">;
 
 export type AdminTag = Tag & {
+  /** The collections whose rules use this tag, which stop it being deleted. */
+  collections: { id: string; title: string }[];
   productCount: number;
 };

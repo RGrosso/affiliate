@@ -6,7 +6,7 @@ import {
   TagOperator,
   type CollectionRules
 } from "../types/collectionRules";
-import { countConditions, describeRules } from "./collectionRules";
+import { collectTagIds, countConditions, describeRules } from "./collectionRules";
 
 const wedding = "11111111-1111-4111-8111-111111111111";
 const names = new Map([[wedding, "Wedding"]]);
@@ -69,6 +69,24 @@ describe("describeRules", () => {
 
   it("copes with no conditions", () => {
     expect(describeRules({ match: RuleMatch.All, rules: [] }, names)).toBe("No conditions");
+  });
+});
+
+describe("collectTagIds", () => {
+  it("lists each tag once, including those inside subgroups", () => {
+    const rules: CollectionRules = {
+      match: RuleMatch.All,
+      rules: [
+        tag(TagOperator.Has),
+        retailer(RetailerOperator.Is, "Etsy"),
+        { type: RuleType.Group, match: RuleMatch.Any, rules: [tag(TagOperator.HasNot), tag(TagOperator.Has, unknownTag)] },
+      ],
+    };
+    expect(collectTagIds(rules)).toEqual([wedding, unknownTag]);
+  });
+
+  it("is empty when no rule uses a tag", () => {
+    expect(collectTagIds({ match: RuleMatch.All, rules: [retailer(RetailerOperator.Is, "Etsy")] })).toEqual([]);
   });
 });
 

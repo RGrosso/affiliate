@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { formatCurrency, formatDate, formatDateTime, formatYear } from "./format";
+import { formatCurrency, formatDate, formatDateTime, formatList, formatYear } from "./format";
+
+describe("formatList", () => {
+  it("joins names into a sentence without a serial comma", () => {
+    expect(formatList([])).toBe("");
+    expect(formatList(["Gifts"])).toBe("Gifts");
+    expect(formatList(["Gifts", "Sale"])).toBe("Gifts and Sale");
+    expect(formatList(["Gifts", "Sale", "Under £20"])).toBe("Gifts, Sale and Under £20");
+  });
+});
 
 describe("formatCurrency", () => {
   it("formats pence as pounds with two decimals", () => {
