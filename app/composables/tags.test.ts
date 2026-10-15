@@ -16,6 +16,7 @@ const tag: AdminTag = {
   showOnCards: false,
   showInFilter: false,
   productCount: 2,
+  collections: [],
 };
 
 const calls = vi.hoisted(() => ({ list: 0, deleted: 0, bodies: [] as unknown[] }));

@@ -112,6 +112,18 @@ const columns: TableColumn<AdminTag>[] = [
 ];
 
 async function deleteTag(tag: AdminTag) {
+  if (tag.collections.length) {
+    const names = formatList(tag.collections.map(collection => collection.title));
+    await confirm({
+      title: `"${tag.name}" can't be deleted`,
+      description: `This tag is used by ${names}. Remove it from ${tag.collections.length === 1 ? "that collection" : "those collections"} first.`,
+      confirmLabel: "OK",
+      cancelLabel: "Close",
+      color: "neutral",
+    });
+    return;
+  }
+
   const count = tag.productCount;
   const confirmed = await confirm({
     title: `Delete "${tag.name}"?`,

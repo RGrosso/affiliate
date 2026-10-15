@@ -66,6 +66,14 @@ export async function requireUser(event: H3Event) {
   return { ...session, user: toSessionUser(user) };
 }
 
+/** For public routes that show admins more, such as drafts. A visitor or a stale session is simply not an admin. */
+export async function isAdminRequest(event: H3Event) {
+  const session = await getUserSession(event);
+  const user = session.user && await findSessionUser(session.user.id);
+
+  return user?.role === "admin";
+}
+
 export async function requireAdmin(event: H3Event) {
   const session = await requireUser(event);
 
