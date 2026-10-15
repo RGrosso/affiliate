@@ -1,21 +1,20 @@
 {
   "name": "affiliate",
-  "type": "module",
   "private": true,
-  "packageManager": "pnpm@12.11.2",
+  "type": "module",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
     "dev:reset": "node scripts/reset-dev-data.ts",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "lint": "eslint . --fix",
-    "lint:check": "eslint .",
-    "test": "vitest run",
-    "test:unit": "vitest run --project unit --project unit-server",
-    "test:nuxt": "vitest run --project nuxt",
-    "test:watch": "vitest",
+    "postinstall": "nuxt prepare && vp config",
+    "lint": "vp lint --fix && vp fmt",
+    "lint:check": "vp run lint",
+    "test": "vp test",
+    "test:unit": "vp test --project unit --project unit-server",
+    "test:nuxt": "vp test --project nuxt",
+    "test:watch": "vp test watch",
     "storybook": "storybook dev -p 6006 --no-open",
     "build-storybook": "storybook build",
     "test:e2e": "playwright test",
@@ -59,5 +58,6 @@
     "vite-plus": "catalog:vite-plus",
     "vitest": "catalog:vite-plus",
     "vue-tsc": "3.3.11"
-  }
+  },
+  "packageManager": "pnpm@12.11.2"
 }
