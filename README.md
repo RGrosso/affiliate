@@ -154,16 +154,59 @@ Tag routes are admin only:
 
 | Method | Path | What it does |
 | --- | --- | --- |
-| `GET` | `/api/tags` | Lists tags, each with a `productCount` |
+| `GET` | `/api/tags` | Lists tags, each with a `productCount` and the `collections` that use it |
 | `GET` | `/api/tags/:id` | Returns one tag, or a 404 if it doesn't exist |
-| `POST` | `/api/tags` | Creates a tag from `{ name }` plus any of the optional details (description, tooltip, icon, priority, showOnCards) |
+| `POST` | `/api/tags` | Creates a tag from `{ name }` plus any of the optional details (description, tooltip, icon, priority, showOnCards, showInFilter) |
 | `PATCH` | `/api/tags/:id` | Updates a tag |
-| `DELETE` | `/api/tags/:id` | Deletes a tag and its product links |
+| `DELETE` | `/api/tags/:id` | Deletes a tag and its product links, unless a collection uses it (a 409 naming the collections) |
 
 Product routes change as follows:
 
 - `GET /api/products?tag=<slug>` filters the list. Repeat it (`?tag=a&tag=b`, up to 20) to filter by several tags: a product matches if it has any of them. Each item now includes `tags`, highest priority first.
 - Product create and update accept `tagIds`. If a tag no longer exists, the response is a `VALIDATION_ERROR` on `tagIds`.
+
+## Collections
+
+Collections group products, like Shopify's. Each has a title, a URL handle, a plain text description, an optional image, SEO fields (which fall back to the title and the start of the description), a status and a default sort. This release is the backend only: the admin pages, the public page and the homepage changes come later.
+
+There are two types, fixed when the collection is created:
+
+- **Manual**: you pick the products. They keep the order you added them in.
+- **Automated**: the products are chosen by rules. A rule is a tag the product has (or doesn't have) or a retailer it is (or isn't) from, combined with "all" or "any", with one level of subgroups. See `shared/schemas/collectionRules.schema.ts`. `rules` is required for an automated collection.
+
+A collection is a **draft** or **published**. New ones start as drafts. Visitors get a 404 for a draft, and an admin who is logged in can see it, flagged with `isDraft`.
+
+### The All collection
+
+`/collections/all` is the **All products** collection. A migration inserts it, so it exists on every database. It is locked: it can't be deleted, and its handle, type, rules (it has none, so it matches every product), status and sort can't change. You can edit its title, description, image and SEO fields. Sending a different value for a locked field is a `VALIDATION_ERROR` on that field; sending the value it already has is fine. The handle `all` is reserved, so no other collection can use it.
+
+### Sorting
+
+`GET` product lists take `?sort=`: `newest` (the default), `oldest`, `price-asc`, `price-desc`, `title-asc`, `title-desc` and `manual`. Products with no price come last in both price sorts, and ties fall back to the title, then the id. `manual` (the order products were added) only exists for manual collections. Each collection has a `defaultSort` that applies when the request doesn't name one.
+
+### Tag filter
+
+Turn on **Show in filter** for a tag and it appears as a filter on the collections that have at least one product with it. The first page of `/api/collections/handle/:handle/products` includes `facets.tags`: those tags, highest priority first, each with its product count. The counts cover the whole collection, so choosing a tag (`?tag=<slug>`) narrows the products but doesn't hide the other filters.
+
+### Stored values
+
+What the database stores is defined in `server/` only (`server/utils/storedCollection.ts` and `storedCollectionRules.ts`), separately from the values the API and the app use (`shared/types/collection.ts`, `collectionRules.ts`). `server/utils/collectionMapper.ts` converts between them, and a contract test pins the stored values, so renaming one in the API doesn't touch the data.
+
+### Collection routes
+
+| Method | Path | Who | What it does |
+| --- | --- | --- | --- |
+| `GET` | `/api/collections` | Admin | Lists collections with their product count and a sentence describing the rules |
+| `POST` | `/api/collections` | Admin | Creates a collection |
+| `GET` | `/api/collections/:id` | Admin | Returns one collection for editing, with its rules and `productIds` |
+| `PATCH` | `/api/collections/:id` | Admin | Changes the fields sent. The type can't change |
+| `DELETE` | `/api/collections/:id` | Admin | Deletes a collection (not the All collection) |
+| `POST` | `/api/collections/preview` | Admin | Takes `{ rules, sort }` and returns `{ total, items }` with the first 12 matches |
+| `GET` | `/api/collections/handle/:handle` | Public | The collection's details, with SEO resolved and no rules. Drafts 404 unless an admin is logged in |
+| `GET` | `/api/collections/handle/:handle/products` | Public | A page of products (`?page`, `?pageSize`, `?sort`, `?tag`) plus `facets` on page 1. Same draft rule |
+| `GET` | `/api/products/retailers` | Admin | The distinct retailers, for the retailer rule's dropdown |
+
+A tag that a collection's rules use can't be deleted. The request fails with a 409 that names the collections, and the admin tags page explains the same.
 
 ## Product pages
 
@@ -193,7 +236,7 @@ The homepage shows products in a horizontal row that scrolls at every width, wit
 | `pnpm lint:check` | ESLint without fixing (`pnpm lint` fixes) |
 | `pnpm storybook` | Storybook for the core components on `http://localhost:6006` |
 
-Repository and service tests run against an in-memory PGlite database with the real migrations applied (`createTestDb()` in `test/setup/db.ts`), so they don't mock the database.
+Repository and service tests run against an in-memory PGlite database with the real migrations applied (`createTestDb()` in `test/setup/db.ts`), so they don't mock the database. `resetDb()` empties the tables and then puts back the locked All collection, so a test starts with the same row a real database has.
 
 The first time, install the test browser with `pnpm exec playwright install chromium`. CI runs all of these on every pull request.
 
