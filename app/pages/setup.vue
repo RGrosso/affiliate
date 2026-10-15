@@ -2,14 +2,10 @@
   <CoreContainer>
     <div class="flex items-center justify-center pt-20">
       <div class="w-full max-w-md">
-        <h1 class="mb-2">
-          Set up your account
-        </h1>
+        <h1 class="mb-2">Set up your account</h1>
 
         <template v-if="step === 'username'">
-          <p class="mb-6 text-muted">
-            Enter your username to get started.
-          </p>
+          <p class="mb-6 text-muted">Enter your username to get started.</p>
 
           <UForm
             ref="usernameForm"
@@ -43,9 +39,8 @@
 
         <template v-else>
           <p class="mb-6 text-muted">
-            Choose a password for <span class="font-semibold">{{ state.username }}</span>.
-            It needs at least {{ PASSWORD_MIN_LENGTH }} characters, with an uppercase letter,
-            a lowercase letter, a number and a symbol.
+            Choose a password for <span class="font-semibold">{{ state.username }}</span
+            >. It needs at least {{ PASSWORD_MIN_LENGTH }} characters, with an uppercase letter, a lowercase letter, a number and a symbol.
           </p>
 
           <UForm
@@ -107,13 +102,7 @@
 
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import {
-  PASSWORD_MIN_LENGTH,
-  setupPasswordSchema,
-  setupUsernameSchema,
-  type SetupPasswordInput,
-  type SetupUsernameInput
-} from "#shared/schemas/auth.schema";
+import { PASSWORD_MIN_LENGTH, setupPasswordSchema, setupUsernameSchema, type SetupPasswordInput, type SetupUsernameInput } from "#shared/schemas/auth.schema";
 
 definePageMeta({ hideFooter: true });
 
@@ -144,9 +133,7 @@ async function checkUsername(event: FormSubmitEvent<SetupUsernameInput>) {
     step.value = "password";
   } catch (err) {
     const error = getApiError(err);
-    usernameForm.value?.setErrors(
-      error.fieldErrors ? toFormErrors(error.fieldErrors) : [{ name: "username", message: error.message }]
-    );
+    usernameForm.value?.setErrors(error.fieldErrors ? toFormErrors(error.fieldErrors) : [{ name: "username", message: error.message }]);
   } finally {
     pending.value = false;
   }

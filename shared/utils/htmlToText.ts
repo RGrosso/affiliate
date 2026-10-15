@@ -1,4 +1,4 @@
-const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": "\"", "&#39;": "'" };
+const ENTITIES: Record<string, string> = { "&nbsp;": " ", "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'" };
 
 /** Plain text from editor HTML, for previews and meta descriptions. Not a sanitiser. */
 export function htmlToText(html: string | null | undefined) {

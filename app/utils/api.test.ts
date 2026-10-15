@@ -20,9 +20,7 @@ describe("getApiError", () => {
 
 describe("toFormErrors", () => {
   it("maps the first message of each field and skips empty ones", () => {
-    expect(toFormErrors({ title: ["Too long", "Also wrong"], handle: [] })).toEqual([
-      { name: "title", message: "Too long" },
-    ]);
+    expect(toFormErrors({ title: ["Too long", "Also wrong"], handle: [] })).toEqual([{ name: "title", message: "Too long" }]);
   });
 
   it("handles no field errors", () => {

@@ -12,7 +12,7 @@ const preview: Preview = {
     // Nuxt UI parts such as tooltips and toasts need UApp's providers
     story => ({
       components: { UApp, story },
-      template: "<UApp><div class=\"p-4\"><story /></div></UApp>",
+      template: '<UApp><div class="p-4"><story /></div></UApp>',
     }),
     withThemeByClassName({
       themes: { light: "light", dark: "dark" },

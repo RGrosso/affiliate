@@ -6,7 +6,7 @@ import { expectAccessible } from "~~/test/nuxt/axe";
 const auth = vi.hoisted(() => ({
   user: { value: null as { username: string } | null },
   isAdmin: { value: false },
-  logout: vi.fn(),
+  logout: vi.fn<() => Promise<void>>(),
 }));
 
 mockNuxtImport("useAuth", () => () => ({

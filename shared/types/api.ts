@@ -3,17 +3,17 @@
  * handle success and failure the same way regardless of the endpoint.
  */
 
-export type ApiErrorCode
-  = | "BAD_REQUEST"
-    | "VALIDATION_ERROR"
-    | "UNAUTHORIZED"
-    | "INVALID_CREDENTIALS"
-    | "SETUP_REQUIRED"
-    | "ACCOUNT_DISABLED"
-    | "FORBIDDEN"
-    | "NOT_FOUND"
-    | "CONFLICT"
-    | "INTERNAL_ERROR";
+export type ApiErrorCode =
+  | "BAD_REQUEST"
+  | "VALIDATION_ERROR"
+  | "UNAUTHORIZED"
+  | "INVALID_CREDENTIALS"
+  | "SETUP_REQUIRED"
+  | "ACCOUNT_DISABLED"
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "INTERNAL_ERROR";
 
 export const apiErrorStatus: Record<ApiErrorCode, number> = {
   BAD_REQUEST: 400,
@@ -47,8 +47,5 @@ export type ApiError = {
 export type ApiResponse<T = null> = ApiSuccess<T> | ApiError;
 
 export function isApiError(value: unknown): value is ApiError {
-  return typeof value === "object"
-    && value !== null
-    && (value as ApiError).success === false
-    && typeof (value as ApiError).code === "string";
+  return typeof value === "object" && value !== null && (value as ApiError).success === false && typeof (value as ApiError).code === "string";
 }

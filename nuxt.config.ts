@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  modules: ["@nuxt/eslint", "@nuxt/fonts", "@nuxt/ui", "@nuxthub/core", "nuxt-auth-utils", "@vueuse/nuxt"],
+  modules: ["@nuxt/fonts", "@nuxt/ui", "@nuxthub/core", "nuxt-auth-utils", "@vueuse/nuxt"],
   $env: {
     // `nuxt dev --envName e2e`, used by the Playwright tests: a separate build and database,
     // so they can run alongside `pnpm dev` without touching its data
@@ -42,17 +42,6 @@ export default defineNuxtConfig({
     // Type-check the standalone Node scripts too (run with `node`, outside the app)
     nodeTsConfig: {
       include: ["../scripts/**/*"],
-    },
-  },
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: "always-multiline",
-        braceStyle: "1tbs",
-        quotes: "double",
-        indent: 2,
-        semi: true,
-      },
     },
   },
   fonts: {

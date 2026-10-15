@@ -55,9 +55,7 @@
         <UCard>
           <template #header>
             <div class="flex items-center justify-between">
-              <h2 class="text-sm font-semibold">
-                Media
-              </h2>
+              <h2 class="text-sm font-semibold">Media</h2>
               <span class="text-xs text-muted">Images are cropped to square</span>
             </div>
           </template>
@@ -71,10 +69,7 @@
                 v-for="(item, index) in media"
                 :key="item.key"
                 class="group relative aspect-square rounded-lg border border-default overflow-hidden bg-muted cursor-grab"
-                :class="[
-                  index === 0 ? 'col-span-2 row-span-2' : '',
-                  dragIndex === index ? 'opacity-40' : '',
-                ]"
+                :class="[index === 0 ? 'col-span-2 row-span-2' : '', dragIndex === index ? 'opacity-40' : '']"
                 draggable="true"
                 @dragstart="dragIndex = index"
                 @dragover.prevent
@@ -85,7 +80,7 @@
                   :src="item.previewUrl"
                   :alt="item.alt"
                   class="size-full object-cover"
-                >
+                />
                 <div
                   v-if="item.status === 'uploading'"
                   class="absolute inset-0 flex items-center justify-center bg-default/60"
@@ -125,9 +120,7 @@
                     />
                     <template #content>
                       <div class="p-3 w-64 space-y-2">
-                        <p class="text-xs font-medium">
-                          Alt text
-                        </p>
+                        <p class="text-xs font-medium">Alt text</p>
                         <UInput
                           v-model="item.alt"
                           placeholder="Describe the image"
@@ -166,7 +159,7 @@
                   multiple
                   class="sr-only"
                   @change="onFileInput"
-                >
+                />
               </label>
             </div>
 
@@ -178,9 +171,7 @@
               @dragleave="dropActive = false"
               @drop.prevent="onDrop"
             >
-              <span class="inline-flex rounded-md border border-default px-3 py-1.5 text-sm font-medium bg-default">
-                Upload new
-              </span>
+              <span class="inline-flex rounded-md border border-default px-3 py-1.5 text-sm font-medium bg-default"> Upload new </span>
               <span class="text-sm text-muted">Accepts images up to 8MB. Drag to reorder once uploaded.</span>
               <input
                 type="file"
@@ -188,16 +179,14 @@
                 multiple
                 class="sr-only"
                 @change="onFileInput"
-              >
+              />
             </label>
           </UFormField>
         </UCard>
 
         <UCard>
           <template #header>
-            <h2 class="text-sm font-semibold">
-              Affiliate link
-            </h2>
+            <h2 class="text-sm font-semibold">Affiliate link</h2>
           </template>
 
           <div class="space-y-4">
@@ -274,9 +263,7 @@
         <UCard>
           <template #header>
             <div class="flex items-center justify-between">
-              <h2 class="text-sm font-semibold">
-                Search engine listing
-              </h2>
+              <h2 class="text-sm font-semibold">Search engine listing</h2>
               <UButton
                 variant="link"
                 size="sm"
@@ -358,9 +345,7 @@
       <div class="space-y-4">
         <UCard v-if="featured">
           <template #header>
-            <h2 class="text-sm font-semibold">
-              Preview
-            </h2>
+            <h2 class="text-sm font-semibold">Preview</h2>
           </template>
 
           <div class="space-y-3">
@@ -369,7 +354,7 @@
                 :src="featured.previewUrl"
                 :alt="featured.alt"
                 class="size-full object-cover"
-              >
+              />
             </div>
             <div>
               <p class="font-medium truncate">
@@ -384,9 +369,7 @@
 
         <UCard>
           <template #header>
-            <h2 class="text-sm font-semibold">
-              Tags
-            </h2>
+            <h2 class="text-sm font-semibold">Tags</h2>
           </template>
 
           <UFormField name="tagIds">
@@ -484,31 +467,35 @@ const seoOpen = ref(false);
 // When editing, keep the saved handle rather than re-deriving it from the title
 const handleTouched = ref(!!product);
 
-watch(uploadedImages, (images) => {
+watch(uploadedImages, images => {
   state.images = images;
 });
 
 // Auto-fill the handle from the title until the user edits it themselves.
-watch(() => state.title, (title) => {
-  if (!handleTouched.value) state.handle = slugify(title);
-});
+watch(
+  () => state.title,
+  title => {
+    if (!handleTouched.value) state.handle = slugify(title);
+  }
+);
 
 const plainDescription = computed(() => htmlToText(state.description));
 
 // Everything the user can change, normalised so it can be compared with the last saved version
-const snapshot = () => JSON.stringify({
-  title: state.title.trim(),
-  description: htmlToText(state.description) ? state.description : "",
-  handle: state.handle,
-  price: state.price ?? null,
-  retailer: state.retailer.trim(),
-  brand: state.brand.trim(),
-  affiliateUrl: state.affiliateUrl.trim(),
-  seoTitle: state.seoTitle.trim(),
-  seoDescription: state.seoDescription.trim(),
-  media: media.value.map(item => [item.url ?? item.key, item.alt.trim()]),
-  tagIds: [...state.tagIds].sort(),
-});
+const snapshot = () =>
+  JSON.stringify({
+    title: state.title.trim(),
+    description: htmlToText(state.description) ? state.description : "",
+    handle: state.handle,
+    price: state.price ?? null,
+    retailer: state.retailer.trim(),
+    brand: state.brand.trim(),
+    affiliateUrl: state.affiliateUrl.trim(),
+    seoTitle: state.seoTitle.trim(),
+    seoDescription: state.seoDescription.trim(),
+    media: media.value.map(item => [item.url ?? item.key, item.alt.trim()]),
+    tagIds: [...state.tagIds].sort(),
+  });
 
 const savedSnapshot = ref(snapshot());
 const isDirty = computed(() => snapshot() !== savedSnapshot.value);
@@ -516,13 +503,16 @@ const isDirty = computed(() => snapshot() !== savedSnapshot.value);
 // The editor rewrites the HTML it's given (e.g. wrapping list items in <p>), which would count as an
 // unsaved change on load. Until the user has been in the editor, take its output as the saved version.
 const descriptionTouched = ref(false);
-watch(() => state.description, () => {
-  if (descriptionTouched.value) return;
-  savedSnapshot.value = JSON.stringify({
-    ...JSON.parse(savedSnapshot.value),
-    description: JSON.parse(snapshot()).description,
-  });
-});
+watch(
+  () => state.description,
+  () => {
+    if (descriptionTouched.value) return;
+    savedSnapshot.value = JSON.stringify({
+      ...JSON.parse(savedSnapshot.value),
+      description: JSON.parse(snapshot()).description,
+    });
+  }
+);
 
 const { skip: skipLeavePrompt } = useUnsavedChangesGuard(isDirty);
 

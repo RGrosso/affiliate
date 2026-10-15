@@ -13,16 +13,14 @@ const options: RunOptions = {
   rules: {
     // Page-level rules that don't apply to a component rendered on its own
     "landmark-one-main": { enabled: false },
-    "region": { enabled: false },
+    region: { enabled: false },
     "page-has-heading-one": { enabled: false },
   },
 };
 
 async function violationsIn(container: HTMLElement) {
   const { violations } = await axe.run(container, options);
-  return violations.flatMap(v =>
-    v.nodes.map(node => `${v.id}: ${node.failureSummary ?? v.help}\n  at ${node.html}`)
-  );
+  return violations.flatMap(v => v.nodes.map(node => `${v.id}: ${node.failureSummary ?? v.help}\n  at ${node.html}`));
 }
 
 /** Fails the test with a readable list if axe finds accessibility violations, in light or dark mode. */

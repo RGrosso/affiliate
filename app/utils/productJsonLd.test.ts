@@ -22,16 +22,16 @@ describe("productJsonLd", () => {
     expect(productJsonLd(product)).toEqual({
       "@context": "https://schema.org",
       "@type": "Product",
-      "name": "Moon Lamp",
-      "description": "A lamp & a moon.",
-      "image": ["https://example.com/a.jpg"],
-      "brand": { "@type": "Brand", "name": "Luna" },
-      "offers": {
+      name: "Moon Lamp",
+      description: "A lamp & a moon.",
+      image: ["https://example.com/a.jpg"],
+      brand: { "@type": "Brand", name: "Luna" },
+      offers: {
         "@type": "Offer",
-        "price": "24.99",
-        "priceCurrency": "GBP",
-        "url": "https://example.com/moon-lamp",
-        "seller": { "@type": "Organization", "name": "Lamp Shop" },
+        price: "24.99",
+        priceCurrency: "GBP",
+        url: "https://example.com/moon-lamp",
+        seller: { "@type": "Organization", name: "Lamp Shop" },
       },
     });
   });
@@ -49,6 +49,6 @@ describe("productJsonLd", () => {
       images: [],
     });
 
-    expect(bare).toEqual({ "@context": "https://schema.org", "@type": "Product", "name": "Moon Lamp" });
+    expect(bare).toEqual({ "@context": "https://schema.org", "@type": "Product", name: "Moon Lamp" });
   });
 });

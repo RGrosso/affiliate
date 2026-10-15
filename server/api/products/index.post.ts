@@ -1,6 +1,6 @@
 import { addProductSchema } from "#shared/schemas/products.schema";
 
-export default defineApiHandler(async (event) => {
+export default defineApiHandler(async event => {
   const { user } = await requireAdmin(event);
   const input = await readValidated(event, addProductSchema);
 

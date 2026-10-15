@@ -18,7 +18,12 @@
 import type { BadgeProps } from "@nuxt/ui";
 import type { TagIcon } from "#shared/types/tag";
 
-const { label, color = "neutral", icon, tooltip } = defineProps<{
+const {
+  label,
+  color = "neutral",
+  icon,
+  tooltip,
+} = defineProps<{
   label: string;
   color?: BadgeProps["color"];
   icon?: TagIcon | null;

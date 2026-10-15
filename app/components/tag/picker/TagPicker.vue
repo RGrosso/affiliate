@@ -18,16 +18,10 @@
       @create="onCreate"
     >
       <template #content-top>
-        <p class="px-3 py-2 text-sm font-semibold border-b border-default">
-          Tags
-        </p>
+        <p class="px-3 py-2 text-sm font-semibold border-b border-default">Tags</p>
       </template>
-      <template #create-item-label>
-        Add "{{ name }}"
-      </template>
-      <template #empty>
-        No tags found
-      </template>
+      <template #create-item-label> Add "{{ name }}" </template>
+      <template #empty> No tags found </template>
     </USelectMenu>
 
     <ul

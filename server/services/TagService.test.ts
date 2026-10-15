@@ -39,14 +39,16 @@ describe("create", () => {
   });
 
   it("saves any details sent with the name", async () => {
-    const created = await service.create(createTagSchema.parse({
-      name: "Hot Deals",
-      description: "Reduced this week",
-      tooltip: "Reduced",
-      icon: "flame",
-      priority: 5,
-      showOnCards: true,
-    }));
+    const created = await service.create(
+      createTagSchema.parse({
+        name: "Hot Deals",
+        description: "Reduced this week",
+        tooltip: "Reduced",
+        icon: "flame",
+        priority: 5,
+        showOnCards: true,
+      })
+    );
 
     expect(created).toMatchObject({
       name: "Hot Deals",

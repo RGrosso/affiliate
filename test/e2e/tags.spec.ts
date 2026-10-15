@@ -22,7 +22,7 @@ test.describe("managing tags", () => {
 
     await page.getByRole("button", { name: "Tags", exact: true }).click();
     await page.getByPlaceholder("Search or add tags").fill("E2E New");
-    await page.getByRole("option", { name: "Add \"E2E New\"" }).click();
+    await page.getByRole("option", { name: 'Add "E2E New"' }).click();
 
     const chips = page.getByRole("list", { name: "Selected tags" });
     await expect(chips).toContainText("E2E New");
@@ -79,14 +79,20 @@ test.describe("managing tags", () => {
   test("shows the tag on the product's card on the homepage", async ({ page, goto }) => {
     await goto("/", { waitUntil: "hydration" });
 
-    const card = page.locator("div", { has: page.getByRole("heading", { name: "E2E Tag Lamp" }) }).filter({ hasText: "E2E New" }).last();
+    const card = page
+      .locator("div", { has: page.getByRole("heading", { name: "E2E Tag Lamp" }) })
+      .filter({ hasText: "E2E New" })
+      .last();
     await expect(card.getByRole("heading", { name: "E2E Tag Lamp" })).toBeVisible();
     await expect(card.getByText("E2E New", { exact: true })).toBeVisible();
   });
 
   test("filters the admin product list by the tag", async ({ page, goto }) => {
     await goto("/admin/tags", { waitUntil: "hydration" });
-    await page.getByRole("row", { name: /E2E New/ }).getByRole("link", { name: "1", exact: true }).click();
+    await page
+      .getByRole("row", { name: /E2E New/ })
+      .getByRole("link", { name: "1", exact: true })
+      .click();
 
     await expect(page).toHaveURL(/\/admin\/products\?tag=e2e-new/);
     await expect(page.getByRole("link", { name: "E2E Tag Lamp" })).toBeVisible();
@@ -237,7 +243,7 @@ test.describe("adding tags", () => {
     await page.getByRole("link", { name: "Edit E2E Added" }).click();
 
     await page.getByRole("button", { name: "Delete tag" }).click();
-    const dialog = page.getByRole("dialog", { name: "Delete \"E2E Added\"?" });
+    const dialog = page.getByRole("dialog", { name: 'Delete "E2E Added"?' });
     await expect(dialog).toContainText("This removes the tag from 1 product");
     await dialog.getByRole("button", { name: "Delete tag" }).click();
 

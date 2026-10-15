@@ -6,8 +6,8 @@ import { expectAccessible } from "~~/test/nuxt/axe";
 const toast = vi.hoisted(() => {
   let nextId = 0;
   return {
-    add: vi.fn(() => ({ id: ++nextId })),
-    remove: vi.fn(),
+    add: vi.fn<(toast: { title?: string }) => { id: number }>(() => ({ id: ++nextId })),
+    remove: vi.fn<(id: number) => void>(),
   };
 });
 

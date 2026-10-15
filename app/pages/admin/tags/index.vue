@@ -75,9 +75,7 @@
           class="w-6 h-6"
         />
       </div>
-      <h2 class="text-sm font-semibold mb-1">
-        No tags yet
-      </h2>
+      <h2 class="text-sm font-semibold mb-1">No tags yet</h2>
       <p class="text-sm text-muted max-w-sm">
         Choose Add tag to create one with a description, tooltip and icon, then add it to products from the product page.
       </p>
@@ -115,9 +113,10 @@ async function deleteTag(tag: AdminTag) {
   const count = tag.productCount;
   const confirmed = await confirm({
     title: `Delete "${tag.name}"?`,
-    description: count > 0
-      ? `This removes the tag from ${count} ${count === 1 ? "product" : "products"}. This can't be undone.`
-      : "It isn't on any products. This can't be undone.",
+    description:
+      count > 0
+        ? `This removes the tag from ${count} ${count === 1 ? "product" : "products"}. This can't be undone.`
+        : "It isn't on any products. This can't be undone.",
     confirmLabel: "Delete tag",
     color: "error",
   });

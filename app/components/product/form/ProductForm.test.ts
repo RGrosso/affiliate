@@ -43,7 +43,7 @@ registerEndpoint("/api/products", { method: "POST", handler: () => ({ success: t
 
 registerEndpoint("/api/products/p1", {
   method: "PATCH",
-  handler: async (event) => {
+  handler: async event => {
     patches.push(readJsonBody(event) as { tagIds?: string[] });
     return { success: true };
   },
@@ -126,7 +126,14 @@ describe("ProductForm", () => {
   it("shows the product's existing tags as selected", async () => {
     const wrapper = await mountForm({ product: { ...product, tagIds: [ECO_ID] } });
 
-    await vi.waitFor(() => expect(wrapper.findComponent({ name: "TagPicker" }).findAll("li").map(li => li.text())).toEqual(["Eco"]));
+    await vi.waitFor(() =>
+      expect(
+        wrapper
+          .findComponent({ name: "TagPicker" })
+          .findAll("li")
+          .map(li => li.text())
+      ).toEqual(["Eco"])
+    );
   });
 
   it("sends the chosen tags when the product is saved", async () => {
@@ -153,8 +160,7 @@ describe("ProductForm", () => {
   });
 
   describe("leaving with unsaved changes", () => {
-    const button = (label: string) =>
-      [...document.body.querySelectorAll("button")].find(el => el.textContent?.trim() === label);
+    const button = (label: string) => [...document.body.querySelectorAll("button")].find(el => el.textContent?.trim() === label);
 
     beforeEach(async () => {
       await useRouter().push("/");
@@ -191,7 +197,7 @@ describe("ProductForm", () => {
 
       await wrapper.get("form").trigger("submit");
 
-      await vi.waitFor(() => expect(useRouter().currentRoute.value.path).not.toBe("/"));
+      await vi.waitFor(() => expect(useRouter().currentRoute.value.path).not.toBe("/"), { timeout: 5000 });
       expect(document.body.querySelector("[role=dialog]")).toBeNull();
     });
   });

@@ -3,7 +3,7 @@ import { users } from "hub:db:schema";
 import { setupPasswordSchema } from "#shared/schemas/auth.schema";
 
 /** Step 2 of setup: save the chosen password and log the user in. */
-export default defineApiHandler(async (event) => {
+export default defineApiHandler(async event => {
   const { username, password } = await readValidated(event, setupPasswordSchema);
 
   const user = await findUserAwaitingSetup(username);
@@ -13,7 +13,8 @@ export default defineApiHandler(async (event) => {
   }
 
   // `password IS NULL` guards against two setups racing for the same account
-  const [updated] = await db.update(users)
+  const [updated] = await db
+    .update(users)
     .set({ password: await hashPassword(password) })
     .where(and(eq(users.id, user.id), isNull(users.password)))
     .returning();

@@ -4,13 +4,7 @@
 import * as h3 from "h3";
 
 const utils = import.meta.glob<Record<string, unknown>>(
-  [
-    "../../shared/utils/*.ts",
-    "../../server/utils/*.ts",
-    "../../server/repositories/*.ts",
-    "../../server/services/*.ts",
-    "!**/*.test.ts",
-  ],
+  ["../../shared/utils/*.ts", "../../server/utils/*.ts", "../../server/repositories/*.ts", "../../server/services/*.ts", "!**/*.test.ts"],
   { eager: true }
 );
 

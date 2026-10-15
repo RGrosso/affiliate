@@ -4,8 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const cwd = fileURLToPath(new URL("../..", import.meta.url));
 
-const seedSamplesFor = async (envName: string) =>
-  (await loadNuxtConfig({ cwd, envName })).runtimeConfig.seedSamples;
+const seedSamplesFor = async (envName: string) => (await loadNuxtConfig({ cwd, envName })).runtimeConfig.seedSamples;
 
 describe("seedSamples", () => {
   it("is on in development", async () => {
