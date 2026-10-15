@@ -10,7 +10,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && vp config",
     "lint": "vp lint --fix && vp fmt",
-    "lint:check": "vp run lint",
+    "lint:check": "vp lint && vp fmt --check",
     "test": "vp test",
     "test:unit": "vp test --project unit --project unit-server",
     "test:nuxt": "vp test --project nuxt",

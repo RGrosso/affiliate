@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
-      - run: vp run lint
+      - run: vp run lint:check
 
   types:
     name: Type check

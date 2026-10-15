@@ -185,13 +185,13 @@ The homepage shows products in a horizontal row that scrolls at every width, wit
 
 ## Testing
 
-| Command           | What it runs                                                                                                         |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `pnpm test`       | Unit tests (Node) and component tests (headless Chromium, with accessibility checks)                                 |
-| `pnpm test:types` | Type check of the app, server and tests                                                                              |
-| `pnpm test:e2e`   | Playwright end-to-end tests against a dev server with its own database (`.data-e2e/`), so your `.data/` is untouched |
-| `pnpm lint:check` | Oxlint and an Oxfmt format check through Vite+ (`vp run lint`), without fixing. `pnpm lint` fixes and formats        |
-| `pnpm storybook`  | Storybook for the core components on `http://localhost:6006`                                                         |
+| Command           | What it runs                                                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm test`       | Unit tests (Node) and component tests (headless Chromium, with accessibility checks)                                        |
+| `pnpm test:types` | Type check of the app, server and tests                                                                                     |
+| `pnpm test:e2e`   | Playwright end-to-end tests against a dev server with its own database (`.data-e2e/`), so your `.data/` is untouched        |
+| `pnpm lint:check` | Oxlint and an Oxfmt format check through Vite+ (`vp lint && vp fmt --check`), without fixing. `pnpm lint` fixes and formats |
+| `pnpm storybook`  | Storybook for the core components on `http://localhost:6006`                                                                |
 
 Repository and service tests run against an in-memory PGlite database with the real migrations applied (`createTestDb()` in `test/setup/db.ts`), so they don't mock the database.
 

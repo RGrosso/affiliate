@@ -14,11 +14,6 @@ const nodeAliases = {
 };
 
 export default defineConfig({
-  run: {
-    tasks: {
-      lint: { command: "vp lint && vp fmt --check" },
-    },
-  },
   lint: {
     plugins: ["eslint", "typescript", "oxc", "vue", "import", "vitest"],
     categories: { correctness: "error" },
@@ -76,6 +71,7 @@ export default defineConfig({
       "dist/**",
       "node_modules/**",
       "coverage/**",
+      "server/db/migrations/**",
       "storybook-static/**",
       "playwright-report/**",
       "test-results/**",
@@ -88,7 +84,7 @@ export default defineConfig({
     trailingComma: "es5",
     arrowParens: "avoid",
     singleAttributePerLine: true,
-    ignorePatterns: ["pnpm-lock.yaml", "drizzle/**", "patches/**"],
+    ignorePatterns: ["pnpm-lock.yaml", "patches/**", "server/db/migrations/**"],
   },
   staged: {
     "*.{js,ts,mjs,cjs,vue}": "vp lint --fix",
