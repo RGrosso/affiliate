@@ -11,7 +11,6 @@ const product: ProductDetail = {
   pricePence: 2499,
   retailer: "Lamp Shop",
   affiliateUrl: "https://example.com/moon-lamp",
-  isSample: false,
   seoTitle: null,
   seoDescription: null,
   images: [{ url: "https://example.com/a.jpg", alt: null }],

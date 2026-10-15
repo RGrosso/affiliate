@@ -15,7 +15,6 @@ const listColumns = {
   pricePence: products.pricePence,
   retailer: products.retailer,
   affiliateUrl: products.affiliateUrl,
-  isSample: products.isSample,
   createdAt: products.createdAt,
 } satisfies Record<Exclude<keyof ProductListItem, "image" | "tags">, PgColumn>;
 

@@ -35,7 +35,6 @@ export type ProductListItem = {
   pricePence: number | null;
   retailer: string | null;
   affiliateUrl: string | null;
-  isSample: boolean;
   /** A `Date` on the server, an ISO string once it has come through the API. */
   createdAt: Date | string;
   image: ProductImage | null;
@@ -52,7 +51,6 @@ export type ProductDetail = {
   pricePence: number | null;
   retailer: string | null;
   affiliateUrl: string | null;
-  isSample: boolean;
   seoTitle: string | null;
   seoDescription: string | null;
   images: ProductImage[];

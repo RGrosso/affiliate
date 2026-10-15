@@ -64,7 +64,6 @@ export class ProductService {
       pricePence: product.pricePence,
       retailer: product.retailer,
       affiliateUrl: product.affiliateUrl,
-      isSample: product.isSample,
       seoTitle: product.seoTitle,
       seoDescription: product.seoDescription,
       images: product.images,

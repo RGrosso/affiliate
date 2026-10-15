@@ -82,11 +82,12 @@ describe("getByHandle", () => {
 
     const product = await service.getByHandle("moon-lamp");
 
-    expect(product).toMatchObject({ title: "Moon Lamp", brand: "Luna", retailer: "Lamp Shop", pricePence: 1999, isSample: false });
+    expect(product).toMatchObject({ title: "Moon Lamp", brand: "Luna", retailer: "Lamp Shop", pricePence: 1999 });
     expect(product.images).toEqual([{ url: "/a.jpg", alt: "Front" }, { url: "/b.jpg", alt: null }]);
     expect(product.tags.map(tag => tag.name)).toEqual(["Top", "Hidden", "Low"]);
     expect(Object.keys(product.tags[0]!).sort()).toEqual(["icon", "id", "name", "slug", "tooltip"]);
     expect(product).not.toHaveProperty("authorId");
+    expect(product).not.toHaveProperty("isSample");
   });
 
   it("sanitises the description", async () => {
@@ -123,9 +124,8 @@ describe("list", () => {
       { title: "A", tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/a2.jpg" }] },
       authorId
     );
-    const sample = await service.create({ title: "B", tagIds: [], images: [] }, authorId);
+    await service.create({ title: "B", tagIds: [], images: [] }, authorId);
     await service.create({ title: "C", tagIds: [], images: [] }, authorId);
-    await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
 
     const paged = await service.list({ page: 1, pageSize: 2 });
     expect(paged).toMatchObject({ page: 1, pageSize: 2, total: 3, totalPages: 2 });

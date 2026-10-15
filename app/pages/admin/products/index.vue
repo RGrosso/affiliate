@@ -51,19 +51,12 @@
           </div>
         </template>
         <template #title-cell="{ row }">
-          <div class="flex items-center gap-2">
-            <NuxtLink
-              :to="`/admin/products/${row.original.id}`"
-              class="font-medium text-highlighted hover:underline"
-            >
-              {{ row.original.title }}
-            </NuxtLink>
-            <CoreTag
-              v-if="row.original.isSample"
-              label="Sample"
-              color="warning"
-            />
-          </div>
+          <NuxtLink
+            :to="`/admin/products/${row.original.id}`"
+            class="font-medium text-highlighted hover:underline"
+          >
+            {{ row.original.title }}
+          </NuxtLink>
         </template>
         <template #retailer-cell="{ row }">
           {{ row.original.retailer ?? "—" }}
