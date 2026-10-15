@@ -59,6 +59,8 @@ export default defineConfig({
       "import/no-mutable-exports": "error",
       "import/no-named-default": "error",
       "vitest/expect-expect": ["error", { assertFunctionNames: ["expect", "expectAccessible"] }],
+      // Vitest takes a custom failure message as expect's second argument
+      "vitest/valid-expect": ["error", { maxArgs: 2 }],
     },
     ignorePatterns: [
       ".output/**",
