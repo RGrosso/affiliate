@@ -12,6 +12,7 @@ const product: EditableProduct = {
   handle: "moon-lamp",
   pricePence: 2499,
   retailer: "Gadget Hub",
+  brand: null,
   affiliateUrl: "https://example.com/moon-lamp",
   seoTitle: null,
   seoDescription: null,

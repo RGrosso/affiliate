@@ -36,56 +36,41 @@
 
     <CoreContainer variant="padded">
       <section class="space-y-5">
-        <div class="flex flex-wrap justify-between items-end gap-3">
-          <div>
-            <h2 class="text-3xl sm:text-4xl">
-              Trending right now
-            </h2>
-            <p class="mt-1">
-              From mildly useful to absolutely bonkers.
-            </p>
-          </div>
-          <UButton
-            to="/products"
-            label="View all"
-            variant="link"
-            trailing-icon="i-heroicons-arrow-right"
-            class="font-bold"
-          />
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <template v-if="status === 'pending'">
-            <UCard
-              v-for="i in FEATURED_COUNT"
-              :key="i"
-              :ui="{ body: 'p-3 sm:p-3 space-y-3' }"
-            >
-              <USkeleton class="aspect-square rounded-sm" />
-              <USkeleton class="h-5 w-3/4" />
-              <USkeleton class="h-4 w-1/3" />
-            </UCard>
+        <ProductRow
+          label="Trending right now"
+          :products="items"
+          :loading="status === 'pending'"
+          :loading-more="loadingMore"
+          :can-load-more="canLoadMore"
+          :view-all-to="VIEW_ALL"
+          @load-more="loadMore"
+        >
+          <template #header>
+            <div>
+              <h2 class="text-3xl sm:text-4xl">
+                Trending right now
+              </h2>
+              <p class="mt-1">
+                From mildly useful to absolutely bonkers.
+              </p>
+            </div>
           </template>
-
-          <ProductCard
-            v-for="product in featured"
-            v-else
-            :key="product.id"
-            :product="product"
-          />
-        </div>
+          <template #actions>
+            <UButton
+              :to="VIEW_ALL"
+              label="View all"
+              variant="link"
+              trailing-icon="i-heroicons-arrow-right"
+              class="font-bold"
+            />
+          </template>
+        </ProductRow>
 
         <p
-          v-if="status !== 'pending' && !featured.length"
+          v-if="status !== 'pending' && !items.length"
           class="text-center py-12"
         >
           {{ error ? "We couldn't load products right now. Please try again later." : "New finds are on the way. Check back soon!" }}
-        </p>
-        <p
-          v-if="featured.length"
-          class="text-sm text-dimmed"
-        >
-          We may earn a commission, at no cost to you.
         </p>
       </section>
     </CoreContainer>
@@ -93,12 +78,10 @@
 </template>
 
 <script setup lang="ts">
-const FEATURED_COUNT = 8;
+import type { ProductListItem } from "#shared/types/product";
 
-const { data, status, error } = await useFetch("/api/products", {
-  query: { pageSize: FEATURED_COUNT },
-  lazy: true,
-});
+// Collections don't exist yet; this placeholder is where "View all" will lead
+const VIEW_ALL = "/collections/all";
 
-const featured = computed(() => data.value?.data.items ?? []);
+const { items, status, error, loadingMore, canLoadMore, loadMore } = await useLoadMore<ProductListItem>("/api/products", { pageSize: 10 });
 </script>

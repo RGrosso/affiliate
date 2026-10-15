@@ -27,9 +27,8 @@ const mixedTags = [gift, eco, hidden, newTag, bestseller];
 
 const product = {
   title: "Moon Lamp",
-  retailer: "Gadget Hub",
+  handle: "moon-lamp",
   pricePence: 2499,
-  affiliateUrl: "https://example.com/moon-lamp",
   image: null,
 };
 
@@ -61,7 +60,7 @@ export const Grid: Story = {
     setup: () => ({
       products: [
         { ...product, title: "Moon Lamp", tags: pickCardTags([newTag, bestseller, eco]) },
-        { ...product, title: "Desk Cactus", retailer: "Plant Place", pricePence: 1200, tags: pickCardTags([gift]) },
+        { ...product, title: "Desk Cactus", pricePence: 1200, tags: pickCardTags([gift]) },
         { ...product, title: "Pet Mug", pricePence: 899, tags: pickCardTags(mixedTags) },
         { ...product, title: "Plain Notebook", pricePence: 450 },
       ],

@@ -115,6 +115,8 @@ import {
   type SetupUsernameInput
 } from "#shared/schemas/auth.schema";
 
+definePageMeta({ hideFooter: true });
+
 const { loggedIn, fetch, setupUsername, redirectAfterLogin } = useAuth();
 const toast = useToast();
 const usernameForm = useTemplateRef("usernameForm");

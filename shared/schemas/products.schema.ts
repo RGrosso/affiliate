@@ -1,6 +1,8 @@
 import { pageQuerySchema } from "./pagination.schema";
 import { z } from "./zod";
 
+export const HANDLE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 const emptyToUndefined = (value: unknown) => (value === "" || value === null ? undefined : value);
 
 const optionalUrl = (label: string) =>
@@ -34,7 +36,7 @@ export const addProductSchema = z.object({
     z
       .string()
       .max(100, "The URL handle can be at most 100 characters")
-      .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens only")
+      .regex(HANDLE_PATTERN, "Use lowercase letters, numbers and hyphens only")
       .optional()
   ),
   price: z
@@ -45,6 +47,7 @@ export const addProductSchema = z.object({
     .optional()
     .nullable(),
   retailer: z.string().trim().max(100, "The retailer name can be at most 100 characters").optional().nullable(),
+  brand: z.string().trim().max(100, "The brand can be at most 100 characters").optional().nullable(),
   affiliateUrl: optionalUrl("affiliate link"),
   seoTitle: z.string().trim().max(70, "The page title can be at most 70 characters").optional().nullable(),
   seoDescription: z.string().trim().max(320, "The meta description can be at most 320 characters").optional().nullable(),

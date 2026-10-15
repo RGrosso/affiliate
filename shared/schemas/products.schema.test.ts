@@ -42,6 +42,11 @@ describe("addProductSchema", () => {
     ]);
   });
 
+  it("trims the brand and limits its length", () => {
+    expect(addProductSchema.parse({ title: "A", brand: "  Luna  " }).brand).toBe("Luna");
+    expect(fieldErrors({ title: "A", brand: "x".repeat(101) }).brand).toEqual(["The brand can be at most 100 characters"]);
+  });
+
   it("allows at most 10 images", () => {
     const images = Array.from({ length: 11 }, (_, i) => ({ url: `/images/${i}.jpg` }));
     expect(fieldErrors({ title: "A", images }).images).toEqual(["You can add up to 10 images"]);

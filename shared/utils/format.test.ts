@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCurrency, formatDate, formatDateTime } from "./format";
+import { formatCurrency, formatDate, formatDateTime, formatYear } from "./format";
 
 describe("formatCurrency", () => {
   it("formats pence as pounds with two decimals", () => {
@@ -31,6 +31,13 @@ describe("formatDate", () => {
 
   it("uses the London date, not UTC, just after midnight in summer", () => {
     expect(formatDate("2026-07-01T23:30:00Z")).toBe("2 Jul 2026");
+  });
+});
+
+describe("formatYear", () => {
+  it("gives the four-digit year", () => {
+    expect(formatYear("2026-06-01T12:00:00Z")).toBe("2026");
+    expect(formatYear("2026-12-31T23:30:00Z")).toBe("2026");
   });
 });
 

@@ -3,8 +3,14 @@
     :locale="en_gb"
     :toaster="{ position: 'top-right' }"
   >
-    <Header />
-    <NuxtPage />
+    <!-- Keeps the footer at the bottom of short pages -->
+    <div class="min-h-dvh flex flex-col">
+      <Header />
+      <div class="flex-1">
+        <NuxtPage />
+      </div>
+      <Footer />
+    </div>
   </UApp>
 </template>
 

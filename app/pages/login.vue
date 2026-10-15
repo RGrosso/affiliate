@@ -74,6 +74,8 @@
 import type { FormSubmitEvent } from "@nuxt/ui";
 import { loginSchema, type LoginInput } from "#shared/schemas/auth.schema";
 
+definePageMeta({ hideFooter: true });
+
 const { user, fetch, logout, setupUsername, redirectAfterLogin } = useAuth();
 const toast = useToast();
 const form = useTemplateRef("form");

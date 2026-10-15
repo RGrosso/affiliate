@@ -215,6 +215,19 @@
             </UFormField>
 
             <UFormField
+              label="Brand"
+              name="brand"
+              help="Who makes it, if that's different from the shop that sells it"
+            >
+              <UInput
+                v-model="state.brand"
+                placeholder="Lodge"
+                icon="i-heroicons-sparkles"
+                class="w-full"
+              />
+            </UFormField>
+
+            <UFormField
               label="Price"
               name="price"
               help="Optional. Shown as a guide; the retailer's price may change."
@@ -319,7 +332,7 @@
             >
               <UTextarea
                 v-model="state.seoDescription"
-                :placeholder="plainDescription.slice(0, 320)"
+                :placeholder="metaDescription(null, state.description)"
                 :rows="3"
                 autoresize
                 class="w-full"
@@ -441,6 +454,7 @@ const toState = (product?: EditableProduct) => ({
   handle: product?.handle ?? "",
   price: product?.pricePence == null ? null : product.pricePence / 100,
   retailer: product?.retailer ?? "",
+  brand: product?.brand ?? "",
   affiliateUrl: product?.affiliateUrl ?? "",
   seoTitle: product?.seoTitle ?? "",
   seoDescription: product?.seoDescription ?? "",
@@ -488,6 +502,7 @@ const snapshot = () => JSON.stringify({
   handle: state.handle,
   price: state.price ?? null,
   retailer: state.retailer.trim(),
+  brand: state.brand.trim(),
   affiliateUrl: state.affiliateUrl.trim(),
   seoTitle: state.seoTitle.trim(),
   seoDescription: state.seoDescription.trim(),
@@ -516,12 +531,12 @@ const saveBarMessage = computed(() => {
   return product ? "Unsaved changes" : "Unsaved product";
 });
 
-const urlPrefix = computed(() => `${requestUrl.host}/products/`);
+const urlPrefix = computed(() => `${requestUrl.host}/product/`);
 
 const seoPreview = computed(() => ({
   title: state.seoTitle || state.title,
-  description: state.seoDescription || plainDescription.value.slice(0, 320),
-  url: `${requestUrl.origin}/products/${state.handle || slugify(state.title)}`,
+  description: metaDescription(state.seoDescription, state.description),
+  url: `${requestUrl.origin}/product/${state.handle || slugify(state.title)}`,
 }));
 
 const toolbarItems: EditorToolbarItem[][] = [
@@ -544,10 +559,6 @@ const toolbarItems: EditorToolbarItem[][] = [
     { kind: "clearFormatting", icon: "i-lucide-remove-formatting", tooltip: { text: "Clear formatting" } },
   ],
 ];
-
-function htmlToText(html: string | null | undefined) {
-  return (html ?? "").replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
-}
 
 function isHttpUrl(value: string | null | undefined): value is string {
   return !!value && /^https?:\/\/\S+\.\S+/.test(value);

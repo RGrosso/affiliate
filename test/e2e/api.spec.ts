@@ -61,6 +61,24 @@ test.describe("API", () => {
     expect(past.total).toBe(all.total);
   });
 
+  test("returns a product by its handle to logged-out requests", async ({ request }) => {
+    const response = await request.get("/api/products/handle/cast-iron-skillet-12");
+
+    expect(response.status()).toBe(200);
+    const { data } = await response.json();
+    expect(data).toMatchObject({ handle: "cast-iron-skillet-12", brand: "Ironhearth" });
+    expect(data).not.toHaveProperty("authorId");
+  });
+
+  test("returns a 404 for an unknown or malformed product handle", async ({ request }) => {
+    for (const handle of ["no-such-product", "Not%20A%20Handle"]) {
+      const response = await request.get(`/api/products/handle/${handle}`);
+
+      expect(response.status()).toBe(404);
+      expect(await response.json()).toMatchObject({ success: false, code: "NOT_FOUND" });
+    }
+  });
+
   test("only lets admins ask for every tag on the product list", async ({ request }) => {
     const response = await request.get("/api/products?allTags=true");
 

@@ -52,6 +52,7 @@ export function formatCurrency(
 
 const dateFormatter = new Intl.DateTimeFormat(LOCALE, { dateStyle: "medium", timeZone: TIME_ZONE });
 const dateTimeFormatter = new Intl.DateTimeFormat(LOCALE, { dateStyle: "medium", timeStyle: "short", timeZone: TIME_ZONE });
+const yearFormatter = new Intl.DateTimeFormat(LOCALE, { year: "numeric", timeZone: TIME_ZONE });
 
 export function formatDate(value: string | number | Date): string {
   return dateFormatter.format(new Date(value));
@@ -59,4 +60,8 @@ export function formatDate(value: string | number | Date): string {
 
 export function formatDateTime(value: string | number | Date): string {
   return dateTimeFormatter.format(new Date(value));
+}
+
+export function formatYear(value: string | number | Date): string {
+  return yearFormatter.format(new Date(value));
 }

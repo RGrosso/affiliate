@@ -15,7 +15,7 @@ The theme lives in `app/assets/css/main.css` (scales, fonts, surfaces) and `app/
 - Style surfaces and text with Nuxt UI's semantic classes (`bg-default`, `bg-muted`, `bg-elevated`, `text-default`, `text-muted`, `text-highlighted`, `border-default`, `text-primary`), so light and dark mode follow the theme. Fixed Tailwind shades like `gray-500` stay the same in both modes.
 - For a dark brand band such as the hero or announcement strip, use `bg-band` or `bg-band-strong` with `text-white` and `text-band-muted`. Bands stay dark blue in both modes, so white text always passes.
 - `action` (orange) is for the main call-to-action button on a page, plus the full stop in the logo. Solid action buttons get dark navy text from `app.config.ts`; white fails contrast on orange.
-- Show "We may earn a commission, at no cost to you." near affiliate links.
+- The site footer carries "We may earn a commission, at no cost to you." Don't repeat it on pages; the footer is hidden only on login, setup and the admin area.
 
 ## Core components
 

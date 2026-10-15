@@ -1,6 +1,6 @@
 import type { z } from "#shared/schemas/zod";
 import type { addProductSchema, ProductListQuery } from "#shared/schemas/products.schema";
-import type { ProductListItem } from "#shared/types/product";
+import type { ProductDetail, ProductListItem } from "#shared/types/product";
 
 const SEEDED_KEY = "sample_products_seeded";
 
@@ -47,6 +47,32 @@ export class ProductService {
     const tags = (await this.tags.findForProducts([id])).get(id) ?? [];
 
     return { ...product, tags, tagIds: tags.map(tag => tag.id) };
+  }
+
+  /** The public product page: every tag as a badge, and the description made safe to render. */
+  async getByHandle(handle: string): Promise<ProductDetail> {
+    const product = await this.products.findByHandleWithImages(handle);
+    if (!product) {
+      throw productNotFound();
+    }
+
+    const tags = (await this.tags.findForProducts([product.id])).get(product.id) ?? [];
+
+    return {
+      id: product.id,
+      title: product.title,
+      handle: product.handle,
+      description: sanitiseRichText(product.description),
+      brand: product.brand,
+      pricePence: product.pricePence,
+      retailer: product.retailer,
+      affiliateUrl: product.affiliateUrl,
+      isSample: product.isSample,
+      seoTitle: product.seoTitle,
+      seoDescription: product.seoDescription,
+      images: product.images,
+      tags: sortTagsByPriority(tags).map(toTagBadge),
+    };
   }
 
   async create(input: ProductInput, authorId: string) {
@@ -127,6 +153,7 @@ export class ProductService {
         pricePence: sample.pricePence,
         description: sample.description,
         retailer: sample.retailer,
+        brand: sample.brand,
         affiliateUrl: `https://example.com/products/${sample.handle}`,
         seoTitle: sample.title,
         seoDescription: sample.seoDescription,

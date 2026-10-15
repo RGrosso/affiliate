@@ -28,6 +28,7 @@ export const products = pgTable("products", {
   description: text("description"),
   pricePence: integer("price_pence"),
   retailer: text("retailer"),
+  brand: text("brand"),
   affiliateUrl: text("affiliate_url"),
   seoTitle: text("seo_title"),
   seoDescription: text("seo_description"),
