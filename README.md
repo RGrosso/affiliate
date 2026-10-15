@@ -31,11 +31,11 @@ To finish setting it up:
 
 The same flow applies to any user whose password is empty (`NULL`). Logging in as that user sends them to `/setup` to choose a password first.
 
-To start again from scratch, stop the dev server and run `pnpm dev:reset`, then `pnpm dev`. The reset deletes the `.data/` folder. The next dev server start re-runs the migrations and seeds the admin again with no password. The sample products come back on the next admin login. It refuses to run with `NODE_ENV=production`.
+To start again from scratch, stop the dev server and run `pnpm dev:reset`, then `pnpm dev`. The reset deletes the `.data/` folder. The next dev server start re-runs the migrations and seeds the admin again with no password. The sample products come back on the next admin login (see [Sample products](#sample-products)). It refuses to run with `NODE_ENV=production`.
 
 ## Sample products
 
-The first time an admin logs in (or finishes setup), 24 example products with square placeholder images are added so the store isn't empty. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so they don't come back once they're gone, for example after you remove them from the database. If the store already has products, no samples are added. The sample data lives in `server/utils/sampleProducts.ts`.
+In development, the first time an admin logs in (or finishes setup), 24 example products with square placeholder images are added so the store isn't empty. They get a **Sample** badge in **Admin → Products**. Production builds don't add them. This is controlled by the `seedSamples` runtime config, on in development and off in production, and you can override it with the `NUXT_SEED_SAMPLES` environment variable. For example, `NUXT_SEED_SAMPLES=false pnpm dev` runs the site with no samples. They are only ever added once: a `sample_products_seeded` row in the `settings` table records that, so they don't come back once they're gone, for example after you remove them from the database. If the store already has products, no samples are added. To start again with a fresh set, stop the dev server and run `pnpm dev:reset`. The sample data lives in `server/utils/sampleProducts.ts`.
 
 Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
 

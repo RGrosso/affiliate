@@ -11,7 +11,8 @@ rmSync(".data-e2e", { recursive: true, force: true });
 const server = spawn(
   process.execPath,
   ["node_modules/nuxt/bin/nuxt.mjs", "dev", "--envName", "e2e", "--port", String(E2E_PORT), "--no-fork"],
-  { stdio: "inherit" }
+  // The tests rely on the samples, even if NUXT_SEED_SAMPLES=false is set in the shell
+  { stdio: "inherit", env: { ...process.env, NUXT_SEED_SAMPLES: "true" } }
 );
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
