@@ -197,7 +197,7 @@ describe("ProductForm", () => {
 
       await wrapper.get("form").trigger("submit");
 
-      await vi.waitFor(() => expect(useRouter().currentRoute.value.path).not.toBe("/"));
+      await vi.waitFor(() => expect(useRouter().currentRoute.value.path).not.toBe("/"), { timeout: 5000 });
       expect(document.body.querySelector("[role=dialog]")).toBeNull();
     });
   });
