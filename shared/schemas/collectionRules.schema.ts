@@ -22,7 +22,7 @@ const tagRule = z.object({
 
 const retailerRule = z.object({
   type: z.literal(RuleType.Retailer),
-  operator: z.enum(RetailerOperator, { error: "Please choose whether the retailer is or isn’t the one given" }),
+  operator: z.enum(RetailerOperator, { error: "Please choose whether the retailer is or isn't the one given" }),
   retailer: z
     .string({ error: "Please choose a retailer" })
     .trim()

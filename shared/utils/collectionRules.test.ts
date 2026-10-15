@@ -23,20 +23,20 @@ describe("describeRules", () => {
 
   it("describes the negative tag condition", () => {
     const rules: CollectionRules = { match: RuleMatch.All, rules: [tag(TagOperator.HasNot)] };
-    expect(describeRules(rules, names)).toBe("Doesn’t have the tag “Wedding”");
+    expect(describeRules(rules, names)).toBe("Doesn't have the tag “Wedding”");
   });
 
   it("describes both retailer operators", () => {
     const is: CollectionRules = { match: RuleMatch.All, rules: [retailer(RetailerOperator.Is, "Etsy")] };
     const isNot: CollectionRules = { match: RuleMatch.All, rules: [retailer(RetailerOperator.IsNot, "Etsy")] };
     expect(describeRules(is, names)).toBe("Retailer is Etsy");
-    expect(describeRules(isNot, names)).toBe("Retailer isn’t Etsy");
+    expect(describeRules(isNot, names)).toBe("Retailer isn't Etsy");
   });
 
   it("joins conditions with “and” for all and “or” for any", () => {
     const rules = [tag(TagOperator.Has), retailer(RetailerOperator.IsNot, "Etsy")];
-    expect(describeRules({ match: RuleMatch.All, rules }, names)).toBe("Has the tag “Wedding” and retailer isn’t Etsy");
-    expect(describeRules({ match: RuleMatch.Any, rules }, names)).toBe("Has the tag “Wedding” or retailer isn’t Etsy");
+    expect(describeRules({ match: RuleMatch.All, rules }, names)).toBe("Has the tag “Wedding” and retailer isn't Etsy");
+    expect(describeRules({ match: RuleMatch.Any, rules }, names)).toBe("Has the tag “Wedding” or retailer isn't Etsy");
   });
 
   it("puts subgroups in brackets", () => {
@@ -64,7 +64,7 @@ describe("describeRules", () => {
 
   it("calls a tag that no longer exists a deleted tag", () => {
     expect(describeRules({ match: RuleMatch.All, rules: [tag(TagOperator.Has, unknownTag)] }, names)).toBe("Has a deleted tag");
-    expect(describeRules({ match: RuleMatch.All, rules: [tag(TagOperator.HasNot, unknownTag)] }, names)).toBe("Doesn’t have a deleted tag");
+    expect(describeRules({ match: RuleMatch.All, rules: [tag(TagOperator.HasNot, unknownTag)] }, names)).toBe("Doesn't have a deleted tag");
   });
 
   it("copes with no conditions", () => {

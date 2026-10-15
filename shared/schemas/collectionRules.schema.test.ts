@@ -106,7 +106,7 @@ describe("collectionRulesSchema", () => {
       { path: "rules.0.operator", message: "Please choose whether the product has the tag or not" },
     ]);
     expect(messages({ match: "all", rules: [{ ...retailerRule, operator: "has" }] })).toEqual([
-      { path: "rules.0.operator", message: "Please choose whether the retailer is or isn’t the one given" },
+      { path: "rules.0.operator", message: "Please choose whether the retailer is or isn't the one given" },
     ]);
   });
 

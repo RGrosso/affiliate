@@ -17,12 +17,12 @@ const joiners: Record<RuleMatch, string> = {
 
 const describeTag: Record<TagOperator, (name: string) => string> = {
   [TagOperator.Has]: name => `has ${name}`,
-  [TagOperator.HasNot]: name => `doesn’t have ${name}`,
+  [TagOperator.HasNot]: name => `doesn't have ${name}`,
 };
 
 const describeRetailer: Record<RetailerOperator, (retailer: string) => string> = {
   [RetailerOperator.Is]: retailer => `retailer is ${retailer}`,
-  [RetailerOperator.IsNot]: retailer => `retailer isn’t ${retailer}`,
+  [RetailerOperator.IsNot]: retailer => `retailer isn't ${retailer}`,
 };
 
 // One entry per rule type: TypeScript flags a new type that is missing here
