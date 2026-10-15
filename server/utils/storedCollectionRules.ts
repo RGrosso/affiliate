@@ -1,4 +1,5 @@
 import { z } from "#shared/schemas/zod";
+import type { Equals } from "#shared/types/assert";
 
 // These values are persisted in `collections.rules`. Changing one needs a data migration
 // plus a new version handled in `parseStoredRules`. The API's values live in `shared/types/collectionRules.ts`.
@@ -32,10 +33,16 @@ const storedGroup = z.object({
   rules: z.array(z.discriminatedUnion("type", [storedTagRule, storedRetailerRule])).min(1),
 });
 
+const storedRuleItem = z.discriminatedUnion("type", [storedTagRule, storedRetailerRule, storedGroup]);
+
+// Fails to compile when a new stored rule type isn't added to the union above
+true satisfies Equals<z.infer<typeof storedRuleItem>["type"], StoredRuleType>;
+
+// Stays 1 when STORED_RULES_VERSION moves on, so older rows still parse before they're upgraded
 const storedRulesV1 = z.object({
   version: z.literal(1),
   match: z.enum(StoredRuleMatch),
-  rules: z.array(z.discriminatedUnion("type", [storedTagRule, storedRetailerRule, storedGroup])).min(1),
+  rules: z.array(storedRuleItem).min(1),
 });
 
 export type StoredTagRule = z.infer<typeof storedTagRule>;
