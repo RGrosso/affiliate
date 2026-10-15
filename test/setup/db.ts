@@ -5,6 +5,12 @@ import { PgTable } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import * as schema from "../../server/db/schema";
+import {
+  ALL_COLLECTION_ID,
+  StoredCollectionStatus,
+  StoredCollectionType,
+  StoredProductSort
+} from "../../server/utils/storedCollection";
 
 const migrationsFolder = fileURLToPath(new URL("../../server/db/migrations/postgresql", import.meta.url));
 
@@ -25,8 +31,23 @@ const tableNames = Object.values(schema)
   .map(table => `"${getTableName(table)}"`)
   .join(", ");
 
+/** Mirrors the row migration 0006 inserts; `collections.test.ts` checks the two agree. */
+export const allCollectionRow = {
+  id: ALL_COLLECTION_ID,
+  title: "All products",
+  handle: "all",
+  type: StoredCollectionType.Automated,
+  status: StoredCollectionStatus.Published,
+  locked: true,
+  description: "Every product in the shop, newest first.",
+  rules: null,
+  defaultSort: StoredProductSort.Newest,
+} as const;
+
+/** Empties every table, then puts back the All collection that the migrations insert, so each test starts like a fresh database. */
 export async function resetDb(db: TestDb) {
   await db.execute(sql.raw(`TRUNCATE TABLE ${tableNames} RESTART IDENTITY CASCADE`));
+  await db.insert(schema.collections).values(allCollectionRow);
 }
 
 export async function insertTestUser(db: TestDb, username = "tester") {
