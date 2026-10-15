@@ -7,7 +7,7 @@ import {
   StoredRuleMatch,
   StoredRuleType,
   StoredTagOperator,
-  type StoredCollectionRules
+  type StoredCollectionRules,
 } from "../utils/storedCollectionRules";
 import { ProductRepository, type NewProduct } from "./ProductRepository";
 
@@ -141,7 +141,10 @@ describe("findFeaturedImages", () => {
 describe("findPage with rules", () => {
   // A: Etsy, gifts. B: Amazon, gifts. C: Etsy, no tags.
   const catalogue = async () => {
-    const [gifts] = await db.insert(tags).values([{ name: "Gifts", slug: "gifts" }]).returning();
+    const [gifts] = await db
+      .insert(tags)
+      .values([{ name: "Gifts", slug: "gifts" }])
+      .returning();
     const a = await repo.insert(product("A", { retailer: "Etsy", createdAt: new Date(2026, 0, 3) }));
     const b = await repo.insert(product("B", { retailer: "Amazon", createdAt: new Date(2026, 0, 2) }));
     await repo.insert(product("C", { retailer: "Etsy", createdAt: new Date(2026, 0, 1) }));
@@ -152,10 +155,12 @@ describe("findPage with rules", () => {
     return gifts!.id;
   };
 
-  const rules = (...items: StoredCollectionRules["rules"]): StoredCollectionRules =>
-    ({ version: STORED_RULES_VERSION, match: StoredRuleMatch.All, rules: items });
-  const retailerIs = (retailer: string) =>
-    ({ type: StoredRuleType.Retailer, operator: StoredRetailerOperator.Is, retailer });
+  const rules = (...items: StoredCollectionRules["rules"]): StoredCollectionRules => ({
+    version: STORED_RULES_VERSION,
+    match: StoredRuleMatch.All,
+    rules: items,
+  });
+  const retailerIs = (retailer: string) => ({ type: StoredRuleType.Retailer, operator: StoredRetailerOperator.Is, retailer });
   const hasTag = (tagId: string) => ({ type: StoredRuleType.Tag, operator: StoredTagOperator.Has, tagId });
 
   const titles = (page: { items: { title: string }[] }) => page.items.map(item => item.title);

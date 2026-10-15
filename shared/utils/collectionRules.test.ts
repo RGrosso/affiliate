@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  RetailerOperator,
-  RuleMatch,
-  RuleType,
-  TagOperator,
-  type CollectionRules
-} from "../types/collectionRules";
+import { RetailerOperator, RuleMatch, RuleType, TagOperator, type CollectionRules } from "../types/collectionRules";
 import { countConditions, describeRules } from "./collectionRules";
 
 const wedding = "11111111-1111-4111-8111-111111111111";

@@ -6,7 +6,7 @@ import {
   StoredRuleType,
   StoredTagOperator,
   type StoredCollectionRuleItem,
-  type StoredCollectionRules
+  type StoredCollectionRules,
 } from "../utils/storedCollectionRules";
 
 type StoredRuleOfType<T extends StoredRuleType> = Extract<StoredCollectionRuleItem, { type: T }>;

@@ -39,14 +39,16 @@ describe("toStoredRules", () => {
     expect(toStoredRules(rules)).toEqual({
       version: 1,
       match: "all",
-      rules: [{
-        type: "group",
-        match: "any",
-        rules: [
-          { type: "tag", operator: "has_not", tagId },
-          { type: "retailer", operator: "is_not", retailer: "Etsy" },
-        ],
-      }],
+      rules: [
+        {
+          type: "group",
+          match: "any",
+          rules: [
+            { type: "tag", operator: "has_not", tagId },
+            { type: "retailer", operator: "is_not", retailer: "Etsy" },
+          ],
+        },
+      ],
     });
   });
 });

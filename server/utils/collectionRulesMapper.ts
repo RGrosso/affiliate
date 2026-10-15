@@ -5,7 +5,7 @@ import {
   TagOperator,
   type CollectionRule,
   type CollectionRuleItem,
-  type CollectionRules
+  type CollectionRules,
 } from "#shared/types/collectionRules";
 import {
   STORED_RULES_VERSION,
@@ -15,7 +15,7 @@ import {
   StoredTagOperator,
   type StoredCollectionRule,
   type StoredCollectionRuleItem,
-  type StoredCollectionRules
+  type StoredCollectionRules,
 } from "./storedCollectionRules";
 
 // Every API value maps to a stored one and back; the Record types make TypeScript flag a missing entry

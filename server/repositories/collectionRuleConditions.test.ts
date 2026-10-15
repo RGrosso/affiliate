@@ -9,7 +9,7 @@ import {
   StoredTagOperator,
   type StoredCollectionRule,
   type StoredCollectionRuleItem,
-  type StoredCollectionRules
+  type StoredCollectionRules,
 } from "../utils/storedCollectionRules";
 import { compileRules } from "./collectionRuleConditions";
 import { ProductRepository } from "./ProductRepository";
@@ -37,16 +37,11 @@ const catalogue = [
 const { Has, HasNot } = StoredTagOperator;
 const { Is, IsNot } = StoredRetailerOperator;
 
-const tagRule = (operator: StoredTagOperator, tagId: string): StoredCollectionRule =>
-  ({ type: StoredRuleType.Tag, operator, tagId });
-const retailerRule = (operator: StoredRetailerOperator, retailer: string): StoredCollectionRule =>
-  ({ type: StoredRuleType.Retailer, operator, retailer });
-const group = (match: StoredRuleMatch, ...rules: StoredCollectionRule[]): StoredCollectionRuleItem =>
-  ({ type: StoredRuleType.Group, match, rules });
-const all = (...rules: StoredCollectionRuleItem[]): StoredCollectionRules =>
-  ({ version: STORED_RULES_VERSION, match: StoredRuleMatch.All, rules });
-const any = (...rules: StoredCollectionRuleItem[]): StoredCollectionRules =>
-  ({ version: STORED_RULES_VERSION, match: StoredRuleMatch.Any, rules });
+const tagRule = (operator: StoredTagOperator, tagId: string): StoredCollectionRule => ({ type: StoredRuleType.Tag, operator, tagId });
+const retailerRule = (operator: StoredRetailerOperator, retailer: string): StoredCollectionRule => ({ type: StoredRuleType.Retailer, operator, retailer });
+const group = (match: StoredRuleMatch, ...rules: StoredCollectionRule[]): StoredCollectionRuleItem => ({ type: StoredRuleType.Group, match, rules });
+const all = (...rules: StoredCollectionRuleItem[]): StoredCollectionRules => ({ version: STORED_RULES_VERSION, match: StoredRuleMatch.All, rules });
+const any = (...rules: StoredCollectionRuleItem[]): StoredCollectionRules => ({ version: STORED_RULES_VERSION, match: StoredRuleMatch.Any, rules });
 
 async function titlesFor(rules: StoredCollectionRules | null, tag?: string[]) {
   const { items, total } = await repo.findPage({ page: 1, pageSize: 50, tag }, { rules });
@@ -64,11 +59,14 @@ afterAll(() => close());
 beforeEach(async () => {
   await resetDb(db);
   const authorId = (await insertTestUser(db)).id;
-  const rows = await db.insert(tags).values([
-    { name: "Wedding", slug: "wedding" },
-    { name: "Gift", slug: "gift" },
-    { name: "Unused", slug: "unused" },
-  ]).returning();
+  const rows = await db
+    .insert(tags)
+    .values([
+      { name: "Wedding", slug: "wedding" },
+      { name: "Gift", slug: "gift" },
+      { name: "Unused", slug: "unused" },
+    ])
+    .returning();
   const idBySlug = new Map(rows.map(row => [row.slug, row.id]));
   wedding = idBySlug.get("wedding")!;
   gift = idBySlug.get("gift")!;
@@ -179,10 +177,7 @@ describe("subgroups", () => {
   });
 
   it("nests an all group inside any", async () => {
-    const rules = any(
-      retailerRule(Is, "Argos"),
-      group(StoredRuleMatch.All, tagRule(Has, wedding), retailerRule(Is, "Amazon"))
-    );
+    const rules = any(retailerRule(Is, "Argos"), group(StoredRuleMatch.All, tagRule(Has, wedding), retailerRule(Is, "Amazon")));
     expect(await titlesFor(rules)).toEqual(["Pen", "Vase"]);
   });
 

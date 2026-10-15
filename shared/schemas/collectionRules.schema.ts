@@ -1,10 +1,4 @@
-import {
-  RetailerOperator,
-  RuleMatch,
-  RuleType,
-  TagOperator,
-  type CollectionRules
-} from "../types/collectionRules";
+import { RetailerOperator, RuleMatch, RuleType, TagOperator, type CollectionRules } from "../types/collectionRules";
 import type { Equals } from "../types/assert";
 import { countConditions } from "../utils/collectionRules";
 import { z } from "./zod";
@@ -40,10 +34,7 @@ const rule = z.discriminatedUnion("type", [tagRule, retailerRule], { error: unkn
 const subgroup = z.object({
   type: z.literal(RuleType.Group),
   match,
-  rules: z
-    .array(rule, { error: emptyGroup })
-    .min(1, emptyGroup)
-    .max(MAX_ITEMS_PER_GROUP, `A group can have at most ${MAX_ITEMS_PER_GROUP} items`),
+  rules: z.array(rule, { error: emptyGroup }).min(1, emptyGroup).max(MAX_ITEMS_PER_GROUP, `A group can have at most ${MAX_ITEMS_PER_GROUP} items`),
 });
 
 const rootItem = z.discriminatedUnion("type", [tagRule, retailerRule, subgroup], { error: unknownCondition });
@@ -59,7 +50,7 @@ export const collectionRulesSchema = z
       .min(1, noConditions)
       .max(MAX_ITEMS_PER_GROUP, `A collection can have at most ${MAX_ITEMS_PER_GROUP} items at the top level`),
   })
-  .check((ctx) => {
+  .check(ctx => {
     // Counts conditions inside groups too, so a few full groups can't get round the cap
     if (countConditions(ctx.value as CollectionRules) > MAX_CONDITIONS) {
       ctx.issues.push({
