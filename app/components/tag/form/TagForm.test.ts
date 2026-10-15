@@ -136,11 +136,10 @@ describe("TagForm", () => {
 
   it("sends the show in filter switch", async () => {
     const wrapper = await mountInApp(TagForm, { tag });
-    const filterSwitch = wrapper.findAll<HTMLButtonElement>("button[role=switch]").find(el => el.attributes("aria-labelledby") !== undefined
-      && wrapper.get(`[id="${el.attributes("aria-labelledby")}"]`).text() === "Show in filter");
-    expect(filterSwitch?.attributes("aria-checked")).toBe("false");
+    const filterSwitch = field(wrapper, "Show in filter");
+    expect(filterSwitch.attributes("aria-checked")).toBe("false");
 
-    await filterSwitch!.trigger("click");
+    await filterSwitch.trigger("click");
     expect(wrapper.text()).toContain("Unsaved changes");
     await wrapper.get("form").trigger("submit");
 
