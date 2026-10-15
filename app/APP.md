@@ -29,7 +29,7 @@ Use the core component wherever one exists:
 | `<CoreAlert variant="warning" title="…" />` | `UAlert` | Inline messages. `variant` is `success`, `error`, `warning` or `info` and sets the colour and icon. Also takes `description`, `actions` and an optional `icon` override. |
 | `<CoreTag label="Sample" color="warning" />` | `UBadge` | Small labels on products. `color` defaults to `neutral`. `icon` is a `TagIcon` key shown as the leading icon (mapped in `app/utils/tagIcons.ts`). `tooltip` wraps the badge in a focusable `UTooltip`, which needs `UApp` above it. |
 | `<CoreButtonBar :show="dirty">` | (custom) | The light blue (`info`) "Unsaved changes" bar fixed to the bottom of the viewport. It slides up when `show` is true and is removed when false, and renders a spacer so page content isn't hidden under it. Buttons go in the default slot. |
-| `<CoreConfirmDialog title="�" />` | `UModal` | A yes/no dialog with optional `description`, closing `question`, `confirmLabel`, `cancelLabel` and `color`. Don't mount it by hand: call `useConfirmDialog().confirm({ ... })`, which resolves `true` only when confirmed. |
+| `<CoreConfirmDialog title="…" />` | `UModal` | A yes/no dialog with optional `description`, closing `question`, `confirmLabel`, `cancelLabel` and `color`. Don't mount it by hand: call `useConfirmDialog().confirm({ ... })`, which resolves `true` only when confirmed. |
 | `<CorePagination v-model:page="page" :total="total" :page-size="pageSize" />` | `UPagination` | Page controls under a paginated list. Renders nothing when there is only one page. |
 
 Add a row here when you add a core component.
