@@ -37,7 +37,7 @@ To start again from scratch, stop the dev server and run `pnpm dev:reset`, then 
 
 In development, the first time an admin logs in (or finishes setup), 24 example products with square placeholder images are added so the store isn't empty. Their edit page notes that they're samples, but they look like any other product everywhere else. Production builds don't add them. This is controlled by the `seedSamples` runtime config, on in development and off in production, and you can override it with the `NUXT_SEED_SAMPLES` environment variable. For example, `NUXT_SEED_SAMPLES=false pnpm dev` runs the site with no samples. They are only ever added once: a `sample_products_seeded` row in the `settings` table records that, so they don't come back once they're gone, for example after you remove them from the database. If the store already has products, no samples are added. To start again with a fresh set, stop the dev server and run `pnpm dev:reset`. The sample data lives in `server/utils/sampleProducts.ts`.
 
-Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
+Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development). Collection covers are cropped to a 3:1 banner and stored the same way. `POST /api/products/images` takes an optional `prefix` form field, `products` (the default) or `collections`, which decides the folder and the image's URL. Anything else is a 400.
 
 ## Brand and theme
 
@@ -166,7 +166,7 @@ Product routes change as follows:
 
 ## Collections
 
-Collections group products, like Shopify's. Each has a title, a URL handle, a plain text description, an optional image, SEO fields (which fall back to the title and the start of the description), a status and a default sort. The public page is described below; the admin pages come later.
+Collections group products, like Shopify's. Each has a title, a URL handle, a plain text description, an optional image, SEO fields (which fall back to the title and the start of the description), a status and a default sort. The public page is described below, and the admin screens under "Managing collections".
 
 There are two types, fixed when the collection is created:
 
@@ -218,6 +218,22 @@ What the database stores is defined in `server/` only (`server/utils/storedColle
 | `GET`    | `/api/products/retailers`                  | Admin  | The distinct retailers, for the retailer rule's dropdown                                                                 |
 
 A tag that a collection's rules use can't be deleted. The request fails with a 409 that names the collections, and the admin tags page explains the same.
+
+### Managing collections
+
+**Admin → Collections** (`/admin/collections`) lists every collection with its type (Hand-picked or Automatic), status (Draft or Live), product count and a sentence describing its rules. The locked All products collection has a **Locked** badge, and each row links to its page on the site (`/collections/<handle>`).
+
+**Add collection** (`/admin/collections/new`) and each collection's page (`/admin/collections/<id>`) share one form, laid out like the product form. The type is chosen when you create a collection and is read-only afterwards.
+
+- **Details:** the title and a plain text description of up to 500 characters, with a character count.
+- **Hand-picked collections** have a **Products** card. **Add products** opens a dialog that searches the product list by title (`GET /api/products?q=`, a case-insensitive "contains") and lets you tick products to add. Products show in the order they were added, and each has a remove button.
+- **Automatic collections** have a **Conditions** card and a **Preview** card. Choose whether products must match **all** or **any** of the conditions, then add conditions and groups. A group has its own all/any switch and conditions, and groups can't be nested. A condition is a tag the product has or doesn't have, or a retailer it is or isn't from. The retailer list comes from the retailers on existing products, and you can type one that isn't there yet. Retailers are matched exactly. The preview shows how many products match, a sentence describing the rules and the first 12 products. It updates a moment after you stop editing, once the conditions are complete.
+- **Cover image:** uploaded and cropped to 3:1 in the browser, with alt text and a small preview of the banner.
+- **Search listing:** the URL handle fills in from the title until you edit it, then the page title and meta description, which show the title and the start of the description as placeholders, with a Google-style preview.
+- **Default sort:** "Featured (manual order)" is only offered for hand-picked collections, and is their starting choice. **Status:** Draft or Live.
+- **The All products collection** shows a note and keeps its handle, type, status, sort and conditions read-only. You can edit its title, description, image and search listing. It has no delete button.
+- **Saving** shows server problems, such as the reserved `all` handle or a handle already in use, on the field they belong to. Unsaved changes show the usual bar and prompt before you leave.
+- **Delete collection** at the bottom of the page asks for confirmation. It deletes the collection but not its products.
 
 ## Product pages
 
