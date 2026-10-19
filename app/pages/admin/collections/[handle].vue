@@ -49,21 +49,21 @@ import type { ProductListItem } from "#shared/types/product";
 const PAGE_SIZE = 100;
 
 const route = useRoute();
-const id = route.params.id as string;
+const handle = route.params.handle as string;
 const toast = useToast();
 const { confirm } = useConfirmDialog();
 // Plain $fetch drops the session cookie during server rendering
 const requestFetch = useRequestFetch();
 
 // Nitro can't infer the response type from a template-literal URL, so give it explicitly
-const { data, error } = await useFetch<ApiSuccess<AdminCollection>>(`/api/collections/${id}`);
+const { data, error } = await useFetch<ApiSuccess<AdminCollection>>(`/api/collections/by-handle/${handle}`);
 
 const collection = computed(() => data.value?.data ?? null);
 
 // The form needs each chosen product's title, image and price, which the collection itself only lists as ids.
 // A draft collection is readable here because the request is the admin's.
-async function loadProducts(handle: string): Promise<ProductListItem[]> {
-  const url = `/api/collections/handle/${handle}/products`;
+async function loadProducts(collectionHandle: string): Promise<ProductListItem[]> {
+  const url = `/api/collections/handle/${collectionHandle}/products`;
   const items: ProductListItem[] = [];
   for (let page = 1; ; page++) {
     const { data: result } = await requestFetch<ApiSuccess<CollectionProductsPage>>(url, {
@@ -75,15 +75,17 @@ async function loadProducts(handle: string): Promise<ProductListItem[]> {
 }
 
 const { data: products } = await useAsyncData(
-  `admin-collection-products-${id}`,
+  `admin-collection-products-${handle}`,
   async () => (collection.value?.type === CollectionType.Manual ? loadProducts(collection.value.handle) : []),
   { default: () => [] }
 );
 
 const removing = ref(false);
 
-function onSaved(saved: AdminCollection) {
+async function onSaved(saved: AdminCollection) {
   data.value = data.value && { ...data.value, data: saved };
+  // The URL is the handle, so a renamed one moves the page. The form is clean by now, so nothing asks about unsaved changes.
+  if (saved.handle !== handle) await navigateTo(`/admin/collections/${saved.handle}`, { replace: true });
 }
 
 async function deleteCollection() {
@@ -99,7 +101,7 @@ async function deleteCollection() {
 
   removing.value = true;
   try {
-    await $fetch(`/api/collections/${id}`, { method: "DELETE" });
+    await $fetch(`/api/collections/${collection.value.id}`, { method: "DELETE" });
     toast.add({ title: "Collection deleted", color: "success" });
     await navigateTo("/admin/collections");
   } catch (err) {

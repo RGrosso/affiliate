@@ -151,6 +151,13 @@ describe("create", () => {
     expect(error.data?.fieldErrors?.handle).toEqual(["This URL is reserved for the all products page"]);
   });
 
+  it("rejects the reserved new handle when it comes from the title", async () => {
+    const error = await rejection(create({ type: "manual", title: "New" }));
+
+    expect(error.statusCode).toBe(400);
+    expect(error.data?.fieldErrors?.handle).toEqual(["This URL is reserved for the add collection page"]);
+  });
+
   it("rejects a title that can't make a handle", async () => {
     const error = await rejection(create({ type: "manual", title: "!!!" }));
 
@@ -171,6 +178,29 @@ describe("create", () => {
     const error = await rejection(create({ type: "manual", title: "Gifts", productIds: [product.id, unknownId] }));
     expect(error.data?.fieldErrors?.productIds).toEqual(["One of these products no longer exists. Please refresh and try again"]);
     expect(await service.list()).toHaveLength(1);
+  });
+});
+
+describe("getByHandleForAdmin", () => {
+  it("returns the same shape as get, including a draft", async () => {
+    const [product] = [await addProduct("A")];
+    const { id } = await create({ type: "manual", title: "Wedding gifts", productIds: [product.id] });
+
+    const found = await service.getByHandleForAdmin("wedding-gifts");
+
+    expect(found).toEqual(await service.get(id));
+    expect(found).toMatchObject({ id, handle: "wedding-gifts", status: CollectionStatus.Draft, productIds: [product.id] });
+  });
+
+  it("returns the locked All collection", async () => {
+    expect(await service.getByHandleForAdmin("all")).toMatchObject({ id: ALL_COLLECTION_ID, locked: true });
+  });
+
+  it("throws a 404 for an unknown handle", async () => {
+    const error = await rejection(service.getByHandleForAdmin("no-such-collection"));
+
+    expect(error.statusCode).toBe(404);
+    expect(error.data?.message).toBe("We couldn't find that collection");
   });
 });
 

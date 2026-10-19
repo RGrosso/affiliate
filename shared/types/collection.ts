@@ -24,6 +24,9 @@ export type ProductSort = (typeof ProductSort)[keyof typeof ProductSort];
 /** The locked collection of every product. Its page is `/collections/all`, so no other collection can use the handle. */
 export const ALL_COLLECTION_HANDLE = "all";
 
+/** `/admin/collections/new` is the create page, so no collection can use the handle in its admin URL. */
+export const NEW_COLLECTION_HANDLE = "new";
+
 export type CollectionSummary = {
   id: string;
   title: string;

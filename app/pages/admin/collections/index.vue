@@ -29,7 +29,7 @@
         <template #title-cell="{ row }">
           <div class="flex flex-wrap items-center gap-2">
             <NuxtLink
-              :to="`/admin/collections/${row.original.id}`"
+              :to="`/admin/collections/${row.original.handle}`"
               class="font-medium text-highlighted hover:underline"
             >
               {{ row.original.title }}

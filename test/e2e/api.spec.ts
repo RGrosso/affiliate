@@ -113,6 +113,7 @@ test.describe("API", () => {
       request.get("/api/collections"),
       request.post("/api/collections", { data: { type: "manual", title: "Sneaky" } }),
       request.get(`/api/collections/${id}`),
+      request.get("/api/collections/by-handle/all"),
       request.patch(`/api/collections/${id}`, { data: { title: "Sneaky" } }),
       request.delete(`/api/collections/${id}`),
       request.post("/api/collections/preview", { data: {} }),
@@ -215,6 +216,35 @@ test.describe("API", () => {
       } finally {
         await request.delete(`/api/collections/${id}`);
       }
+    });
+
+    test("loads a collection for editing by its handle, drafts included", async ({ request }) => {
+      const handle = `by-handle-e2e-${Date.now()}`;
+      const created = await request.post("/api/collections", { data: { type: "manual", title: "By handle e2e", handle } });
+      const { id } = (await created.json()).data;
+
+      try {
+        const byHandle = await request.get(`/api/collections/by-handle/${handle}`);
+        expect(byHandle.status()).toBe(200);
+        const byId = await request.get(`/api/collections/${id}`);
+        expect((await byHandle.json()).data).toEqual((await byId.json()).data);
+        expect((await byHandle.json()).data).toMatchObject({ id, handle, status: "draft" });
+
+        for (const missing of ["no-such-collection", "Not%20A%20Handle"]) {
+          const response = await request.get(`/api/collections/by-handle/${missing}`);
+          expect(response.status(), missing).toBe(404);
+          expect(await response.json()).toMatchObject({ success: false, code: "NOT_FOUND" });
+        }
+      } finally {
+        await request.delete(`/api/collections/${id}`);
+      }
+    });
+
+    test("rejects the reserved new handle", async ({ request }) => {
+      const response = await request.post("/api/collections", { data: { type: "manual", title: "Reserved", handle: "new" } });
+
+      expect(response.status()).toBe(400);
+      expect(await response.json()).toMatchObject({ fieldErrors: { handle: ["This URL is reserved for the add collection page"] } });
     });
 
     test("won't delete the all products collection", async ({ request }) => {

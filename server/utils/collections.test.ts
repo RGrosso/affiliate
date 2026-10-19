@@ -29,6 +29,13 @@ describe("resolveCollectionHandle", () => {
     expect(thrown(() => resolveCollectionHandle("all", "Anything")).data?.fieldErrors).toEqual(reserved);
     expect(thrown(() => resolveCollectionHandle(undefined, "All")).data?.fieldErrors).toEqual(reserved);
   });
+
+  it("reserves the handle of the add collection page, whether given or built from the title", () => {
+    const reserved = { handle: ["This URL is reserved for the add collection page"] };
+
+    expect(thrown(() => resolveCollectionHandle("new", "Anything")).data?.fieldErrors).toEqual(reserved);
+    expect(thrown(() => resolveCollectionHandle(undefined, "New")).data?.fieldErrors).toEqual(reserved);
+  });
 });
 
 describe("resolveCollectionSeo", () => {

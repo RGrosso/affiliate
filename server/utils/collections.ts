@@ -1,8 +1,7 @@
 import type { H3Event } from "h3";
 import { z } from "#shared/schemas/zod";
 import { HANDLE_PATTERN } from "#shared/schemas/products.schema";
-import { RESERVED_HANDLE_MESSAGE } from "#shared/schemas/collections.schema";
-import { ALL_COLLECTION_HANDLE } from "#shared/types/collection";
+import { reservedHandleMessage } from "#shared/schemas/collections.schema";
 import { META_DESCRIPTION_LENGTH } from "#shared/utils/metaDescription";
 
 export const collectionNotFound = () => notFound("We couldn't find that collection");
@@ -23,7 +22,7 @@ export function readCollectionHandle(event: H3Event): string {
 export const rethrowAsDuplicateCollectionHandle = (error: unknown): never =>
   rethrowUniqueViolationAs("handle", "Another collection already uses this URL handle")(error);
 
-/** The handle to save: the one given, or one built from the title. `all` belongs to the locked collection. */
+/** The handle to save: the one given, or one built from the title. `all` belongs to the locked collection and `new` to the admin create page. */
 export function resolveCollectionHandle(handle: string | undefined, title: string): string {
   const finalHandle = handle || slugify(title);
 
@@ -33,9 +32,10 @@ export function resolveCollectionHandle(handle: string | undefined, title: strin
     });
   }
 
-  if (finalHandle === ALL_COLLECTION_HANDLE) {
+  const reserved = reservedHandleMessage(finalHandle);
+  if (reserved) {
     throw apiError("VALIDATION_ERROR", "Please check the highlighted fields and try again", {
-      handle: [RESERVED_HANDLE_MESSAGE],
+      handle: [reserved],
     });
   }
 

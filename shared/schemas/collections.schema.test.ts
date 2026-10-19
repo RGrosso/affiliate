@@ -70,6 +70,8 @@ describe("createCollectionSchema", () => {
     expect(handle("Not A Handle")).toEqual(["Use lowercase letters, numbers and hyphens only"]);
     expect(handle("a".repeat(101))).toContain("The URL handle can be at most 100 characters");
     expect(handle("all")).toEqual(["This URL is reserved for the all products page"]);
+    expect(handle("new")).toEqual(["This URL is reserved for the add collection page"]);
+    expect(createCollectionSchema.parse({ type: "manual", title: "Gifts", handle: "new-gifts" })).toMatchObject({ handle: "new-gifts" });
     expect(createCollectionSchema.parse({ type: "manual", title: "Gifts", handle: "all-gifts" })).toMatchObject({ handle: "all-gifts" });
   });
 
