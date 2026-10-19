@@ -59,9 +59,12 @@ test.describe("product page", () => {
     expect(response?.status()).toBe(404);
   });
 
-  test("has a placeholder for View all until collections exist", async ({ page, goto }) => {
-    await goto("/collections/all", { waitUntil: "hydration" });
+  test("links the All products breadcrumb to a real collection page", async ({ page, goto }) => {
+    await goto(PRODUCT, { waitUntil: "hydration" });
 
+    await page.getByRole("navigation", { name: "breadcrumb" }).getByRole("link", { name: "All products" }).click();
+
+    await expect(page).toHaveURL(/\/collections\/all$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("All products");
   });
 });

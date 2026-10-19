@@ -31,7 +31,7 @@ export default defineConfig<ConfigOptions>({
     { name: "setup", testMatch: /setup\.ts$/, use: { ...devices["Desktop Chrome"] } },
     {
       name: "public",
-      testMatch: /(home|product|auth|api)\.spec\.ts$/,
+      testMatch: /(home|product|auth|api|collections)\.spec\.ts$/,
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"] },
     },

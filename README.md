@@ -166,14 +166,14 @@ Product routes change as follows:
 
 ## Collections
 
-Collections group products, like Shopify's. Each has a title, a URL handle, a plain text description, an optional image, SEO fields (which fall back to the title and the start of the description), a status and a default sort. This release is the backend only: the admin pages, the public page and the homepage changes come later.
+Collections group products, like Shopify's. Each has a title, a URL handle, a plain text description, an optional image, SEO fields (which fall back to the title and the start of the description), a status and a default sort. The public page is described below; the admin pages come later.
 
 There are two types, fixed when the collection is created:
 
 - **Manual**: you pick the products. They keep the order you added them in.
 - **Automated**: the products are chosen by rules. A rule is a tag the product has (or doesn't have) or a retailer it is (or isn't) from, combined with "all" or "any", with one level of subgroups. See `shared/schemas/collectionRules.schema.ts`. `rules` is required for an automated collection.
 
-A collection is a **draft** or **published**. New ones start as drafts. Visitors get a 404 for a draft, and an admin who is logged in can see it, flagged with `isDraft`.
+A collection is a **draft** or **published**. New ones start as drafts. Visitors get a 404 for a draft, and an admin who is logged in can see it, flagged with `isDraft`. The collection page shows that admin a "Preview" ribbon on the hero and tells search engines not to index it.
 
 ### The All collection
 
@@ -191,19 +191,31 @@ Turn on **Show in filter** for a tag and it appears as a filter on the collectio
 
 What the database stores is defined in `server/` only (`server/utils/storedCollection.ts` and `storedCollectionRules.ts`), separately from the values the API and the app use (`shared/types/collection.ts`, `collectionRules.ts`). `server/utils/collectionMapper.ts` converts between them, and a contract test pins the stored values, so renaming one in the API doesn't touch the data.
 
+### The collection page
+
+`/collections/<handle>` is the public page for a collection, and `/collections/all` is the All products collection. It reads the two public routes below. An unknown handle, or a draft for a visitor, gives a 404 page.
+
+- **Hero**: a full-width band with the title and plain text description at the bottom left, about 280px tall on phones and 380px on larger screens. A cover image fills the band (using its alt text) under a navy gradient that keeps the text legible; without one the band is plain navy.
+- **Toolbar**: the product count, a **Sort by** select and, when any tag has Show in filter on a product in the collection, a **Filter by tag** select (one tag at a time, plus "All"). The sorts are Newest, Oldest, Price: low to high, Price: high to low, A–Z and Z–A, plus Featured (the manual order) for collections where you pick the products. The default is the collection's own default sort.
+- **URL**: the sort and tag live in the query string (`?sort=price-asc&tag=gifts`), so links can be shared and back and forward work. The collection's default sort isn't written to the URL. Changing either one restarts the list from page 1.
+- **Products**: a grid of 2 columns on phones, 3 on medium and 4 on large screens, with a **Load more** button (not infinite scroll). The server renders the first page without knowing the screen width, so the page size is `rowAlignedPageSize(20, PRODUCT_GRID_COLUMNS)` (`shared/utils/pageSize.ts`), the smallest size of at least 20 that fills whole rows at 2, 3 and 4 columns: 24.
+- **SEO**: the resolved SEO title and description, the cover image as the social image, and `CollectionPage` structured data with an `ItemList` of the loaded products (`app/utils/collectionJsonLd.ts`).
+
+`/products` redirects permanently (301) to `/collections/all`, set in `routeRules` in `nuxt.config.ts`.
+
 ### Collection routes
 
-| Method   | Path                                       | Who    | What it does                                                                                        |
-| -------- | ------------------------------------------ | ------ | --------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/collections`                         | Admin  | Lists collections with their product count and a sentence describing the rules                      |
-| `POST`   | `/api/collections`                         | Admin  | Creates a collection                                                                                |
-| `GET`    | `/api/collections/:id`                     | Admin  | Returns one collection for editing, with its rules and `productIds`                                 |
-| `PATCH`  | `/api/collections/:id`                     | Admin  | Changes the fields sent. The type can't change                                                      |
-| `DELETE` | `/api/collections/:id`                     | Admin  | Deletes a collection (not the All collection)                                                       |
-| `POST`   | `/api/collections/preview`                 | Admin  | Takes `{ rules, sort }` and returns `{ total, items }` with the first 12 matches                    |
-| `GET`    | `/api/collections/handle/:handle`          | Public | The collection's details, with SEO resolved and no rules. Drafts 404 unless an admin is logged in   |
-| `GET`    | `/api/collections/handle/:handle/products` | Public | A page of products (`?page`, `?pageSize`, `?sort`, `?tag`) plus `facets` on page 1. Same draft rule |
-| `GET`    | `/api/products/retailers`                  | Admin  | The distinct retailers, for the retailer rule's dropdown                                            |
+| Method   | Path                                       | Who    | What it does                                                                                                             |
+| -------- | ------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/collections`                         | Admin  | Lists collections with their product count and a sentence describing the rules                                           |
+| `POST`   | `/api/collections`                         | Admin  | Creates a collection                                                                                                     |
+| `GET`    | `/api/collections/:id`                     | Admin  | Returns one collection for editing, with its rules and `productIds`                                                      |
+| `PATCH`  | `/api/collections/:id`                     | Admin  | Changes the fields sent. The type can't change                                                                           |
+| `DELETE` | `/api/collections/:id`                     | Admin  | Deletes a collection (not the All collection)                                                                            |
+| `POST`   | `/api/collections/preview`                 | Admin  | Takes `{ rules, sort }` and returns `{ total, items }` with the first 12 matches                                         |
+| `GET`    | `/api/collections/handle/:handle`          | Public | The collection's details (including its `type`), with SEO resolved and no rules. Drafts 404 unless an admin is logged in |
+| `GET`    | `/api/collections/handle/:handle/products` | Public | A page of products (`?page`, `?pageSize`, `?sort`, `?tag`) plus `facets` on page 1. Same draft rule                      |
+| `GET`    | `/api/products/retailers`                  | Admin  | The distinct retailers, for the retailer rule's dropdown                                                                 |
 
 A tag that a collection's rules use can't be deleted. The request fails with a 409 that names the collections, and the admin tags page explains the same.
 
@@ -223,7 +235,7 @@ The page reads from a public route:
 
 The description comes from the rich text editor as HTML. This route sanitises it with `sanitiseRichText` (`server/utils/richText.ts`), keeping only the formatting the editor supports, so the page can render it.
 
-The homepage shows products in a horizontal row that scrolls at every width, with arrow buttons on large screens. It loads 10 products, then 10 more each time the row nears its end until every product is in, and finishes with a **View all** card, which links to `/collections/all`, a placeholder until collections exist. Arrows that have nothing to scroll to are hidden.
+The homepage shows products in a horizontal row that scrolls at every width, with arrow buttons on large screens. It reads the All products collection (`/api/collections/handle/all/products`), loading 10 products, then 10 more each time the row nears its end until every product is in, and finishes with a **View all** card, which links to `/collections/all`. Arrows that have nothing to scroll to are hidden.
 
 ## Testing
 
