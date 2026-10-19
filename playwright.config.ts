@@ -38,7 +38,7 @@ export default defineConfig<ConfigOptions>({
     // Runs last because it changes the shared product data
     {
       name: "admin",
-      testMatch: /(admin|tags)\.spec\.ts$/,
+      testMatch: /(admin|admin-collections|tags)\.spec\.ts$/,
       dependencies: ["public"],
       use: { ...devices["Desktop Chrome"], storageState: ADMIN_STATE },
     },
