@@ -22,4 +22,4 @@ Every repository method, service method, util and route ships with tests in the 
 - **Routes**: the behaviour lives in the service tests; add a case to `test/e2e/api.spec.ts` for what only the route decides, such as auth (401 or 403 when logged out) and query or body validation.
 - **Bugs**: write the test that goes red on the bug first, then fix it.
 
-Before calling server work finished, run `pnpm test`, `pnpm test:types` and `pnpm lint`, and `pnpm test:e2e` when a route changed.
+Before calling server work finished, run `vp lint --fix`, `vp fmt`, `vp test` and `pnpm test:types`, and `pnpm test:e2e` when a route changed.
