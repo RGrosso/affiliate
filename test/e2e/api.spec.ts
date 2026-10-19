@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { ADMIN_STATE } from "./config";
 
+const PIXEL = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==", "base64");
+const image = { name: "cover.png", mimeType: "image/png", buffer: PIXEL };
+
 test.describe("API", () => {
   test("rejects product changes from logged-out requests with an ApiError", async ({ request }) => {
     const response = await request.post("/api/products", { data: { title: "Sneaky" } });
@@ -95,6 +98,13 @@ test.describe("API", () => {
       code: "VALIDATION_ERROR",
       fieldErrors: { pageSize: ["The page size can be at most 100"] },
     });
+  });
+
+  test("rejects image uploads from logged-out requests", async ({ request }) => {
+    const response = await request.post("/api/products/images", { multipart: { file: image, prefix: "collections" } });
+
+    expect(response.status()).toBe(401);
+    expect(await response.json()).toMatchObject({ success: false, code: "UNAUTHORIZED" });
   });
 
   test("rejects every admin collection route for logged-out requests", async ({ request }) => {
@@ -236,6 +246,36 @@ test.describe("API", () => {
         await request.delete(`/api/collections/${collection.id}`);
         expect((await request.delete(`/api/tags/${tag.id}`)).status()).toBe(200);
       }
+    });
+
+    test("stores uploaded images under the product or collection prefix", async ({ request }) => {
+      const upload = async (fields: Record<string, string>) => request.post("/api/products/images", { multipart: { file: image, ...fields } });
+
+      expect((await (await upload({})).json()).data.url).toMatch(/^\/images\/products\//);
+      expect((await (await upload({ prefix: "products" })).json()).data.url).toMatch(/^\/images\/products\//);
+      expect((await (await upload({ prefix: "collections" })).json()).data.url).toMatch(/^\/images\/collections\//);
+    });
+
+    test("rejects an unknown image prefix", async ({ request }) => {
+      const response = await request.post("/api/products/images", { multipart: { file: image, prefix: "../secrets" } });
+
+      expect(response.status()).toBe(400);
+      expect(await response.json()).toMatchObject({ success: false, code: "BAD_REQUEST", message: "Please choose where the image belongs" });
+    });
+
+    test("searches the product list by title, ignoring case", async ({ request }) => {
+      const found = await request.get("/api/products?q=pour-OVER%20coffee");
+      expect((await found.json()).data.items.map((item: { title: string }) => item.title)).toEqual(["Pour-Over Coffee Kit"]);
+
+      const none = await request.get("/api/products?q=no-such-product-title");
+      expect((await none.json()).data).toMatchObject({ items: [], total: 0 });
+    });
+
+    test("rejects a product search that is too long", async ({ request }) => {
+      const response = await request.get(`/api/products?q=${"x".repeat(101)}`);
+
+      expect(response.status()).toBe(400);
+      expect(await response.json()).toMatchObject({ code: "VALIDATION_ERROR", fieldErrors: { q: ["The search can be at most 100 characters"] } });
     });
 
     test("lists the retailers for the rule dropdown", async ({ request }) => {
