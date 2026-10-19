@@ -25,19 +25,10 @@ export const addProductSchema = z.object({
     .trim()
     .min(1, "Please give the product a title")
     .max(255, "The title can be at most 255 characters"),
-  description: z
-    .string()
-    .trim()
-    .max(20_000, "The description is too long")
-    .optional()
-    .nullable(),
+  description: z.string().trim().max(20_000, "The description is too long").optional().nullable(),
   handle: z.preprocess(
     emptyToUndefined,
-    z
-      .string()
-      .max(100, "The URL handle can be at most 100 characters")
-      .regex(HANDLE_PATTERN, "Use lowercase letters, numbers and hyphens only")
-      .optional()
+    z.string().max(100, "The URL handle can be at most 100 characters").regex(HANDLE_PATTERN, "Use lowercase letters, numbers and hyphens only").optional()
   ),
   price: z
     .number({ error: "Please enter the price as a number" })
@@ -62,14 +53,9 @@ export const productListQuerySchema = pageQuerySchema.extend({
   tag: z.preprocess(
     value => (typeof value === "string" ? [value] : value),
     z
-      .array(
-        z
-          .string()
-          .trim()
-          .min(1, "Please choose a tag from the list")
-          .max(100, "The tag can be at most 100 characters"),
-        { error: "Please choose tags from the list" }
-      )
+      .array(z.string().trim().min(1, "Please choose a tag from the list").max(100, "The tag can be at most 100 characters"), {
+        error: "Please choose tags from the list",
+      })
       .max(20, "You can filter by up to 20 tags")
       .optional()
   ),

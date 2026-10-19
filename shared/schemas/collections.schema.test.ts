@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CollectionStatus, CollectionType, ProductSort } from "../types/collection";
-import {
-  collectionProductsQuerySchema,
-  createCollectionSchema,
-  previewCollectionSchema,
-  updateCollectionSchema
-} from "./collections.schema";
+import { collectionProductsQuerySchema, createCollectionSchema, previewCollectionSchema, updateCollectionSchema } from "./collections.schema";
 import { z } from "./zod";
 
 const tagId = "11111111-1111-4111-8111-111111111111";
@@ -36,8 +31,11 @@ describe("createCollectionSchema", () => {
   });
 
   it("accepts an automated collection with rules", () => {
-    expect(createCollectionSchema.parse({ type: "automated", title: "Weddings", rules, defaultSort: "price-asc" }))
-      .toMatchObject({ type: CollectionType.Automated, rules, defaultSort: ProductSort.PriceAsc });
+    expect(createCollectionSchema.parse({ type: "automated", title: "Weddings", rules, defaultSort: "price-asc" })).toMatchObject({
+      type: CollectionType.Automated,
+      rules,
+      defaultSort: ProductSort.PriceAsc,
+    });
   });
 
   it("turns blank optional text into null and a blank handle into nothing", () => {
@@ -58,8 +56,7 @@ describe("createCollectionSchema", () => {
   it("asks for a title", () => {
     expect(fieldErrors(createCollectionSchema, { type: "manual", title: " " }).title).toEqual(["Please give the collection a title"]);
     expect(fieldErrors(createCollectionSchema, { type: "manual" }).title).toEqual(["Please give the collection a title"]);
-    expect(fieldErrors(createCollectionSchema, { type: "manual", title: "a".repeat(256) }).title)
-      .toEqual(["The title can be at most 255 characters"]);
+    expect(fieldErrors(createCollectionSchema, { type: "manual", title: "a".repeat(256) }).title).toEqual(["The title can be at most 255 characters"]);
   });
 
   it("asks for a valid type", () => {
@@ -103,27 +100,29 @@ describe("createCollectionSchema", () => {
 
   it("requires rules for an automated collection and validates them", () => {
     expect(fieldErrors(createCollectionSchema, { type: "automated", title: "Weddings" }).rules).toBeDefined();
-    expect(fieldErrors(createCollectionSchema, { type: "automated", title: "Weddings", rules: { match: "all", rules: [] } }).rules)
-      .toEqual(["Add at least one condition"]);
+    expect(fieldErrors(createCollectionSchema, { type: "automated", title: "Weddings", rules: { match: "all", rules: [] } }).rules).toEqual([
+      "Add at least one condition",
+    ]);
   });
 
   it("doesn't allow manual order on an automated collection", () => {
-    expect(fieldErrors(createCollectionSchema, { type: "automated", title: "Weddings", rules, defaultSort: "manual" }).defaultSort)
-      .toEqual(["Manual order is only available for collections where you pick the products"]);
+    expect(fieldErrors(createCollectionSchema, { type: "automated", title: "Weddings", rules, defaultSort: "manual" }).defaultSort).toEqual([
+      "Manual order is only available for collections where you pick the products",
+    ]);
   });
 
   it("ignores rules on a manual collection and products on an automated one", () => {
     expect(createCollectionSchema.parse({ type: "manual", title: "Gifts", rules })).not.toHaveProperty("rules");
-    expect(createCollectionSchema.parse({ type: "automated", title: "Weddings", rules, productIds: [productA] }))
-      .not.toHaveProperty("productIds");
+    expect(createCollectionSchema.parse({ type: "automated", title: "Weddings", rules, productIds: [productA] })).not.toHaveProperty("productIds");
   });
 
   it("checks the product ids", () => {
     const productIds = (value: unknown) => fieldErrors(createCollectionSchema, { type: "manual", title: "Gifts", productIds: value }).productIds;
     expect(productIds(["nope"])).toEqual(["Please choose products from the list"]);
     expect(productIds([productA, productA])).toEqual(["Each product can only be added once"]);
-    expect(productIds(Array.from({ length: 501 }, (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`)))
-      .toEqual(["A collection can have up to 500 products"]);
+    expect(productIds(Array.from({ length: 501 }, (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`))).toEqual([
+      "A collection can have up to 500 products",
+    ]);
     expect(productIds("nope")).toEqual(["Please choose products from the list"]);
   });
 });
@@ -168,8 +167,9 @@ describe("previewCollectionSchema", () => {
 
   it("needs valid rules and no manual order", () => {
     expect(fieldErrors(previewCollectionSchema, { rules: { match: "all", rules: [] } }).rules).toEqual(["Add at least one condition"]);
-    expect(fieldErrors(previewCollectionSchema, { rules, sort: "manual" }).sort)
-      .toEqual(["Manual order is only available for collections where you pick the products"]);
+    expect(fieldErrors(previewCollectionSchema, { rules, sort: "manual" }).sort).toEqual([
+      "Manual order is only available for collections where you pick the products",
+    ]);
   });
 });
 

@@ -40,7 +40,7 @@ registerEndpoint("/api/tags", {
 });
 registerEndpoint("/api/tags", {
   method: "POST",
-  handler: (event) => {
+  handler: event => {
     posts.push(readJsonBody(event));
     if (conflict.on) return conflictResponse(event);
     return { success: true, data: { ...tag, id: "t2", name: "Fresh", slug: "fresh" } };
@@ -48,7 +48,7 @@ registerEndpoint("/api/tags", {
 });
 registerEndpoint("/api/tags/t1", {
   method: "PATCH",
-  handler: (event) => {
+  handler: event => {
     patches.push(readJsonBody(event));
     if (conflict.on) return conflictResponse(event);
     return { success: true, data: tag };

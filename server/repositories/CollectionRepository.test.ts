@@ -9,7 +9,7 @@ import {
   StoredRuleMatch,
   StoredRuleType,
   StoredTagOperator,
-  type StoredCollectionRules
+  type StoredCollectionRules,
 } from "../utils/storedCollectionRules";
 import { CollectionRepository, type NewCollection } from "./CollectionRepository";
 
@@ -199,15 +199,19 @@ describe("findUsingTag and findUsingTags", () => {
   it("finds collections whose rules mention the tag, including in subgroups", async () => {
     const [wedding, other] = [await addTag("Wedding"), await addTag("Other")];
     const direct = await repo.insert(automated("Direct", tagRules(wedding.id)));
-    const grouped = await repo.insert(automated("Grouped", {
-      version: STORED_RULES_VERSION,
-      match: StoredRuleMatch.All,
-      rules: [{
-        type: StoredRuleType.Group,
-        match: StoredRuleMatch.Any,
-        rules: [{ type: StoredRuleType.Tag, operator: StoredTagOperator.HasNot, tagId: wedding.id }],
-      }],
-    }));
+    const grouped = await repo.insert(
+      automated("Grouped", {
+        version: STORED_RULES_VERSION,
+        match: StoredRuleMatch.All,
+        rules: [
+          {
+            type: StoredRuleType.Group,
+            match: StoredRuleMatch.Any,
+            rules: [{ type: StoredRuleType.Tag, operator: StoredTagOperator.HasNot, tagId: wedding.id }],
+          },
+        ],
+      })
+    );
     await repo.insert(automated("Other only", tagRules(other.id)));
     await repo.insert(manual("Manual"));
 
@@ -231,7 +235,10 @@ describe("findUsingTag and findUsingTags", () => {
 
     const usage = await repo.findUsingTags([a.id, b.id, c.id]);
     expect(usage.get(a.id)).toEqual([{ id: both.id, title: "Both" }]);
-    expect(usage.get(b.id)).toEqual([{ id: both.id, title: "Both" }, { id: onlyB.id, title: "Only B" }]);
+    expect(usage.get(b.id)).toEqual([
+      { id: both.id, title: "Both" },
+      { id: onlyB.id, title: "Only B" },
+    ]);
     expect(usage.has(c.id)).toBe(false);
     expect((await repo.findUsingTags([])).size).toBe(0);
   });

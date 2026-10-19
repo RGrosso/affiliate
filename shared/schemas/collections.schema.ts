@@ -11,8 +11,7 @@ export const MANUAL_SORT_MESSAGE = "Manual order is only available for collectio
 const emptyToUndefined = (value: unknown) => (value === "" || value === null ? undefined : value);
 const emptyToNull = (value: unknown) => (value === "" ? null : value);
 
-const optionalText = (message: string, max: number) =>
-  z.preprocess(emptyToNull, z.string().trim().max(max, message).nullable().optional());
+const optionalText = (message: string, max: number) => z.preprocess(emptyToNull, z.string().trim().max(max, message).nullable().optional());
 
 const sort = z.enum(ProductSort, { error: "Please choose how to sort the products" });
 const status = z.enum(CollectionStatus, { error: "Please choose whether the collection is a draft or published" });
@@ -98,12 +97,7 @@ export const collectionProductsQuerySchema = pageQuerySchema.extend({
   /** One tag slug, narrowing the results to products that have it. */
   tag: z.preprocess(
     emptyToUndefined,
-    z
-      .string({ error: "Please choose one tag" })
-      .trim()
-      .min(1, "Please choose a tag from the list")
-      .max(100, "The tag can be at most 100 characters")
-      .optional()
+    z.string({ error: "Please choose one tag" }).trim().min(1, "Please choose a tag from the list").max(100, "The tag can be at most 100 characters").optional()
   ),
 });
 

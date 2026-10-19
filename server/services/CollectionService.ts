@@ -1,10 +1,5 @@
 import type { CollectionRow } from "hub:db:schema";
-import type {
-  CollectionProductsQuery,
-  CreateCollectionData,
-  PreviewCollectionData,
-  UpdateCollectionData
-} from "#shared/schemas/collections.schema";
+import type { CollectionProductsQuery, CreateCollectionData, PreviewCollectionData, UpdateCollectionData } from "#shared/schemas/collections.schema";
 import { MANUAL_SORT_MESSAGE } from "#shared/schemas/collections.schema";
 import type { ApiFieldErrors } from "#shared/types/api";
 import {
@@ -15,20 +10,13 @@ import {
   type AdminCollectionListItem,
   type CollectionPreview,
   type CollectionProductsPage,
-  type PublicCollection
+  type PublicCollection,
 } from "#shared/types/collection";
 import { collectTagIds, describeRules } from "#shared/utils/collectionRules";
 import type { ProductScope } from "../repositories/ProductRepository";
 import { fromStoredRules, toStoredRules } from "../utils/collectionRulesMapper";
 import { parseStoredRules } from "../utils/storedCollectionRules";
-import {
-  sortFromStored,
-  sortToStored,
-  statusFromStored,
-  statusToStored,
-  typeFromStored,
-  typeToStored
-} from "../utils/collectionMapper";
+import { sortFromStored, sortToStored, statusFromStored, statusToStored, typeFromStored, typeToStored } from "../utils/collectionMapper";
 
 const PREVIEW_SIZE = 12;
 const LOCKED_MESSAGE = "This can't be changed on the all products collection";
@@ -53,32 +41,34 @@ export class CollectionService {
   async list(): Promise<AdminCollectionListItem[]> {
     const [rows, manualCounts] = await Promise.all([this.collections.findAll(), this.collections.countProducts()]);
 
-    const apiRules = new Map(rows.map((row) => {
-      const stored = storedRulesOf(row);
-      return [row.id, stored && fromStoredRules(stored)] as const;
-    }));
+    const apiRules = new Map(
+      rows.map(row => {
+        const stored = storedRulesOf(row);
+        return [row.id, stored && fromStoredRules(stored)] as const;
+      })
+    );
     const tagIds = [...new Set([...apiRules.values()].flatMap(rules => (rules ? collectTagIds(rules) : [])))];
     const tagNames = new Map((await this.tags.findByIds(tagIds)).map(tag => [tag.id, tag.name]));
 
-    return Promise.all(rows.map(async (row) => {
-      const type = typeFromStored[row.type];
-      const rules = apiRules.get(row.id) ?? null;
-      const isManual = type === CollectionType.Manual;
+    return Promise.all(
+      rows.map(async row => {
+        const type = typeFromStored[row.type];
+        const rules = apiRules.get(row.id) ?? null;
+        const isManual = type === CollectionType.Manual;
 
-      return {
-        id: row.id,
-        title: row.title,
-        handle: row.handle,
-        type,
-        status: statusFromStored[row.status],
-        locked: row.locked,
-        productCount: isManual
-          ? manualCounts.get(row.id) ?? 0
-          : await this.products.countMatching({ rules: storedRulesOf(row) }),
-        rulesSummary: isManual ? null : rules ? describeRules(rules, tagNames) : "Every product",
-        updatedAt: row.updatedAt,
-      };
-    }));
+        return {
+          id: row.id,
+          title: row.title,
+          handle: row.handle,
+          type,
+          status: statusFromStored[row.status],
+          locked: row.locked,
+          productCount: isManual ? (manualCounts.get(row.id) ?? 0) : await this.products.countMatching({ rules: storedRulesOf(row) }),
+          rulesSummary: isManual ? null : rules ? describeRules(rules, tagNames) : "Every product",
+          updatedAt: row.updatedAt,
+        };
+      })
+    );
   }
 
   async get(id: string): Promise<AdminCollection> {
@@ -112,33 +102,35 @@ export class CollectionService {
     const handle = resolveCollectionHandle(input.handle, input.title);
     const isAutomated = input.type === CollectionType.Automated;
 
-    const { id } = await this.db.transaction(async (tx) => {
-      const collections = new CollectionRepository(tx);
-      if (input.type === CollectionType.Manual) {
-        await this.assertProductsExist(new ProductRepository(tx), input.productIds);
-      } else {
-        await this.assertTagsExist(new TagRepository(tx), collectTagIds(input.rules));
-      }
+    const { id } = await this.db
+      .transaction(async tx => {
+        const collections = new CollectionRepository(tx);
+        if (input.type === CollectionType.Manual) {
+          await this.assertProductsExist(new ProductRepository(tx), input.productIds);
+        } else {
+          await this.assertTagsExist(new TagRepository(tx), collectTagIds(input.rules));
+        }
 
-      const collection = await collections.insert({
-        title: input.title,
-        handle,
-        type: typeToStored[input.type],
-        status: statusToStored[input.status],
-        description: input.description,
-        imageUrl: input.imageUrl,
-        imageAlt: input.imageAlt,
-        seoTitle: input.seoTitle,
-        seoDescription: input.seoDescription,
-        defaultSort: sortToStored[input.defaultSort],
-        rules: isAutomated ? toStoredRules(input.rules) : null,
-      });
+        const collection = await collections.insert({
+          title: input.title,
+          handle,
+          type: typeToStored[input.type],
+          status: statusToStored[input.status],
+          description: input.description,
+          imageUrl: input.imageUrl,
+          imageAlt: input.imageAlt,
+          seoTitle: input.seoTitle,
+          seoDescription: input.seoDescription,
+          defaultSort: sortToStored[input.defaultSort],
+          rules: isAutomated ? toStoredRules(input.rules) : null,
+        });
 
-      if (input.type === CollectionType.Manual) {
-        await collections.replaceProducts(collection.id, input.productIds);
-      }
-      return collection;
-    }).catch(rethrowAsDuplicateCollectionHandle);
+        if (input.type === CollectionType.Manual) {
+          await collections.replaceProducts(collection.id, input.productIds);
+        }
+        return collection;
+      })
+      .catch(rethrowAsDuplicateCollectionHandle);
 
     return this.get(id);
   }
@@ -149,35 +141,37 @@ export class CollectionService {
    * sort that matches what is saved is accepted, so a form that sends everything back still works.
    */
   async update(id: string, input: UpdateCollectionData) {
-    await this.db.transaction(async (tx) => {
-      const collections = new CollectionRepository(tx);
-      const existing = await collections.findById(id);
-      if (!existing) {
-        throw collectionNotFound();
-      }
+    await this.db
+      .transaction(async tx => {
+        const collections = new CollectionRepository(tx);
+        const existing = await collections.findById(id);
+        if (!existing) {
+          throw collectionNotFound();
+        }
 
-      const type = typeFromStored[existing.type];
-      const errors = this.findFieldErrors(existing, type, input);
-      if (Object.keys(errors).length) {
-        throw apiError("VALIDATION_ERROR", FIELD_ERRORS_MESSAGE, errors);
-      }
+        const type = typeFromStored[existing.type];
+        const errors = this.findFieldErrors(existing, type, input);
+        if (Object.keys(errors).length) {
+          throw apiError("VALIDATION_ERROR", FIELD_ERRORS_MESSAGE, errors);
+        }
 
-      if (input.rules) await this.assertTagsExist(new TagRepository(tx), collectTagIds(input.rules));
-      if (input.productIds) await this.assertProductsExist(new ProductRepository(tx), input.productIds);
+        if (input.rules) await this.assertTagsExist(new TagRepository(tx), collectTagIds(input.rules));
+        if (input.productIds) await this.assertProductsExist(new ProductRepository(tx), input.productIds);
 
-      const { type: _type, productIds, rules, status, defaultSort, handle, ...details } = input;
-      // undefined fields are left alone. updatedAt is always set so a change to the products alone still counts
-      await collections.update(id, {
-        ...details,
-        handle: handle !== undefined && handle !== existing.handle ? resolveCollectionHandle(handle, existing.title) : undefined,
-        status: status && statusToStored[status],
-        defaultSort: defaultSort && sortToStored[defaultSort],
-        rules: rules && toStoredRules(rules),
-        updatedAt: new Date(),
-      });
+        const { type: _type, productIds, rules, status, defaultSort, handle, ...details } = input;
+        // undefined fields are left alone. updatedAt is always set so a change to the products alone still counts
+        await collections.update(id, {
+          ...details,
+          handle: handle !== undefined && handle !== existing.handle ? resolveCollectionHandle(handle, existing.title) : undefined,
+          status: status && statusToStored[status],
+          defaultSort: defaultSort && sortToStored[defaultSort],
+          rules: rules && toStoredRules(rules),
+          updatedAt: new Date(),
+        });
 
-      if (productIds) await collections.replaceProducts(id, productIds);
-    }).catch(rethrowAsDuplicateCollectionHandle);
+        if (productIds) await collections.replaceProducts(id, productIds);
+      })
+      .catch(rethrowAsDuplicateCollectionHandle);
 
     return this.get(id);
   }
@@ -267,10 +261,7 @@ export class CollectionService {
   async preview({ rules, sort }: PreviewCollectionData): Promise<CollectionPreview> {
     await this.assertTagsExist(this.tags, collectTagIds(rules));
 
-    const { items, total } = await this.products.findPage(
-      { page: 1, pageSize: PREVIEW_SIZE },
-      { rules: toStoredRules(rules), sort }
-    );
+    const { items, total } = await this.products.findPage({ page: 1, pageSize: PREVIEW_SIZE }, { rules: toStoredRules(rules), sort });
 
     return { total, items: await this.productService.toListItems(items) };
   }

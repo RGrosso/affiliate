@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  modules: ["@nuxt/eslint", "@nuxt/fonts", "@nuxt/ui", "@nuxthub/core", "nuxt-auth-utils", "@vueuse/nuxt"],
+  modules: ["@nuxt/fonts", "@nuxt/ui", "@nuxthub/core", "nuxt-auth-utils", "@vueuse/nuxt"],
   $env: {
     // `nuxt dev --envName e2e`, used by the Playwright tests: a separate build and database,
     // so they can run alongside `pnpm dev` without touching its data
@@ -7,6 +7,9 @@ export default defineNuxtConfig({
       buildDir: ".nuxt-e2e",
       hub: { dir: ".data-e2e" },
     },
+  },
+  $production: {
+    runtimeConfig: { seedSamples: false },
   },
   devtools: { enabled: true },
   app: {
@@ -19,6 +22,10 @@ export default defineNuxtConfig({
     theme: {
       colors: ["primary", "secondary", "action", "success", "info", "warning", "error", "neutral"],
     },
+  },
+  runtimeConfig: {
+    // Turned off for production builds below; NUXT_SEED_SAMPLES=true or false overrides it
+    seedSamples: true,
   },
   compatibilityDate: "2025-07-15",
   nitro: {
@@ -35,17 +42,6 @@ export default defineNuxtConfig({
     // Type-check the standalone Node scripts too (run with `node`, outside the app)
     nodeTsConfig: {
       include: ["../scripts/**/*"],
-    },
-  },
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: "always-multiline",
-        braceStyle: "1tbs",
-        quotes: "double",
-        indent: 2,
-        semi: true,
-      },
     },
   },
   fonts: {

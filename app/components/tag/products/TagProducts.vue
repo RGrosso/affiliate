@@ -2,9 +2,7 @@
   <UCard>
     <template #header>
       <div class="flex items-center justify-between gap-2">
-        <h2 class="text-sm font-semibold">
-          Products with this tag
-        </h2>
+        <h2 class="text-sm font-semibold">Products with this tag</h2>
         <UButton
           v-if="total > 0"
           :to="`/admin/products?tag=${slug}`"
@@ -33,7 +31,7 @@
           :alt="product.image.alt ?? product.title"
           class="size-10 max-w-none shrink-0 aspect-square object-cover rounded-md border border-default"
           loading="lazy"
-        >
+        />
         <div
           v-else
           class="size-10 shrink-0 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"

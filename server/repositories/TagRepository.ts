@@ -20,7 +20,8 @@ export class TagRepository {
   constructor(private readonly db: DbExecutor) {}
 
   findAll(): Promise<Omit<AdminTag, "collections">[]> {
-    return this.db.select({ ...tagColumns, productCount: count(productTags.productId) })
+    return this.db
+      .select({ ...tagColumns, productCount: count(productTags.productId) })
       .from(tags)
       .leftJoin(productTags, eq(productTags.tagId, tags.id))
       .groupBy(tags.id)
@@ -28,10 +29,7 @@ export class TagRepository {
   }
 
   async findById(id: string): Promise<Tag | undefined> {
-    const [tag] = await this.db.select(tagColumns)
-      .from(tags)
-      .where(eq(tags.id, id))
-      .limit(1);
+    const [tag] = await this.db.select(tagColumns).from(tags).where(eq(tags.id, id)).limit(1);
 
     return tag;
   }
@@ -47,7 +45,8 @@ export class TagRepository {
     const byProduct = new Map<string, Tag[]>();
     if (!productIds.length) return byProduct;
 
-    const rows = await this.db.select({ productId: productTags.productId, ...tagColumns })
+    const rows = await this.db
+      .select({ productId: productTags.productId, ...tagColumns })
       .from(productTags)
       .innerJoin(tags, eq(tags.id, productTags.tagId))
       .where(inArray(productTags.productId, productIds));
@@ -71,19 +70,14 @@ export class TagRepository {
   }
 
   async update(id: string, values: Partial<NewTag>): Promise<Tag | undefined> {
-    const [tag] = await this.db.update(tags)
-      .set(values)
-      .where(eq(tags.id, id))
-      .returning(tagColumns);
+    const [tag] = await this.db.update(tags).set(values).where(eq(tags.id, id)).returning(tagColumns);
 
     return tag;
   }
 
   /** Product links go with it through the product_tags ON DELETE CASCADE foreign key. */
   async delete(id: string) {
-    const deleted = await this.db.delete(tags)
-      .where(eq(tags.id, id))
-      .returning({ id: tags.id });
+    const deleted = await this.db.delete(tags).where(eq(tags.id, id)).returning({ id: tags.id });
 
     return deleted.length > 0;
   }

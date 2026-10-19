@@ -1,11 +1,4 @@
-import {
-  RetailerOperator,
-  RuleMatch,
-  RuleType,
-  TagOperator,
-  type CollectionRuleItem,
-  type CollectionRules
-} from "../types/collectionRules";
+import { RetailerOperator, RuleMatch, RuleType, TagOperator, type CollectionRuleItem, type CollectionRules } from "../types/collectionRules";
 
 type RuleOfType<T extends RuleType> = Extract<CollectionRuleItem, { type: T }>;
 type TagNames = ReadonlyMap<string, string>;

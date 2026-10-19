@@ -31,11 +31,11 @@ To finish setting it up:
 
 The same flow applies to any user whose password is empty (`NULL`). Logging in as that user sends them to `/setup` to choose a password first.
 
-To start again from scratch, stop the dev server and run `pnpm dev:reset`, then `pnpm dev`. The reset deletes the `.data/` folder. The next dev server start re-runs the migrations and seeds the admin again with no password. The sample products come back on the next admin login. It refuses to run with `NODE_ENV=production`.
+To start again from scratch, stop the dev server and run `pnpm dev:reset`, then `pnpm dev`. The reset deletes the `.data/` folder. The next dev server start re-runs the migrations and seeds the admin again with no password. The sample products come back on the next admin login (see [Sample products](#sample-products)). It refuses to run with `NODE_ENV=production`.
 
 ## Sample products
 
-The first time an admin logs in (or finishes setup), 24 example products with square placeholder images are added so the store isn't empty. A warning on **Admin → Products** lets you delete all of them in one go. They're only ever added once: a `sample_products_seeded` row in the `settings` table records that, so deleting them won't bring them back. If the store already has products, no samples are added. The sample data lives in `server/utils/sampleProducts.ts`.
+In development, the first time an admin logs in (or finishes setup), 24 example products with square placeholder images are added so the store isn't empty. Their edit page notes that they're samples, but they look like any other product everywhere else. Production builds don't add them. This is controlled by the `seedSamples` runtime config, on in development and off in production, and you can override it with the `NUXT_SEED_SAMPLES` environment variable. For example, `NUXT_SEED_SAMPLES=false pnpm dev` runs the site with no samples. They are only ever added once: a `sample_products_seeded` row in the `settings` table records that, so they don't come back once they're gone, for example after you remove them from the database. If the store already has products, no samples are added. To start again with a fresh set, stop the dev server and run `pnpm dev:reset`. The sample data lives in `server/utils/sampleProducts.ts`.
 
 Product images uploaded from the create and edit pages are cropped to square in the browser and stored in NuxtHub Blob (`.data/blob` in development).
 
@@ -55,16 +55,16 @@ The site is UK-based. Copy is in British English, prices are in pounds sterling 
 
 ## Project structure
 
-| Path | What's in it |
-| --- | --- |
-| `app/` | Pages, components, composables and route middleware (Vue) |
-| `server/api/` | API routes |
-| `server/services/` | Business rules and transactions, one class per area (e.g. `ProductService`) |
-| `server/repositories/` | The only code that queries the database with Drizzle (e.g. `ProductRepository`) |
-| `server/utils/` | Server helpers, auto-imported: API responses, auth, pure helpers |
-| `server/db/` | Drizzle schema, migrations and dev seed SQL |
-| `shared/types/` | Types used by both client and server (`ApiResponse`, `UserState`, `PagedResult`, …) |
-| `shared/schemas/` | Zod validation schemas used by both forms and API routes |
+| Path                   | What's in it                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `app/`                 | Pages, components, composables and route middleware (Vue)                           |
+| `server/api/`          | API routes                                                                          |
+| `server/services/`     | Business rules and transactions, one class per area (e.g. `ProductService`)         |
+| `server/repositories/` | The only code that queries the database with Drizzle (e.g. `ProductRepository`)     |
+| `server/utils/`        | Server helpers, auto-imported: API responses, auth, pure helpers                    |
+| `server/db/`           | Drizzle schema, migrations and dev seed SQL                                         |
+| `shared/types/`        | Types used by both client and server (`ApiResponse`, `UserState`, `PagedResult`, …) |
+| `shared/schemas/`      | Zod validation schemas used by both forms and API routes                            |
 
 ## Server structure
 
@@ -91,7 +91,7 @@ On the server, return `ok(data, message?)` and throw `apiError(code, message)` o
 
 On the client, `getApiError(err)` turns a failed `$fetch` into an `ApiError`, and `toFormErrors(error.fieldErrors)` maps it onto a `UForm`.
 
-List endpoints are paginated by offset. They take `?page` (1 or more, default 1) and `?pageSize` (1 to 100, default 20), validated by `pageQuerySchema` in `shared/schemas/pagination.schema.ts`. Their `data` is a `PagedResult<T>` from `shared/types/pagination.ts`. `GET /api/products` also returns `sampleCount`. For example, `GET /api/products?page=2&pageSize=20` returns:
+List endpoints are paginated by offset. They take `?page` (1 or more, default 1) and `?pageSize` (1 to 100, default 20), validated by `pageQuerySchema` in `shared/schemas/pagination.schema.ts`. Their `data` is a `PagedResult<T>` from `shared/types/pagination.ts`. For example, `GET /api/products?page=2&pageSize=20` returns:
 
 ```json
 {
@@ -101,8 +101,7 @@ List endpoints are paginated by offset. They take `?page` (1 or more, default 1)
     "page": 2,
     "pageSize": 20,
     "total": 45,
-    "totalPages": 3,
-    "sampleCount": 20
+    "totalPages": 3
   }
 }
 ```
@@ -113,12 +112,12 @@ On the client, `usePagedFetch` (in `app/composables/pagedFetch.ts`) keeps the cu
 
 Each user has a `role` (`admin`, `editor`, `user`) and a `state`:
 
-| State | Meaning |
-| --- | --- |
-| `active` | Can log in. If `password` is `NULL`, they must set one at `/setup` first. |
-| `pending` | Reserved for future approval or confirmation flows; can't log in yet. |
-| `disabled` | Can't log in. |
-| `deleted` | Treated as if the account doesn't exist. |
+| State      | Meaning                                                                   |
+| ---------- | ------------------------------------------------------------------------- |
+| `active`   | Can log in. If `password` is `NULL`, they must set one at `/setup` first. |
+| `pending`  | Reserved for future approval or confirmation flows; can't log in yet.     |
+| `disabled` | Can't log in.                                                             |
+| `deleted`  | Treated as if the account doesn't exist.                                  |
 
 ## Database
 
@@ -152,13 +151,13 @@ In the admin:
 
 Tag routes are admin only:
 
-| Method | Path | What it does |
-| --- | --- | --- |
-| `GET` | `/api/tags` | Lists tags, each with a `productCount` and the `collections` that use it |
-| `GET` | `/api/tags/:id` | Returns one tag, or a 404 if it doesn't exist |
-| `POST` | `/api/tags` | Creates a tag from `{ name }` plus any of the optional details (description, tooltip, icon, priority, showOnCards, showInFilter) |
-| `PATCH` | `/api/tags/:id` | Updates a tag |
-| `DELETE` | `/api/tags/:id` | Deletes a tag and its product links, unless a collection uses it (a 409 naming the collections) |
+| Method   | Path            | What it does                                                                                                                     |
+| -------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/tags`     | Lists tags, each with a `productCount` and the `collections` that use it                                                         |
+| `GET`    | `/api/tags/:id` | Returns one tag, or a 404 if it doesn't exist                                                                                    |
+| `POST`   | `/api/tags`     | Creates a tag from `{ name }` plus any of the optional details (description, tooltip, icon, priority, showOnCards, showInFilter) |
+| `PATCH`  | `/api/tags/:id` | Updates a tag                                                                                                                    |
+| `DELETE` | `/api/tags/:id` | Deletes a tag and its product links, unless a collection uses it (a 409 naming the collections)                                  |
 
 Product routes change as follows:
 
@@ -194,17 +193,17 @@ What the database stores is defined in `server/` only (`server/utils/storedColle
 
 ### Collection routes
 
-| Method | Path | Who | What it does |
-| --- | --- | --- | --- |
-| `GET` | `/api/collections` | Admin | Lists collections with their product count and a sentence describing the rules |
-| `POST` | `/api/collections` | Admin | Creates a collection |
-| `GET` | `/api/collections/:id` | Admin | Returns one collection for editing, with its rules and `productIds` |
-| `PATCH` | `/api/collections/:id` | Admin | Changes the fields sent. The type can't change |
-| `DELETE` | `/api/collections/:id` | Admin | Deletes a collection (not the All collection) |
-| `POST` | `/api/collections/preview` | Admin | Takes `{ rules, sort }` and returns `{ total, items }` with the first 12 matches |
-| `GET` | `/api/collections/handle/:handle` | Public | The collection's details, with SEO resolved and no rules. Drafts 404 unless an admin is logged in |
-| `GET` | `/api/collections/handle/:handle/products` | Public | A page of products (`?page`, `?pageSize`, `?sort`, `?tag`) plus `facets` on page 1. Same draft rule |
-| `GET` | `/api/products/retailers` | Admin | The distinct retailers, for the retailer rule's dropdown |
+| Method   | Path                                       | Who    | What it does                                                                                        |
+| -------- | ------------------------------------------ | ------ | --------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/collections`                         | Admin  | Lists collections with their product count and a sentence describing the rules                      |
+| `POST`   | `/api/collections`                         | Admin  | Creates a collection                                                                                |
+| `GET`    | `/api/collections/:id`                     | Admin  | Returns one collection for editing, with its rules and `productIds`                                 |
+| `PATCH`  | `/api/collections/:id`                     | Admin  | Changes the fields sent. The type can't change                                                      |
+| `DELETE` | `/api/collections/:id`                     | Admin  | Deletes a collection (not the All collection)                                                       |
+| `POST`   | `/api/collections/preview`                 | Admin  | Takes `{ rules, sort }` and returns `{ total, items }` with the first 12 matches                    |
+| `GET`    | `/api/collections/handle/:handle`          | Public | The collection's details, with SEO resolved and no rules. Drafts 404 unless an admin is logged in   |
+| `GET`    | `/api/collections/handle/:handle/products` | Public | A page of products (`?page`, `?pageSize`, `?sort`, `?tag`) plus `facets` on page 1. Same draft rule |
+| `GET`    | `/api/products/retailers`                  | Admin  | The distinct retailers, for the retailer rule's dropdown                                            |
 
 A tag that a collection's rules use can't be deleted. The request fails with a 409 that names the collections, and the admin tags page explains the same.
 
@@ -218,9 +217,9 @@ Products have an optional **brand** (who makes it) alongside the **retailer** (t
 
 The page reads from a public route:
 
-| Method | Path | What it does |
-| --- | --- | --- |
-| `GET` | `/api/products/handle/:handle` | Returns the product with its images and every tag as a badge, or a 404 |
+| Method | Path                           | What it does                                                           |
+| ------ | ------------------------------ | ---------------------------------------------------------------------- |
+| `GET`  | `/api/products/handle/:handle` | Returns the product with its images and every tag as a badge, or a 404 |
 
 The description comes from the rich text editor as HTML. This route sanitises it with `sanitiseRichText` (`server/utils/richText.ts`), keeping only the formatting the editor supports, so the page can render it.
 
@@ -228,17 +227,19 @@ The homepage shows products in a horizontal row that scrolls at every width, wit
 
 ## Testing
 
-| Command | What it runs |
-| --- | --- |
-| `pnpm test` | Unit tests (Node) and component tests (headless Chromium, with accessibility checks) |
-| `pnpm test:types` | Type check of the app, server and tests |
-| `pnpm test:e2e` | Playwright end-to-end tests against a dev server with its own database (`.data-e2e/`), so your `.data/` is untouched |
-| `pnpm lint:check` | ESLint without fixing (`pnpm lint` fixes) |
-| `pnpm storybook` | Storybook for the core components on `http://localhost:6006` |
+| Command           | What it runs                                                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm test`       | Unit tests (Node) and component tests (headless Chromium, with accessibility checks)                                        |
+| `pnpm test:types` | Type check of the app, server and tests                                                                                     |
+| `pnpm test:e2e`   | Playwright end-to-end tests against a dev server with its own database (`.data-e2e/`), so your `.data/` is untouched        |
+| `pnpm lint:check` | Oxlint and an Oxfmt format check through Vite+ (`vp lint && vp fmt --check`), without fixing. `pnpm lint` fixes and formats |
+| `pnpm storybook`  | Storybook for the core components on `http://localhost:6006`                                                                |
 
 Repository and service tests run against an in-memory PGlite database with the real migrations applied (`createTestDb()` in `test/setup/db.ts`), so they don't mock the database. `resetDb()` empties the tables and then puts back the locked All collection, so a test starts with the same row a real database has.
 
 The first time, install the test browser with `pnpm exec playwright install chromium`. CI runs all of these on every pull request.
+
+Linting, formatting and the Vitest config all live in `vite.config.ts`. `pnpm install` sets up a pre-commit hook (`.vite-hooks/pre-commit`) that lints and formats staged files with `vp staged`. In VS Code, install the recommended Oxc extension to format on save.
 
 ## Production
 

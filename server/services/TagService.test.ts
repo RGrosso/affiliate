@@ -54,15 +54,17 @@ describe("create", () => {
   });
 
   it("saves any details sent with the name", async () => {
-    const created = await service.create(createTagSchema.parse({
-      name: "Hot Deals",
-      description: "Reduced this week",
-      tooltip: "Reduced",
-      icon: "flame",
-      priority: 5,
-      showOnCards: true,
-      showInFilter: true,
-    }));
+    const created = await service.create(
+      createTagSchema.parse({
+        name: "Hot Deals",
+        description: "Reduced this week",
+        tooltip: "Reduced",
+        icon: "flame",
+        priority: 5,
+        showOnCards: true,
+        showInFilter: true,
+      })
+    );
 
     expect(created).toMatchObject({
       name: "Hot Deals",
@@ -114,7 +116,16 @@ describe("update", () => {
     const { id } = await service.create({ name: "Deals" });
 
     const updated = await service.update(id, { ...edit("Hot Deals"), tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true, showInFilter: true });
-    expect(updated).toMatchObject({ id, name: "Hot Deals", slug: "hot-deals", tooltip: "Reduced", icon: "flame", priority: 4, showOnCards: true, showInFilter: true });
+    expect(updated).toMatchObject({
+      id,
+      name: "Hot Deals",
+      slug: "hot-deals",
+      tooltip: "Reduced",
+      icon: "flame",
+      priority: 4,
+      showOnCards: true,
+      showInFilter: true,
+    });
   });
 
   it("changes only the fields that are sent", async () => {

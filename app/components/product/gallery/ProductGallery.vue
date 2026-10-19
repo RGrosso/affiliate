@@ -17,12 +17,12 @@
           v-for="(image, index) in images"
           :key="`${index}-${image.url}`"
           :src="image.url"
-          :alt="index === current ? image.alt ?? title : ''"
+          :alt="index === current ? (image.alt ?? title) : ''"
           :aria-hidden="index !== current"
           class="size-full shrink-0 object-cover"
           :fetchpriority="index === 0 ? 'high' : undefined"
           :data-main="index === current ? '' : undefined"
-        >
+        />
       </div>
       <div
         v-else
@@ -80,9 +80,11 @@
           :aria-label="`Show image ${index + 1} of ${images.length}`"
           :aria-current="index === current"
           class="block size-16 lg:size-20 rounded-md overflow-hidden bg-elevated transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :class="index === current
-            ? 'ring-2 ring-primary'
-            : 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100 focus-visible:grayscale-0 focus-visible:opacity-100'"
+          :class="
+            index === current
+              ? 'ring-2 ring-primary'
+              : 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100 focus-visible:grayscale-0 focus-visible:opacity-100'
+          "
           @click="show(index)"
         >
           <img
@@ -90,7 +92,7 @@
             alt=""
             class="size-full object-cover"
             loading="lazy"
-          >
+          />
         </button>
       </li>
     </ul>
@@ -115,7 +117,10 @@ function show(index: number) {
   current.value = (index + images.length) % images.length;
 }
 
-watch(() => images, () => {
-  current.value = 0;
-});
+watch(
+  () => images,
+  () => {
+    current.value = 0;
+  }
+);
 </script>

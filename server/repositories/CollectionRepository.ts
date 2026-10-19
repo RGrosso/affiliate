@@ -10,25 +10,17 @@ export class CollectionRepository {
 
   /** The locked All collection first, then alphabetically. */
   findAll() {
-    return this.db.select()
-      .from(collections)
-      .orderBy(desc(collections.locked), asc(collections.title), asc(collections.id));
+    return this.db.select().from(collections).orderBy(desc(collections.locked), asc(collections.title), asc(collections.id));
   }
 
   async findById(id: string) {
-    const [collection] = await this.db.select()
-      .from(collections)
-      .where(eq(collections.id, id))
-      .limit(1);
+    const [collection] = await this.db.select().from(collections).where(eq(collections.id, id)).limit(1);
 
     return collection;
   }
 
   async findByHandle(handle: string) {
-    const [collection] = await this.db.select()
-      .from(collections)
-      .where(eq(collections.handle, handle))
-      .limit(1);
+    const [collection] = await this.db.select().from(collections).where(eq(collections.handle, handle)).limit(1);
 
     return collection;
   }
@@ -39,19 +31,14 @@ export class CollectionRepository {
   }
 
   async update(id: string, values: Partial<NewCollection>) {
-    const [collection] = await this.db.update(collections)
-      .set(values)
-      .where(eq(collections.id, id))
-      .returning({ id: collections.id });
+    const [collection] = await this.db.update(collections).set(values).where(eq(collections.id, id)).returning({ id: collections.id });
 
     return collection;
   }
 
   /** The hand-picked products go with it through the collection_products ON DELETE CASCADE foreign key. */
   async delete(id: string) {
-    const deleted = await this.db.delete(collections)
-      .where(eq(collections.id, id))
-      .returning({ id: collections.id });
+    const deleted = await this.db.delete(collections).where(eq(collections.id, id)).returning({ id: collections.id });
 
     return deleted.length > 0;
   }
@@ -68,7 +55,8 @@ export class CollectionRepository {
 
   /** Product ids in manual order. */
   async findProductIds(collectionId: string) {
-    const rows = await this.db.select({ productId: collectionProducts.productId })
+    const rows = await this.db
+      .select({ productId: collectionProducts.productId })
       .from(collectionProducts)
       .where(eq(collectionProducts.collectionId, collectionId))
       .orderBy(asc(collectionProducts.position));
@@ -78,7 +66,8 @@ export class CollectionRepository {
 
   /** How many hand-picked products each collection has. Collections with none are missing from the map. */
   async countProducts() {
-    const rows = await this.db.select({ collectionId: collectionProducts.collectionId, total: count() })
+    const rows = await this.db
+      .select({ collectionId: collectionProducts.collectionId, total: count() })
       .from(collectionProducts)
       .groupBy(collectionProducts.collectionId);
 
@@ -96,7 +85,8 @@ export class CollectionRepository {
       ${`$.** ? (@.${STORED_TAG_ID_KEY} == $tag)`}::jsonpath,
       jsonb_build_object('tag', ${tags.id}::text)
     )`;
-    const rows = await this.db.select({ tagId: tags.id, id: collections.id, title: collections.title })
+    const rows = await this.db
+      .select({ tagId: tags.id, id: collections.id, title: collections.title })
       .from(tags)
       .innerJoin(collections, mentionsTag)
       .where(inArray(tags.id, tagIds))

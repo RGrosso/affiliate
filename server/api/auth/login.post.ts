@@ -1,10 +1,9 @@
 import { loginSchema } from "#shared/schemas/auth.schema";
 import { UserState } from "#shared/types/user";
 
-const invalidCredentials = () =>
-  apiError("INVALID_CREDENTIALS", "That username and password don't match. Please try again.");
+const invalidCredentials = () => apiError("INVALID_CREDENTIALS", "That username and password don't match. Please try again.");
 
-export default defineApiHandler(async (event) => {
+export default defineApiHandler(async event => {
   const { username, password } = await readValidated(event, loginSchema);
 
   const user = await findUserByUsername(username);

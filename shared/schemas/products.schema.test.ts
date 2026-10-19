@@ -21,17 +21,13 @@ describe("addProductSchema", () => {
 
   it("treats an empty handle as not given, but rejects an invalid one", () => {
     expect(addProductSchema.parse({ title: "A", handle: "" }).handle).toBeUndefined();
-    expect(fieldErrors({ title: "A", handle: "Not Valid" }).handle).toEqual([
-      "Use lowercase letters, numbers and hyphens only",
-    ]);
+    expect(fieldErrors({ title: "A", handle: "Not Valid" }).handle).toEqual(["Use lowercase letters, numbers and hyphens only"]);
   });
 
   it("validates the price in pounds", () => {
     expect(addProductSchema.parse({ title: "A", price: 19.99 }).price).toBe(19.99);
     expect(fieldErrors({ title: "A", price: -1 }).price).toEqual(["The price can't be negative"]);
-    expect(fieldErrors({ title: "A", price: 1.234 }).price).toEqual([
-      "The price can have at most 2 decimal places",
-    ]);
+    expect(fieldErrors({ title: "A", price: 1.234 }).price).toEqual(["The price can have at most 2 decimal places"]);
     expect(fieldErrors({ title: "A", price: "12" }).price).toEqual(["Please enter the price as a number"]);
   });
 

@@ -5,7 +5,7 @@ import { z } from "zod";
  * Import `z` from this file (not "zod") so the config is always applied.
  */
 z.config({
-  customError: (issue) => {
+  customError: issue => {
     switch (issue.code) {
       case "invalid_type":
         if (issue.input === undefined || issue.input === null || issue.input === "") {
@@ -16,9 +16,7 @@ z.config({
 
       case "too_small":
         if (issue.origin === "string") {
-          return Number(issue.minimum) <= 1
-            ? "This field is required"
-            : `Must be at least ${issue.minimum} characters`;
+          return Number(issue.minimum) <= 1 ? "This field is required" : `Must be at least ${issue.minimum} characters`;
         }
         if (issue.origin === "number") return `Must be ${issue.minimum} or more`;
         if (issue.origin === "array") return `Choose at least ${issue.minimum}`;

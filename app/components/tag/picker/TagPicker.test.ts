@@ -94,7 +94,7 @@ describe("TagPicker", () => {
     const wrapper = await open();
 
     await search("  Gift idea ");
-    const create = optionNamed("Add \"Gift idea\"");
+    const create = optionNamed('Add "Gift idea"');
     expect(create).toBeDefined();
 
     create!.click();

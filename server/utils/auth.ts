@@ -13,23 +13,17 @@ export function toSessionUser(user: UserRow): User {
 }
 
 export async function findUserByUsername(username: string) {
-  const [user] = await db.select()
-    .from(users)
-    .where(eq(users.username, username))
-    .limit(1);
+  const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
 
   return user;
 }
 
 /** An active user who hasn't chosen a password yet (e.g. the seeded dev admin). */
 export async function findUserAwaitingSetup(username: string) {
-  const [user] = await db.select()
+  const [user] = await db
+    .select()
     .from(users)
-    .where(and(
-      eq(users.username, username),
-      isNull(users.password),
-      eq(users.state, UserState.Active)
-    ))
+    .where(and(eq(users.username, username), isNull(users.password), eq(users.state, UserState.Active)))
     .limit(1);
 
   return user;
@@ -40,13 +34,10 @@ export async function findUserAwaitingSetup(username: string) {
  * (e.g. after a DB reset). Returns the user only if they can still log in.
  */
 export async function findSessionUser(id: string) {
-  const [user] = await db.select()
+  const [user] = await db
+    .select()
     .from(users)
-    .where(and(
-      eq(users.id, id),
-      isNotNull(users.password),
-      eq(users.state, UserState.Active)
-    ))
+    .where(and(eq(users.id, id), isNotNull(users.password), eq(users.state, UserState.Active)))
     .limit(1);
 
   return user;
@@ -54,7 +45,7 @@ export async function findSessionUser(id: string) {
 
 export async function requireUser(event: H3Event) {
   const session = await getUserSession(event);
-  const user = session.user && await findSessionUser(session.user.id);
+  const user = session.user && (await findSessionUser(session.user.id));
 
   if (!user) {
     if (session.user) {
@@ -69,7 +60,7 @@ export async function requireUser(event: H3Event) {
 /** For public routes that show admins more, such as drafts. A visitor or a stale session is simply not an admin. */
 export async function isAdminRequest(event: H3Event) {
   const session = await getUserSession(event);
-  const user = session.user && await findSessionUser(session.user.id);
+  const user = session.user && (await findSessionUser(session.user.id));
 
   return user?.role === "admin";
 }

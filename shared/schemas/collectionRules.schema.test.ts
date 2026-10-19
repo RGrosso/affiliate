@@ -46,9 +46,7 @@ describe("collectionRulesSchema", () => {
 
   it("allows 20 items in a group and rejects 21", () => {
     expect(collectionRulesSchema.safeParse({ match: "all", rules: manyRules(20) }).success).toBe(true);
-    expect(messages({ match: "all", rules: manyRules(21) })).toEqual([
-      { path: "rules", message: "A collection can have at most 20 items at the top level" },
-    ]);
+    expect(messages({ match: "all", rules: manyRules(21) })).toEqual([{ path: "rules", message: "A collection can have at most 20 items at the top level" }]);
     expect(messages({ match: "all", rules: [{ type: "group", match: "any", rules: manyRules(21) }] })).toEqual([
       { path: "rules.0.rules", message: "A group can have at most 20 items" },
     ]);
@@ -65,18 +63,14 @@ describe("collectionRulesSchema", () => {
 
   it("doesn't allow a subgroup inside a subgroup", () => {
     const nested = { type: "group", match: "any", rules: [{ type: "group", match: "all", rules: [retailerRule] }] };
-    expect(messages({ match: "all", rules: [nested] })).toEqual([
-      { path: "rules.0.rules.0.type", message: "Please choose a valid condition" },
-    ]);
+    expect(messages({ match: "all", rules: [nested] })).toEqual([{ path: "rules.0.rules.0.type", message: "Please choose a valid condition" }]);
   });
 
   it("rejects an unknown condition type", () => {
     expect(messages({ match: "all", rules: [{ type: "price", operator: "is", value: 1 }] })).toEqual([
       { path: "rules.0.type", message: "Please choose a valid condition" },
     ]);
-    expect(messages({ match: "all", rules: ["tag"] })).toEqual([
-      { path: "rules.0", message: "Please choose a valid condition" },
-    ]);
+    expect(messages({ match: "all", rules: ["tag"] })).toEqual([{ path: "rules.0", message: "Please choose a valid condition" }]);
   });
 
   it("asks for a tag from the list", () => {
@@ -118,9 +112,7 @@ describe("collectionRulesSchema", () => {
     const expected = "Please choose whether all or any of the conditions must match";
     expect(messages({ match: "some", rules: [tagRule] })).toEqual([{ path: "match", message: expected }]);
     expect(messages({ rules: [tagRule] })).toEqual([{ path: "match", message: expected }]);
-    expect(messages({ match: "all", rules: [{ type: "group", match: "none", rules: [tagRule] }] })).toEqual([
-      { path: "rules.0.match", message: expected },
-    ]);
+    expect(messages({ match: "all", rules: [{ type: "group", match: "none", rules: [tagRule] }] })).toEqual([{ path: "rules.0.match", message: expected }]);
   });
 
   it("reports field errors the way the form reads them", () => {

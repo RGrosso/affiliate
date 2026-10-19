@@ -30,14 +30,14 @@ registerEndpoint("/api/tags", {
 });
 registerEndpoint("/api/tags", {
   method: "POST",
-  handler: (event) => {
+  handler: event => {
     calls.bodies.push(readJsonBody(event));
     return { success: true, data: { ...tag, id: "t2", name: "New", slug: "new" } };
   },
 });
 registerEndpoint("/api/tags/t1", {
   method: "PATCH",
-  handler: (event) => {
+  handler: event => {
     calls.bodies.push(readJsonBody(event));
     return { success: true, data: { ...tag, name: "Renamed" } };
   },

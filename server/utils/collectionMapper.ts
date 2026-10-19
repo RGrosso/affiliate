@@ -1,13 +1,5 @@
-import {
-  CollectionStatus,
-  CollectionType,
-  ProductSort
-} from "#shared/types/collection";
-import {
-  StoredCollectionStatus,
-  StoredCollectionType,
-  StoredProductSort
-} from "./storedCollection";
+import { CollectionStatus, CollectionType, ProductSort } from "#shared/types/collection";
+import { StoredCollectionStatus, StoredCollectionType, StoredProductSort } from "./storedCollection";
 
 // Every API value maps to a stored one and back; the Record types make TypeScript flag a missing entry
 export const typeToStored: Record<CollectionType, StoredCollectionType> = {

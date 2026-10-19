@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CollectionStatus, CollectionType, ProductSort } from "#shared/types/collection";
-import {
-  sortFromStored,
-  sortToStored,
-  statusFromStored,
-  statusToStored,
-  typeFromStored,
-  typeToStored
-} from "./collectionMapper";
+import { sortFromStored, sortToStored, statusFromStored, statusToStored, typeFromStored, typeToStored } from "./collectionMapper";
 
 describe("collection mappers", () => {
   it("map every API value to a stored value and back", () => {

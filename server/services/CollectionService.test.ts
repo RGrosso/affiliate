@@ -32,12 +32,18 @@ const create = (input: CreateCollectionInput) => service.create(createCollection
 const update = (id: string, input: Parameters<typeof updateCollectionSchema.parse>[0]) => service.update(id, updateCollectionSchema.parse(input));
 
 const addProduct = async (title: string, extra: Partial<typeof products.$inferInsert> = {}) => {
-  const [product] = await db.insert(products).values({ title, handle: title.toLowerCase().replaceAll(" ", "-"), authorId, ...extra }).returning();
+  const [product] = await db
+    .insert(products)
+    .values({ title, handle: title.toLowerCase().replaceAll(" ", "-"), authorId, ...extra })
+    .returning();
   return product!;
 };
 
 const addTag = async (name: string, extra: Partial<typeof tags.$inferInsert> = {}) => {
-  const [tag] = await db.insert(tags).values({ name, slug: name.toLowerCase(), ...extra }).returning();
+  const [tag] = await db
+    .insert(tags)
+    .values({ name, slug: name.toLowerCase(), ...extra })
+    .returning();
   return tag!;
 };
 
@@ -94,15 +100,31 @@ describe("create", () => {
 
   it("saves an automated collection with its rules mapped back to the API shape", async () => {
     const tag = await addTag("Wedding");
-    const rules = rulesOf(hasTag(tag.id), { type: RuleType.Group, match: RuleMatch.Any, rules: [{ type: RuleType.Retailer, operator: RetailerOperator.IsNot, retailer: "Etsy" }] });
+    const rules = rulesOf(hasTag(tag.id), {
+      type: RuleType.Group,
+      match: RuleMatch.Any,
+      rules: [{ type: RuleType.Retailer, operator: RetailerOperator.IsNot, retailer: "Etsy" }],
+    });
 
     const created = await create({ type: "automated", title: "Weddings", status: "published", defaultSort: "price-asc", rules });
 
-    expect(created).toMatchObject({ type: CollectionType.Automated, status: CollectionStatus.Published, defaultSort: ProductSort.PriceAsc, rules, productIds: [] });
+    expect(created).toMatchObject({
+      type: CollectionType.Automated,
+      status: CollectionStatus.Published,
+      defaultSort: ProductSort.PriceAsc,
+      rules,
+      productIds: [],
+    });
   });
 
   it("stores the API values as their stored equivalents", async () => {
-    const created = await create({ type: "automated", title: "Priced", status: "published", defaultSort: "price-desc", rules: rulesOf({ type: RuleType.Retailer, operator: RetailerOperator.Is, retailer: "Etsy" }) });
+    const created = await create({
+      type: "automated",
+      title: "Priced",
+      status: "published",
+      defaultSort: "price-desc",
+      rules: rulesOf({ type: RuleType.Retailer, operator: RetailerOperator.Is, retailer: "Etsy" }),
+    });
 
     const [row] = await db.select().from(collections).where(eq(collections.id, created.id));
     expect(row).toMatchObject({ type: "automated", status: "published", defaultSort: "price_desc" });
@@ -185,8 +207,16 @@ describe("list", () => {
     await addProduct("C");
     await tagProduct(a.id, wedding.id);
     await create({ type: "manual", title: "Picks", productIds: [a.id, b.id] });
-    await create({ type: "automated", title: "Weddings", rules: rulesOf(hasTag(wedding.id), { type: RuleType.Retailer, operator: RetailerOperator.Is, retailer: "Etsy" }) });
-    await create({ type: "automated", title: "Everything but Etsy", rules: rulesOf({ type: RuleType.Retailer, operator: RetailerOperator.IsNot, retailer: "Etsy" }) });
+    await create({
+      type: "automated",
+      title: "Weddings",
+      rules: rulesOf(hasTag(wedding.id), { type: RuleType.Retailer, operator: RetailerOperator.Is, retailer: "Etsy" }),
+    });
+    await create({
+      type: "automated",
+      title: "Everything but Etsy",
+      rules: rulesOf({ type: RuleType.Retailer, operator: RetailerOperator.IsNot, retailer: "Etsy" }),
+    });
     await create({ type: "automated", title: "Ghosts", rules: rulesOf(hasTag(wedding.id)) });
     await db.delete(tags);
 
@@ -278,12 +308,15 @@ describe("update", () => {
     const { id: manualId } = await create({ type: "manual", title: "Manual" });
     const { id: autoId } = await create({ type: "automated", title: "Auto", rules: rulesOf(hasTag((await addTag("T")).id)) });
 
-    expect((await rejection(update(manualId, { rules: rulesOf(hasTag(unknownId)) }))).data?.fieldErrors?.rules)
-      .toEqual(["Collections where you pick the products don't use rules"]);
-    expect((await rejection(update(autoId, { productIds: [] }))).data?.fieldErrors?.productIds)
-      .toEqual(["Automated collections choose their products with rules"]);
-    expect((await rejection(update(autoId, { defaultSort: "manual" }))).data?.fieldErrors?.defaultSort)
-      .toEqual(["Manual order is only available for collections where you pick the products"]);
+    expect((await rejection(update(manualId, { rules: rulesOf(hasTag(unknownId)) }))).data?.fieldErrors?.rules).toEqual([
+      "Collections where you pick the products don't use rules",
+    ]);
+    expect((await rejection(update(autoId, { productIds: [] }))).data?.fieldErrors?.productIds).toEqual([
+      "Automated collections choose their products with rules",
+    ]);
+    expect((await rejection(update(autoId, { defaultSort: "manual" }))).data?.fieldErrors?.defaultSort).toEqual([
+      "Manual order is only available for collections where you pick the products",
+    ]);
     expect((await update(manualId, { defaultSort: "manual" })).defaultSort).toBe(ProductSort.Manual);
   });
 
@@ -291,10 +324,12 @@ describe("update", () => {
     const manual = await create({ type: "manual", title: "Manual" });
     const auto = await create({ type: "automated", title: "Auto", rules: rulesOf(hasTag((await addTag("T")).id)) });
 
-    expect((await rejection(update(auto.id, { rules: rulesOf(hasTag(unknownId)) }))).data?.fieldErrors?.rules)
-      .toEqual(["One of these tags no longer exists. Please refresh and try again"]);
-    expect((await rejection(update(manual.id, { productIds: [unknownId] }))).data?.fieldErrors?.productIds)
-      .toEqual(["One of these products no longer exists. Please refresh and try again"]);
+    expect((await rejection(update(auto.id, { rules: rulesOf(hasTag(unknownId)) }))).data?.fieldErrors?.rules).toEqual([
+      "One of these tags no longer exists. Please refresh and try again",
+    ]);
+    expect((await rejection(update(manual.id, { productIds: [unknownId] }))).data?.fieldErrors?.productIds).toEqual([
+      "One of these products no longer exists. Please refresh and try again",
+    ]);
   });
 
   it("rolls everything back when the products can't be saved", async () => {
@@ -334,12 +369,14 @@ describe("update", () => {
     });
 
     it("rejects a new handle, status, sort or rules as field errors", async () => {
-      const error = await rejection(update(ALL_COLLECTION_ID, {
-        handle: "everything",
-        status: "draft",
-        defaultSort: "oldest",
-        rules: rulesOf(hasTag(unknownId)),
-      }));
+      const error = await rejection(
+        update(ALL_COLLECTION_ID, {
+          handle: "everything",
+          status: "draft",
+          defaultSort: "oldest",
+          rules: rulesOf(hasTag(unknownId)),
+        })
+      );
 
       const message = ["This can't be changed on the all products collection"];
       expect(error.statusCode).toBe(400);
@@ -390,7 +427,13 @@ describe("delete", () => {
 
 describe("getByHandle", () => {
   it("returns a published collection with its SEO resolved and no rules", async () => {
-    await create({ type: "automated", title: "Weddings", status: "published", description: "For the big day", rules: rulesOf(hasTag((await addTag("Wedding")).id)) });
+    await create({
+      type: "automated",
+      title: "Weddings",
+      status: "published",
+      description: "For the big day",
+      rules: rulesOf(hasTag((await addTag("Wedding")).id)),
+    });
 
     const collection = await service.getByHandle("weddings");
 
@@ -517,7 +560,10 @@ describe("listProducts", () => {
     const page = await service.listProducts("picks", query({ tag: "sale" }));
 
     expect(titlesOf(page)).toEqual(["B"]);
-    expect(page.facets?.tags.map(facet => [facet.slug, facet.count])).toEqual([["gifts", 2], ["sale", 1]]);
+    expect(page.facets?.tags.map(facet => [facet.slug, facet.count])).toEqual([
+      ["gifts", 2],
+      ["sale", 1],
+    ]);
   });
 
   it("gives public cards only the tags marked for cards", async () => {

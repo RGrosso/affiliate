@@ -1,6 +1,6 @@
 import { expect, test } from "@nuxt/test-utils/playwright";
 
-// A seeded sample product, so these run before admin.spec deletes the samples
+// A seeded sample product
 const PRODUCT = "/product/cast-iron-skillet-12";
 
 test.describe("product page", () => {
@@ -11,7 +11,7 @@ test.describe("product page", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cast Iron Skillet, 12-inch");
     await expect(page.getByText("by Ironhearth")).toBeVisible();
     await expect(page.getByText("£34.99", { exact: true })).toBeVisible();
-    await expect(page.getByText("Sample", { exact: true })).toBeVisible();
+    await expect(page.getByText("Sample", { exact: true })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Description" })).toBeVisible();
     await expect(page.getByText("Oven safe to 260°C")).toBeVisible();
 
@@ -44,12 +44,12 @@ test.describe("product page", () => {
   test("adds Product structured data for search engines", async ({ page, goto }) => {
     await goto(PRODUCT, { waitUntil: "hydration" });
 
-    const jsonLd = JSON.parse(await page.locator("script[type='application/ld+json']").textContent() ?? "{}");
+    const jsonLd = JSON.parse((await page.locator("script[type='application/ld+json']").textContent()) ?? "{}");
     expect(jsonLd).toMatchObject({
       "@type": "Product",
-      "name": "Cast Iron Skillet, 12-inch",
-      "brand": { name: "Ironhearth" },
-      "offers": { price: "34.99", priceCurrency: "GBP" },
+      name: "Cast Iron Skillet, 12-inch",
+      brand: { name: "Ironhearth" },
+      offers: { price: "34.99", priceCurrency: "GBP" },
     });
   });
 

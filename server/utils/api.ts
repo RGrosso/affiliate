@@ -1,14 +1,7 @@
 import type { H3Event } from "h3";
 import type { ZodType } from "zod";
 import { z } from "#shared/schemas/zod";
-import {
-  apiErrorStatus,
-  isApiError,
-  type ApiError,
-  type ApiErrorCode,
-  type ApiFieldErrors,
-  type ApiSuccess
-} from "#shared/types/api";
+import { apiErrorStatus, isApiError, type ApiError, type ApiErrorCode, type ApiFieldErrors, type ApiSuccess } from "#shared/types/api";
 
 export function ok<T>(data: T, message?: string): ApiSuccess<T> {
   return message ? { success: true, data, message } : { success: true, data };
@@ -23,34 +16,24 @@ export function apiError(code: ApiErrorCode, message: string, fieldErrors?: ApiF
   });
 }
 
-export const badRequest = (message = "Something about that request wasn't right") =>
-  apiError("BAD_REQUEST", message);
+export const badRequest = (message = "Something about that request wasn't right") => apiError("BAD_REQUEST", message);
 
-export const unauthorized = (message = "Please log in to continue") =>
-  apiError("UNAUTHORIZED", message);
+export const unauthorized = (message = "Please log in to continue") => apiError("UNAUTHORIZED", message);
 
-export const forbidden = (message = "You don't have permission to do that") =>
-  apiError("FORBIDDEN", message);
+export const forbidden = (message = "You don't have permission to do that") => apiError("FORBIDDEN", message);
 
-export const notFound = (message = "We couldn't find what you were looking for") =>
-  apiError("NOT_FOUND", message);
+export const notFound = (message = "We couldn't find what you were looking for") => apiError("NOT_FOUND", message);
 
-export const conflict = (message = "That already exists") =>
-  apiError("CONFLICT", message);
+export const conflict = (message = "That already exists") => apiError("CONFLICT", message);
 
 export function validationError(error: z.ZodError) {
   const { formErrors, fieldErrors } = z.flattenError(error);
 
   const cleanFieldErrors = Object.fromEntries(
-    Object.entries(fieldErrors as Record<string, string[] | undefined>)
-      .filter((entry): entry is [string, string[]] => !!entry[1]?.length)
+    Object.entries(fieldErrors as Record<string, string[] | undefined>).filter((entry): entry is [string, string[]] => !!entry[1]?.length)
   );
 
-  return apiError(
-    "VALIDATION_ERROR",
-    formErrors[0] ?? "Please check the highlighted fields and try again",
-    cleanFieldErrors
-  );
+  return apiError("VALIDATION_ERROR", formErrors[0] ?? "Please check the highlighted fields and try again", cleanFieldErrors);
 }
 
 /** Reads the JSON body and validates it, throwing a `VALIDATION_ERROR` on failure. */
@@ -92,11 +75,16 @@ export function readIdParam(event: H3Event, notFoundError: () => Error): string 
 
 const codeForStatus = (status: number): ApiErrorCode => {
   switch (status) {
-    case 401: return "UNAUTHORIZED";
-    case 403: return "FORBIDDEN";
-    case 404: return "NOT_FOUND";
-    case 409: return "CONFLICT";
-    default: return status >= 500 ? "INTERNAL_ERROR" : "BAD_REQUEST";
+    case 401:
+      return "UNAUTHORIZED";
+    case 403:
+      return "FORBIDDEN";
+    case 404:
+      return "NOT_FOUND";
+    case 409:
+      return "CONFLICT";
+    default:
+      return status >= 500 ? "INTERNAL_ERROR" : "BAD_REQUEST";
   }
 };
 

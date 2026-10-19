@@ -14,17 +14,7 @@ export async function cropToSquare(file: File, maxSize = 1200): Promise<File> {
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas is not supported in this browser");
 
-  context.drawImage(
-    bitmap,
-    (bitmap.width - side) / 2,
-    (bitmap.height - side) / 2,
-    side,
-    side,
-    0,
-    0,
-    output,
-    output
-  );
+  context.drawImage(bitmap, (bitmap.width - side) / 2, (bitmap.height - side) / 2, side, side, 0, 0, output, output);
   bitmap.close();
 
   const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/webp", 0.9));

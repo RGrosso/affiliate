@@ -37,9 +37,7 @@ export class TagService {
 
   async update(id: string, { name, ...rest }: UpdateTagData) {
     const values = { ...rest, ...(name !== undefined && { name, slug: slugify(name) }) };
-    const tag = Object.keys(values).length
-      ? await this.tags.update(id, values).catch(rethrowAsDuplicateTag)
-      : await this.tags.findById(id);
+    const tag = Object.keys(values).length ? await this.tags.update(id, values).catch(rethrowAsDuplicateTag) : await this.tags.findById(id);
     if (!tag) {
       throw tagNotFound();
     }
@@ -51,10 +49,12 @@ export class TagService {
   async delete(id: string) {
     const using = await this.collections.findUsingTag(id);
     if (using.length) {
-      throw conflict(`This tag is used by ${formatList(using.map(collection => collection.title))}. Remove it from ${using.length === 1 ? "that collection" : "those collections"} first.`);
+      throw conflict(
+        `This tag is used by ${formatList(using.map(collection => collection.title))}. Remove it from ${using.length === 1 ? "that collection" : "those collections"} first.`
+      );
     }
 
-    if (!await this.tags.delete(id)) {
+    if (!(await this.tags.delete(id))) {
       throw tagNotFound();
     }
   }

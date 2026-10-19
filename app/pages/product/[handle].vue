@@ -22,14 +22,9 @@
 
       <div class="flex flex-col gap-5">
         <div
-          v-if="product.isSample || product.tags.length"
+          v-if="product.tags.length"
           class="flex flex-wrap gap-1.5"
         >
-          <CoreTag
-            v-if="product.isSample"
-            label="Sample"
-            color="warning"
-          />
           <CoreTag
             v-for="tag in product.tags"
             :key="tag.id"
@@ -134,9 +129,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
   { label: product.value?.title ?? "", class: "text-toned" },
 ]);
 
-const seoDescription = computed(() =>
-  metaDescription(product.value?.seoDescription, product.value?.description) || undefined
-);
+const seoDescription = computed(() => metaDescription(product.value?.seoDescription, product.value?.description) || undefined);
 
 useSeoMeta({
   title: () => product.value?.seoTitle || product.value?.title,
@@ -148,10 +141,12 @@ useSeoMeta({
 });
 
 useHead({
-  script: [{
-    type: "application/ld+json",
-    // Escaping `<` stops a title or description from closing the script tag early
-    innerHTML: () => product.value ? JSON.stringify(productJsonLd(product.value)).replace(/</g, "\\u003c") : "",
-  }],
+  script: [
+    {
+      type: "application/ld+json",
+      // Escaping `<` stops a title or description from closing the script tag early
+      innerHTML: () => (product.value ? JSON.stringify(productJsonLd(product.value)).replace(/</g, "\\u003c") : ""),
+    },
+  ],
 });
 </script>

@@ -9,7 +9,8 @@ Read `app/APP.md` before building or styling UI: it covers the site name, theme 
 ## Workflow
 
 - Package manager is `pnpm`.
-- `pnpm lint` runs ESLint with `--fix`, so it rewrites files. Run it after every change and review what it changed. CI runs `pnpm lint:check`, which only reports.
+- `pnpm lint` runs Oxlint with `--fix` and then the Oxfmt formatter (`vp lint --fix && vp fmt`), so it rewrites files. Run it after every change and review what it changed. CI runs `pnpm lint:check` (`vp lint && vp fmt --check`), which only reports.
+- Style is enforced by the formatter, not lint rules: double quotes, semicolons, 2-space indent, 160-character lines. Lint, format and Vitest config all live in `vite.config.ts`; there is no ESLint or Prettier.
 - Run `pnpm test` (unit and component tests) and `pnpm test:types` after every change, and `pnpm test:e2e` when you change a page, API route or user journey. CI runs all three plus a Storybook build.
 - Unit tests sit beside the file they test as `*.test.ts`; end-to-end tests live in `test/e2e/`. Component rules (own folder, test, story) are in `app/APP.md`.
 - Dev data lives in `.data/` (embedded PGlite and blob files). `pnpm dev:reset` (dev server stopped first) deletes it, so the next `pnpm dev` starts from first run: the dev admin is re-seeded with no password and sample products come back on next admin login.

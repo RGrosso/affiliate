@@ -33,10 +33,7 @@ function currencyFormatter(minDecimals: CurrencyDecimals, maxDecimals: CurrencyD
  * `maxDecimals: 0` rounds to whole pounds ("£35"); `minDecimals: 0` drops ".00" from whole
  * amounts ("£429") but keeps both pence digits otherwise ("£34.90").
  */
-export function formatCurrency(
-  pence: number | null | undefined,
-  { minDecimals = 2, maxDecimals = 2 }: FormatCurrencyOptions = {}
-): string | null {
+export function formatCurrency(pence: number | null | undefined, { minDecimals = 2, maxDecimals = 2 }: FormatCurrencyOptions = {}): string | null {
   if (pence == null) return null;
 
   const pounds = pence / 100;

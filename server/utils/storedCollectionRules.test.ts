@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  parseStoredRules,
-  STORED_RULES_VERSION,
-  StoredRetailerOperator,
-  StoredRuleMatch,
-  StoredRuleType,
-  StoredTagOperator
-} from "./storedCollectionRules";
+import { parseStoredRules, STORED_RULES_VERSION, StoredRetailerOperator, StoredRuleMatch, StoredRuleType, StoredTagOperator } from "./storedCollectionRules";
 
 const tagId = "11111111-1111-4111-8111-111111111111";
 

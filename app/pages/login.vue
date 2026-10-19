@@ -23,9 +23,7 @@
       class="flex items-center justify-center pt-20"
     >
       <div class="w-full max-w-md">
-        <h1 class="mb-6">
-          Login
-        </h1>
+        <h1 class="mb-6">Login</h1>
         <UForm
           ref="form"
           :schema="loginSchema"
@@ -62,7 +60,7 @@
             class="cursor-pointer"
             :loading="pending"
           >
-            {{ pending ? 'Logging in...' : 'Login' }}
+            {{ pending ? "Logging in..." : "Login" }}
           </UButton>
         </UForm>
       </div>

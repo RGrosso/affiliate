@@ -3,12 +3,7 @@ import { sql } from "drizzle-orm";
 import { collections } from "hub:db:schema";
 import { ALL_COLLECTION_HANDLE } from "#shared/types/collection";
 import { allCollectionRow, createTestDb, type TestDb } from "../../test/setup/db";
-import {
-  ALL_COLLECTION_ID,
-  StoredCollectionStatus,
-  StoredCollectionType,
-  StoredProductSort
-} from "./storedCollection";
+import { ALL_COLLECTION_ID, StoredCollectionStatus, StoredCollectionType, StoredProductSort } from "./storedCollection";
 
 // Pins what is persisted. If one of these changes, existing rows need a migration: don't just update the test.
 describe("stored collection values", () => {

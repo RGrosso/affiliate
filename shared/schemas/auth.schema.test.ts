@@ -16,9 +16,7 @@ describe("usernameSchema", () => {
     expect(messages(usernameSchema, "")).toContain("Please enter a username");
     expect(messages(usernameSchema, "ab")).toContain("Your username needs to be at least 3 characters");
     expect(messages(usernameSchema, "a".repeat(21))).toContain("Your username can be at most 20 characters");
-    expect(messages(usernameSchema, "no spaces")).toContain(
-      "Your username can only use letters, numbers, hyphens (-) and underscores (_)"
-    );
+    expect(messages(usernameSchema, "no spaces")).toContain("Your username can only use letters, numbers, hyphens (-) and underscores (_)");
   });
 });
 
@@ -39,10 +37,7 @@ describe("passwordSchema", () => {
 describe("loginSchema", () => {
   it("only checks that both fields were entered", () => {
     expect(messages(loginSchema, { username: "admin", password: "x" })).toEqual([]);
-    expect(messages(loginSchema, { username: " ", password: "" })).toEqual([
-      "Please enter your username",
-      "Please enter your password",
-    ]);
+    expect(messages(loginSchema, { username: " ", password: "" })).toEqual(["Please enter your username", "Please enter your password"]);
   });
 });
 
@@ -54,9 +49,7 @@ describe("setupPasswordSchema", () => {
       confirmPassword: "Str0ng!pas",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.issues).toEqual([
-      expect.objectContaining({ message: "The passwords don't match", path: ["confirmPassword"] }),
-    ]);
+    expect(result.error?.issues).toEqual([expect.objectContaining({ message: "The passwords don't match", path: ["confirmPassword"] })]);
   });
 });
 

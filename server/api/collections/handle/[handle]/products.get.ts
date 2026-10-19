@@ -1,6 +1,6 @@
 import { collectionProductsQuerySchema } from "#shared/schemas/collections.schema";
 
-export default defineApiHandler(async (event) => {
+export default defineApiHandler(async event => {
   const handle = readCollectionHandle(event);
   const query = readValidatedQuery(event, collectionProductsQuerySchema);
 

@@ -16,7 +16,10 @@ describe("sortTagsByPriority", () => {
   });
 
   it("leaves the original list alone", () => {
-    const tags = [{ name: "B", priority: null }, { name: "A", priority: null }];
+    const tags = [
+      { name: "B", priority: null },
+      { name: "A", priority: null },
+    ];
     sortTagsByPriority(tags);
     expect(tags[0]!.name).toBe("B");
   });

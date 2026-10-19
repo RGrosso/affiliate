@@ -12,22 +12,15 @@
           >
             {{ SITE_NAME }}<span class="text-action">.</span>
           </NuxtLink>
-          <p>
-            Gift ideas for humans, hounds and everything in between. Silly, clever and genuinely good presents,
-            hand-picked from shops across the internet.
-          </p>
+          <p>Gift ideas for humans, hounds and everything in between. Silly, clever and genuinely good presents, hand-picked from shops across the internet.</p>
         </div>
 
         <div class="md:justify-self-end md:max-w-xs">
-          <p class="text-sm">
-            We may earn a commission, at no cost to you.
-          </p>
+          <p class="text-sm">We may earn a commission, at no cost to you.</p>
         </div>
       </div>
 
-      <div class="py-5 border-t border-default text-sm text-muted">
-        © {{ year }} {{ SITE_NAME }}. Prices and availability can change at the retailer.
-      </div>
+      <div class="py-5 border-t border-default text-sm text-muted">© {{ year }} {{ SITE_NAME }}. Prices and availability can change at the retailer.</div>
     </CoreContainer>
   </footer>
 </template>

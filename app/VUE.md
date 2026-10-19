@@ -7,7 +7,11 @@ Vue 3.5 through Nuxt 4. Every component and page uses `<script setup lang="ts">`
 When the script reads a prop, or a prop needs a default, destructure it straight from `defineProps`, with defaults as destructure defaults:
 
 ```ts
-const { label, size = "md", disabled = false } = defineProps<{
+const {
+  label,
+  size = "md",
+  disabled = false,
+} = defineProps<{
   label: string;
   size?: "sm" | "md" | "lg";
   disabled?: boolean;

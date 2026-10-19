@@ -1,6 +1,6 @@
 import { updateCollectionSchema } from "#shared/schemas/collections.schema";
 
-export default defineApiHandler(async (event) => {
+export default defineApiHandler(async event => {
   await requireAdmin(event);
 
   const id = readCollectionId(event);

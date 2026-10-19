@@ -20,8 +20,7 @@ describe("resolveCollectionHandle", () => {
   });
 
   it("asks for a handle when the title has no letters or numbers", () => {
-    expect(thrown(() => resolveCollectionHandle(undefined, "!!!")).data?.fieldErrors)
-      .toEqual({ handle: ["Please add a URL handle using letters or numbers"] });
+    expect(thrown(() => resolveCollectionHandle(undefined, "!!!")).data?.fieldErrors).toEqual({ handle: ["Please add a URL handle using letters or numbers"] });
   });
 
   it("reserves the handle of the all products page, whether given or built from the title", () => {
@@ -36,8 +35,10 @@ describe("resolveCollectionSeo", () => {
   const collection = { title: "Gifts", description: "A lovely gift", seoTitle: null, seoDescription: null };
 
   it("uses the SEO fields when they are set", () => {
-    expect(resolveCollectionSeo({ ...collection, seoTitle: "Buy gifts", seoDescription: "Great gifts" }))
-      .toEqual({ seoTitle: "Buy gifts", seoDescription: "Great gifts" });
+    expect(resolveCollectionSeo({ ...collection, seoTitle: "Buy gifts", seoDescription: "Great gifts" })).toEqual({
+      seoTitle: "Buy gifts",
+      seoDescription: "Great gifts",
+    });
   });
 
   it("falls back to the title and description", () => {

@@ -19,7 +19,6 @@ const listColumns = {
   pricePence: products.pricePence,
   retailer: products.retailer,
   affiliateUrl: products.affiliateUrl,
-  isSample: products.isSample,
   createdAt: products.createdAt,
 } satisfies Record<Exclude<keyof ProductListItem, "image" | "tags">, PgColumn>;
 
@@ -39,7 +38,7 @@ const sortOrders: Record<ProductSort, (collectionId?: string) => SQL[]> = {
   [ProductSort.PriceDesc]: () => [price("desc"), asc(products.title), asc(products.id)],
   [ProductSort.TitleAsc]: () => [asc(lowerTitle), asc(products.title), asc(products.id)],
   [ProductSort.TitleDesc]: () => [desc(lowerTitle), asc(products.title), asc(products.id)],
-  [ProductSort.Manual]: (collectionId) => {
+  [ProductSort.Manual]: collectionId => {
     if (!collectionId) throw new Error("Manual order needs a collection");
 
     const position = sql`(select ${collectionProducts.position} from ${collectionProducts} where ${and(
@@ -54,10 +53,7 @@ export class ProductRepository {
   constructor(private readonly db: DbExecutor) {}
 
   async findById(id: string) {
-    const [product] = await this.db.select()
-      .from(products)
-      .where(eq(products.id, id))
-      .limit(1);
+    const [product] = await this.db.select().from(products).where(eq(products.id, id)).limit(1);
 
     return product;
   }
@@ -70,20 +66,18 @@ export class ProductRepository {
   }
 
   async findByHandleWithImages(handle: string) {
-    const [product] = await this.db.select()
-      .from(products)
-      .where(eq(products.handle, handle))
-      .limit(1);
+    const [product] = await this.db.select().from(products).where(eq(products.handle, handle)).limit(1);
     if (!product) return undefined;
 
     return { ...product, images: await this.findImages(product.id) };
   }
 
   private findImages(productId: string): Promise<ProductImage[]> {
-    return this.db.select({
-      url: productImages.url,
-      alt: productImages.alt,
-    })
+    return this.db
+      .select({
+        url: productImages.url,
+        alt: productImages.alt,
+      })
       .from(productImages)
       .where(eq(productImages.productId, productId))
       .orderBy(asc(productImages.position));
@@ -92,24 +86,31 @@ export class ProductRepository {
   /** Products in a collection: the manual list when `collectionId` is given, otherwise those matching `rules` (all of them for none). */
   private inScope({ rules, collectionId }: ProductScope) {
     return collectionId
-      ? exists(this.db.select({ one: collectionProducts.productId })
-          .from(collectionProducts)
-          .where(and(eq(collectionProducts.collectionId, collectionId), eq(collectionProducts.productId, products.id))))
-      : compileRules(rules ?? null);
+      ? exists(
+          this.db
+            .select({ one: collectionProducts.productId })
+            .from(collectionProducts)
+            .where(and(eq(collectionProducts.collectionId, collectionId), eq(collectionProducts.productId, products.id)))
+        )
+      : compileRules(this.db, rules ?? null);
   }
 
   /** Newest first unless `sort` says otherwise. Ties fall back to the title, then the id, so pages don't shuffle between requests. */
   async findPage(query: ProductListQuery, { sort = ProductSort.Newest, ...scope }: ProductScope & { sort?: ProductSort } = {}) {
     const tagFilter = query.tag?.length
-      ? exists(this.db.select({ one: productTags.productId })
-          .from(productTags)
-          .innerJoin(tags, eq(tags.id, productTags.tagId))
-          .where(and(eq(productTags.productId, products.id), inArray(tags.slug, query.tag))))
+      ? exists(
+          this.db
+            .select({ one: productTags.productId })
+            .from(productTags)
+            .innerJoin(tags, eq(tags.id, productTags.tagId))
+            .where(and(eq(productTags.productId, products.id), inArray(tags.slug, query.tag)))
+        )
       : undefined;
     const filter = and(tagFilter, this.inScope(scope));
 
     const [items, [totals]] = await Promise.all([
-      this.db.select(listColumns)
+      this.db
+        .select(listColumns)
         .from(products)
         .where(filter)
         .orderBy(...sortOrders[sort](scope.collectionId))
@@ -131,7 +132,8 @@ export class ProductRepository {
    * with how many, highest priority first. Counted over the whole scope, so choosing a tag doesn't hide the others.
    */
   async findTagFacets(scope: ProductScope): Promise<TagFacet[]> {
-    const rows = await this.db.select({ ...tagColumns, count: count() })
+    const rows = await this.db
+      .select({ ...tagColumns, count: count() })
       .from(tags)
       .innerJoin(productTags, eq(productTags.tagId, tags.id))
       .innerJoin(products, eq(products.id, productTags.productId))
@@ -143,7 +145,8 @@ export class ProductRepository {
 
   /** The distinct shops products link to, for choosing a retailer in a rule. */
   async findRetailers() {
-    const rows = await this.db.selectDistinct({ retailer: products.retailer })
+    const rows = await this.db
+      .selectDistinct({ retailer: products.retailer })
       .from(products)
       .where(and(isNotNull(products.retailer), ne(products.retailer, "")))
       .orderBy(asc(products.retailer));
@@ -164,11 +167,12 @@ export class ProductRepository {
     const featured = new Map<string, ProductImage>();
     if (!productIds.length) return featured;
 
-    const images = await this.db.select({
-      productId: productImages.productId,
-      url: productImages.url,
-      alt: productImages.alt,
-    })
+    const images = await this.db
+      .select({
+        productId: productImages.productId,
+        url: productImages.url,
+        alt: productImages.alt,
+      })
       .from(productImages)
       .where(inArray(productImages.productId, productIds))
       .orderBy(asc(productImages.position));
@@ -180,14 +184,6 @@ export class ProductRepository {
     }
 
     return featured;
-  }
-
-  async countSamples() {
-    const [result] = await this.db.select({ count: count() })
-      .from(products)
-      .where(eq(products.isSample, true));
-
-    return result?.count ?? 0;
   }
 
   async count() {
@@ -202,17 +198,11 @@ export class ProductRepository {
 
   /** Skips handles that are already taken, so only the rows actually inserted come back. */
   insertSamples(values: NewProduct[]) {
-    return this.db.insert(products)
-      .values(values)
-      .onConflictDoNothing({ target: products.handle })
-      .returning({ id: products.id, handle: products.handle });
+    return this.db.insert(products).values(values).onConflictDoNothing({ target: products.handle }).returning({ id: products.id, handle: products.handle });
   }
 
   async update(id: string, values: Partial<NewProduct>) {
-    const [product] = await this.db.update(products)
-      .set(values)
-      .where(eq(products.id, id))
-      .returning({ id: products.id });
+    const [product] = await this.db.update(products).set(values).where(eq(products.id, id)).returning({ id: products.id });
 
     return product;
   }
@@ -226,14 +216,5 @@ export class ProductRepository {
   async replaceImages(productId: string, images: NewProductImage[]) {
     await this.db.delete(productImages).where(eq(productImages.productId, productId));
     await this.insertImages(images);
-  }
-
-  /** Images go with them through the product_images ON DELETE CASCADE foreign key. */
-  async deleteSamples() {
-    const deleted = await this.db.delete(products)
-      .where(eq(products.isSample, true))
-      .returning({ id: products.id });
-
-    return deleted.length;
   }
 }

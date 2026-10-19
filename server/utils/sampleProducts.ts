@@ -9,15 +9,15 @@ export type SampleProduct = {
   imageCount: number;
 };
 
-export const sampleImageUrl = (handle: string, index: number) =>
-  `https://picsum.photos/seed/${handle}-${index}/800/800`;
+export const sampleImageUrl = (handle: string, index: number) => `https://picsum.photos/seed/${handle}-${index}/800/800`;
 
 export const sampleProducts: SampleProduct[] = [
   {
     title: "Cast Iron Skillet, 12-inch",
     handle: "cast-iron-skillet-12",
     pricePence: 3499,
-    description: "<p>A pre-seasoned skillet that goes from hob to oven to campfire. Even heat, great sear, and it only gets better with age.</p><ul><li>Pre-seasoned with vegetable oil</li><li>Oven safe to 260°C</li><li>Works on induction</li></ul>",
+    description:
+      "<p>A pre-seasoned skillet that goes from hob to oven to campfire. Even heat, great sear, and it only gets better with age.</p><ul><li>Pre-seasoned with vegetable oil</li><li>Oven safe to 260°C</li><li>Works on induction</li></ul>",
     retailer: "Kitchen Supply Co.",
     brand: "Ironhearth",
     seoDescription: "Our pick for the best all-round cast iron skillet: pre-seasoned, oven safe and built to last a lifetime.",
@@ -67,7 +67,8 @@ export const sampleProducts: SampleProduct[] = [
     title: "Ultralight Backpacking Tent",
     handle: "ultralight-backpacking-tent",
     pricePence: 34900,
-    description: "<p>A two-person, three-season tent that packs down to the size of a water bottle and weighs under 1kg.</p><ul><li>Freestanding design</li><li>Two doors, two vestibules</li><li>Pitches in under 3 minutes</li></ul>",
+    description:
+      "<p>A two-person, three-season tent that packs down to the size of a water bottle and weighs under 1kg.</p><ul><li>Freestanding design</li><li>Two doors, two vestibules</li><li>Pitches in under 3 minutes</li></ul>",
     retailer: "Trailhead Outfitters",
     brand: "Ridgeline",
     seoDescription: "A two-person ultralight tent under 1kg, ideal for backpacking and long-distance hikes.",
@@ -167,7 +168,8 @@ export const sampleProducts: SampleProduct[] = [
     title: "Ergonomic Office Chair",
     handle: "ergonomic-office-chair",
     pricePence: 42900,
-    description: "<p>Adjustable lumbar support, 4D armrests and a breathable mesh back for long days at the desk.</p><ul><li>Seat depth adjustment</li><li>Tilt lock in four positions</li><li>12-year warranty</li></ul>",
+    description:
+      "<p>Adjustable lumbar support, 4D armrests and a breathable mesh back for long days at the desk.</p><ul><li>Seat depth adjustment</li><li>Tilt lock in four positions</li><li>12-year warranty</li></ul>",
     retailer: "Workspace Direct",
     brand: "Postura",
     seoDescription: "A fully adjustable ergonomic office chair with lumbar support and a mesh back.",
@@ -227,7 +229,8 @@ export const sampleProducts: SampleProduct[] = [
     title: "Radiator Cat Bed",
     handle: "radiator-cat-bed",
     pricePence: 1999,
-    description: "<p>A fleece-lined hammock that hooks over most radiators, so your cat can nap somewhere toasty.</p><ul><li>Fits radiators up to 7cm deep</li><li>Machine washable</li></ul>",
+    description:
+      "<p>A fleece-lined hammock that hooks over most radiators, so your cat can nap somewhere toasty.</p><ul><li>Fits radiators up to 7cm deep</li><li>Machine washable</li></ul>",
     retailer: "Pet Palace",
     brand: "Purrch",
     seoDescription: "A cosy radiator hammock for cats. Fleece-lined, washable and easy to fit.",

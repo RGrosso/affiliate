@@ -37,15 +37,15 @@ beforeEach(async () => {
 
 describe("create", () => {
   it("stores the price in pence and the images in order", async () => {
-    const created = await service.create(
-      { title: "Moon Lamp", price: 19.99, tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/b.jpg" }] },
-      authorId
-    );
+    const created = await service.create({ title: "Moon Lamp", price: 19.99, tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/b.jpg" }] }, authorId);
 
     expect(created).toMatchObject({ title: "Moon Lamp", handle: "moon-lamp", pricePence: 1999, authorId });
 
     const found = await service.get(created.id);
-    expect(found.images).toEqual([{ url: "/a.jpg", alt: "A" }, { url: "/b.jpg", alt: null }]);
+    expect(found.images).toEqual([
+      { url: "/a.jpg", alt: "A" },
+      { url: "/b.jpg", alt: null },
+    ]);
   });
 
   it("rejects a duplicate handle as a conflict on the handle field", async () => {
@@ -59,7 +59,12 @@ describe("create", () => {
 
 describe("findRetailers", () => {
   it("lists each retailer once, sorted", async () => {
-    for (const [title, retailer] of [["A", "Etsy"], ["B", "Amazon"], ["C", "Etsy"], ["D", null]] as const) {
+    for (const [title, retailer] of [
+      ["A", "Etsy"],
+      ["B", "Amazon"],
+      ["C", "Etsy"],
+      ["D", null],
+    ] as const) {
       await service.create({ title, retailer, tagIds: [], images: [] }, authorId);
     }
 
@@ -81,31 +86,41 @@ describe("getByHandle", () => {
 
   it("returns the public product with its images, brand and every tag as a badge", async () => {
     const [low, top, hidden] = [await addTag("Low", 1, true), await addTag("Top", 9, true), await addTag("Hidden", 5)];
-    await service.create({
-      title: "Moon Lamp",
-      brand: "Luna",
-      retailer: "Lamp Shop",
-      price: 19.99,
-      tagIds: [low.id, top.id, hidden.id],
-      images: [{ url: "/a.jpg", alt: "Front" }, { url: "/b.jpg" }],
-    }, authorId);
+    await service.create(
+      {
+        title: "Moon Lamp",
+        brand: "Luna",
+        retailer: "Lamp Shop",
+        price: 19.99,
+        tagIds: [low.id, top.id, hidden.id],
+        images: [{ url: "/a.jpg", alt: "Front" }, { url: "/b.jpg" }],
+      },
+      authorId
+    );
 
     const product = await service.getByHandle("moon-lamp");
 
-    expect(product).toMatchObject({ title: "Moon Lamp", brand: "Luna", retailer: "Lamp Shop", pricePence: 1999, isSample: false });
-    expect(product.images).toEqual([{ url: "/a.jpg", alt: "Front" }, { url: "/b.jpg", alt: null }]);
+    expect(product).toMatchObject({ title: "Moon Lamp", brand: "Luna", retailer: "Lamp Shop", pricePence: 1999 });
+    expect(product.images).toEqual([
+      { url: "/a.jpg", alt: "Front" },
+      { url: "/b.jpg", alt: null },
+    ]);
     expect(product.tags.map(tag => tag.name)).toEqual(["Top", "Hidden", "Low"]);
     expect(Object.keys(product.tags[0]!).sort()).toEqual(["icon", "id", "name", "slug", "tooltip"]);
     expect(product).not.toHaveProperty("authorId");
+    expect(product).not.toHaveProperty("isSample");
   });
 
   it("sanitises the description", async () => {
-    await service.create({
-      title: "Lamp",
-      description: "<p onclick=\"x()\">Bright</p><script>alert(1)</script>",
-      tagIds: [],
-      images: [],
-    }, authorId);
+    await service.create(
+      {
+        title: "Lamp",
+        description: '<p onclick="x()">Bright</p><script>alert(1)</script>',
+        tagIds: [],
+        images: [],
+      },
+      authorId
+    );
 
     expect((await service.getByHandle("lamp")).description).toBe("<p>Bright</p>");
   });
@@ -125,21 +140,16 @@ describe("list", () => {
       pageSize: 2,
       total: 0,
       totalPages: 0,
-      sampleCount: 0,
     });
   });
 
-  it("pages the products with their featured image and counts the samples", async () => {
-    const withImage = await service.create(
-      { title: "A", tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/a2.jpg" }] },
-      authorId
-    );
-    const sample = await service.create({ title: "B", tagIds: [], images: [] }, authorId);
+  it("pages the products with their featured image", async () => {
+    const withImage = await service.create({ title: "A", tagIds: [], images: [{ url: "/a.jpg", alt: "A" }, { url: "/a2.jpg" }] }, authorId);
+    await service.create({ title: "B", tagIds: [], images: [] }, authorId);
     await service.create({ title: "C", tagIds: [], images: [] }, authorId);
-    await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
 
     const paged = await service.list({ page: 1, pageSize: 2 });
-    expect(paged).toMatchObject({ page: 1, pageSize: 2, total: 3, totalPages: 2, sampleCount: 1 });
+    expect(paged).toMatchObject({ page: 1, pageSize: 2, total: 3, totalPages: 2 });
     expect(paged.items).toHaveLength(2);
 
     const { items } = await service.list({ page: 1, pageSize: 10 });
@@ -160,9 +170,7 @@ describe("update", () => {
     await service.create({ title: "Taken", tagIds: [], images: [] }, authorId);
     const { id } = await service.create({ title: "Mine", tagIds: [], images: [{ url: "/keep.jpg" }] }, authorId);
 
-    const error = await rejection(
-      service.update(id, { title: "Mine", handle: "taken", tagIds: [], images: [{ url: "/lost.jpg" }] })
-    );
+    const error = await rejection(service.update(id, { title: "Mine", handle: "taken", tagIds: [], images: [{ url: "/lost.jpg" }] }));
     expect(error.statusCode).toBe(409);
     expect(error.data?.fieldErrors?.handle).toBeDefined();
 
@@ -288,17 +296,6 @@ describe("tags", () => {
   });
 });
 
-describe("deleteSamples", () => {
-  it("returns how many samples were removed", async () => {
-    const sample = await service.create({ title: "Sample", tagIds: [], images: [] }, authorId);
-    await service.create({ title: "Real", tagIds: [], images: [] }, authorId);
-    await db.update(products).set({ isSample: true }).where(eq(products.id, sample.id));
-
-    expect(await service.deleteSamples()).toBe(1);
-    expect((await service.list({ page: 1, pageSize: 10 })).total).toBe(1);
-  });
-});
-
 describe("seedSamplesOnce", () => {
   const imageTotal = sampleProducts.reduce((sum, sample) => sum + sample.imageCount, 0);
   const allProducts = () => db.select().from(products);
@@ -322,7 +319,7 @@ describe("seedSamplesOnce", () => {
 
   it("does not bring the samples back after they are deleted", async () => {
     await service.seedSamplesOnce(authorId);
-    await service.deleteSamples();
+    await db.delete(products);
     await service.seedSamplesOnce(authorId);
 
     expect(await allProducts()).toHaveLength(0);

@@ -220,7 +220,9 @@ test.describe("API", () => {
     test("won't delete a tag that a collection uses", async ({ request }) => {
       const tag = (await (await request.post("/api/tags", { data: { name: `E2e tag ${Date.now()}` } })).json()).data;
       const rules = { match: "all", rules: [{ type: "tag", operator: "has", tagId: tag.id }] };
-      const created = await request.post("/api/collections", { data: { type: "automated", title: "Uses e2e tag", handle: `uses-e2e-tag-${Date.now()}`, rules } });
+      const created = await request.post("/api/collections", {
+        data: { type: "automated", title: "Uses e2e tag", handle: `uses-e2e-tag-${Date.now()}`, rules },
+      });
       const collection = (await created.json()).data;
 
       try {

@@ -5,12 +5,7 @@ import { PgTable } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import * as schema from "../../server/db/schema";
-import {
-  ALL_COLLECTION_ID,
-  StoredCollectionStatus,
-  StoredCollectionType,
-  StoredProductSort
-} from "../../server/utils/storedCollection";
+import { ALL_COLLECTION_ID, StoredCollectionStatus, StoredCollectionType, StoredProductSort } from "../../server/utils/storedCollection";
 
 const migrationsFolder = fileURLToPath(new URL("../../server/db/migrations/postgresql", import.meta.url));
 
