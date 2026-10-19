@@ -1,5 +1,5 @@
 import { mountSuspended } from "@nuxt/test-utils/runtime";
-import type { Component } from "vue";
+import type { Component, Ref } from "vue";
 import { UApp } from "#components";
 
 /**
@@ -11,4 +11,23 @@ export async function mountInApp(component: Component, props: Record<string, unk
     render: () => h(UApp, null, { default: () => h(component, props) }),
   });
   return app.findComponent(component);
+}
+
+/** Mounts a `v-model` component with the value held in a ref, so edits come back in as they would from a parent form. */
+export async function mountWithModel<T>(component: Component, initial: T, props: Record<string, unknown> = {}) {
+  const model = ref(initial) as Ref<T>;
+  const app = await mountSuspended({
+    render: () =>
+      h(UApp, null, {
+        default: () =>
+          h(component, {
+            ...props,
+            modelValue: model.value,
+            "onUpdate:modelValue": (value: T) => {
+              model.value = value;
+            },
+          }),
+      }),
+  });
+  return { wrapper: app.findComponent(component), model };
 }
