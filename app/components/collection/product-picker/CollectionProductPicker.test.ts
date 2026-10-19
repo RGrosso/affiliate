@@ -19,15 +19,21 @@ const product = (id: string, title: string, pricePence: number | null = 1999, re
   tags: [],
 });
 
-const catalogue = [product("lamp", "Moon Lamp"), product("mug", "Blue Mug", 850, null), product("kettle", "Steel Kettle", null)];
+const widgets = Array.from({ length: 60 }, (_, i) => product(`widget-${i + 1}`, `Widget ${String(i + 1).padStart(2, "0")}`));
+const catalogue = [product("lamp", "Moon Lamp"), product("mug", "Blue Mug", 850, null), product("kettle", "Steel Kettle", null), ...widgets];
 const queries = vi.hoisted(() => [] as Record<string, unknown>[]);
 
-registerEndpoint("/api/products", event => {
+registerEndpoint("/api/products", async event => {
   const query = getQuery(event);
+  // Later pages are slow enough for the loading indicator to be seen
+  if (query.page !== "1") await new Promise(resolve => setTimeout(resolve, 150));
   queries.push(query);
   const q = String(query.q ?? "").toLowerCase();
-  const items = catalogue.filter(item => item.title.toLowerCase().includes(q));
-  return { success: true, data: { items, total: items.length, page: 1, pageSize: 8, totalPages: 1 } };
+  const matches = catalogue.filter(item => item.title.toLowerCase().includes(q));
+  const page = Number(query.page);
+  const pageSize = Number(query.pageSize);
+  const items = matches.slice((page - 1) * pageSize, page * pageSize);
+  return { success: true, data: { items, total: matches.length, page, pageSize, totalPages: Math.ceil(matches.length / pageSize) } };
 });
 
 const dialog = () => document.body.querySelector<HTMLElement>("[role=dialog]");
@@ -52,7 +58,7 @@ async function openPicker(props: Record<string, unknown> = {}) {
   });
   mounted.push(app);
   const wrapper = app.findComponent(CollectionProductPicker);
-  await vi.waitFor(() => expect(rows()).toHaveLength(3));
+  await vi.waitFor(() => expect(rows().length).toBeGreaterThanOrEqual(8));
   return wrapper;
 }
 
@@ -68,7 +74,7 @@ describe("CollectionProductPicker", () => {
   it("lists the products with their retailer and price", async () => {
     await openPicker();
 
-    expect(rows()).toEqual(["Moon LampAmazon · £19.99", "Blue Mug£8.50", "Steel KettleAmazon"]);
+    expect(rows().slice(0, 3)).toEqual(["Moon LampAmazon · £19.99", "Blue Mug£8.50", "Steel KettleAmazon"]);
   });
 
   it("is accessible", async () => {
@@ -85,8 +91,79 @@ describe("CollectionProductPicker", () => {
     await typeSearch("mug");
 
     await vi.waitFor(() => expect(rows()).toEqual(["Blue Mug£8.50"]));
-    expect(queries).toHaveLength(1);
-    expect(queries[0]).toMatchObject({ q: "mug", page: "1" });
+    // Pages of the unfiltered list may still be arriving
+    const searches = queries.filter(query => query.q === "mug");
+    expect(searches).toHaveLength(1);
+    expect(searches[0]).toMatchObject({ page: "1" });
+  });
+
+  describe("infinite loading", () => {
+    const scroller = () => dialog()!.querySelector<HTMLElement>("ul[aria-label=Products]")!.parentElement!;
+    // A short window, so the list overflows however tall the test browser is
+    const scrollToEnd = async () => {
+      scroller().style.maxHeight = "150px";
+      scroller().scrollTo({ top: scroller().scrollHeight });
+      await nextTick();
+    };
+
+    it("loads the next page when the list is scrolled near the end", async () => {
+      await openPicker();
+      const before = rows().length;
+
+      await scrollToEnd();
+
+      await vi.waitFor(() => expect(rows().length).toBeGreaterThan(before));
+      const pages = queries.map(q => Number(q.page));
+      expect(pages).toEqual(pages.map((_, i) => i + 1));
+    });
+
+    it("stops at the last page and doesn't load a page twice", async () => {
+      await openPicker();
+      // "widget 1" matches Widget 10 to 19: two pages of 8
+      await typeSearch("widget 1");
+      await vi.waitFor(() => expect(rows()[0]).toContain("Widget 10"));
+      await scrollToEnd();
+      await vi.waitFor(() => expect(rows()).toHaveLength(10));
+      queries.length = 0;
+
+      await scrollToEnd();
+      await scrollToEnd();
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      expect(rows()).toHaveLength(10);
+      expect(queries).toHaveLength(0);
+    });
+
+    it("has no page controls or load more button", async () => {
+      await openPicker();
+
+      expect(dialog()!.querySelector("nav[aria-label*=agination]")).toBeNull();
+      expect(button("Load more")).toBeUndefined();
+    });
+
+    it("starts again from page 1 for a new search", async () => {
+      await openPicker();
+      await scrollToEnd();
+      await vi.waitFor(() => expect(queries.length).toBeGreaterThan(1));
+      queries.length = 0;
+
+      await typeSearch("widget 2");
+
+      await vi.waitFor(() => expect(rows()[0]).toContain("Widget 20"));
+      expect(queries.find(query => query.q === "widget 2")).toMatchObject({ page: "1" });
+      await scrollToEnd();
+      await vi.waitFor(() => expect(rows()).toHaveLength(10));
+      expect(queries.at(-1)).toMatchObject({ q: "widget 2", page: "2" });
+    });
+
+    it("shows a loading indicator while the next page loads", async () => {
+      await openPicker();
+
+      await scrollToEnd();
+
+      await vi.waitFor(() => expect(dialog()!.querySelector("[role=status]")).not.toBeNull());
+      await vi.waitFor(() => expect(dialog()!.querySelector("[role=status]")).toBeNull());
+    });
   });
 
   it("says when nothing matches", async () => {

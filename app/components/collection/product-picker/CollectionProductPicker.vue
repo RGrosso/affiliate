@@ -21,57 +21,66 @@
           :description="getApiError(error).message"
         />
 
-        <ul
-          v-else-if="items.length"
-          class="divide-y divide-default"
-          :class="{ 'opacity-60': status === 'pending' }"
-          aria-label="Products"
+        <div
+          ref="scroller"
+          class="max-h-[50vh] overflow-y-auto"
         >
-          <li
-            v-for="product in items"
-            :key="product.id"
-            class="flex items-center gap-3 py-2"
+          <ul
+            v-if="items.length"
+            class="divide-y divide-default"
+            aria-label="Products"
           >
-            <img
-              v-if="product.image"
-              :src="product.image.url"
-              alt=""
-              class="size-10 max-w-none shrink-0 aspect-square object-cover rounded-md border border-default"
-            />
-            <div
-              v-else
-              class="size-10 shrink-0 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"
-              aria-hidden="true"
+            <li
+              v-for="product in items"
+              :key="product.id"
+              class="flex items-center gap-3 py-2"
             >
-              <UIcon
-                name="i-heroicons-photo"
-                class="size-5"
+              <img
+                v-if="product.image"
+                :src="product.image.url"
+                alt=""
+                class="size-10 max-w-none shrink-0 aspect-square object-cover rounded-md border border-default"
               />
-            </div>
-            <UCheckbox
-              :model-value="isAdded(product) || selected.has(product.id)"
-              :disabled="isAdded(product)"
-              :label="product.title"
-              :description="describe(product)"
-              class="min-w-0 flex-1"
-              @update:model-value="toggle(product)"
+              <div
+                v-else
+                class="size-10 shrink-0 aspect-square rounded-md bg-muted flex items-center justify-center text-muted"
+                aria-hidden="true"
+              >
+                <UIcon
+                  name="i-heroicons-photo"
+                  class="size-5"
+                />
+              </div>
+              <UCheckbox
+                :model-value="isAdded(product) || selected.has(product.id)"
+                :disabled="isAdded(product)"
+                :label="product.title"
+                :description="describe(product)"
+                class="min-w-0 flex-1"
+                @update:model-value="toggle(product)"
+              />
+            </li>
+          </ul>
+
+          <p
+            v-else-if="!loading && !error"
+            class="text-sm text-muted text-center py-6"
+          >
+            {{ search.trim() ? "No products match that search." : "There are no products yet." }}
+          </p>
+
+          <div
+            v-if="loading"
+            class="flex justify-center py-3"
+            role="status"
+          >
+            <UIcon
+              name="i-lucide-loader-circle"
+              class="size-5 animate-spin text-muted"
             />
-          </li>
-        </ul>
-
-        <p
-          v-else-if="status !== 'pending'"
-          class="text-sm text-muted text-center py-6"
-        >
-          {{ search.trim() ? "No products match that search." : "There are no products yet." }}
-        </p>
-
-        <CorePagination
-          v-model:page="page"
-          :total="total"
-          :page-size="PAGE_SIZE"
-          class="flex justify-end"
-        />
+            <span class="sr-only">Loading products</span>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -96,8 +105,6 @@
 </template>
 
 <script setup lang="ts">
-import type { ApiSuccess } from "#shared/types/api";
-import type { PagedResult } from "#shared/types/pagination";
 import type { ProductListItem } from "#shared/types/product";
 
 const PAGE_SIZE = 8;
@@ -115,7 +122,6 @@ const emit = defineEmits<{
 
 const search = ref("");
 const debouncedSearch = ref("");
-const page = ref(1);
 // Kept across searches and pages, so products ticked on one page are still added from another
 const selected = ref(new Map<string, ProductListItem>());
 
@@ -123,28 +129,19 @@ watchDebounced(
   search,
   value => {
     debouncedSearch.value = value.trim();
-    page.value = 1;
   },
   { debounce: 300 }
 );
 
-// Fetched once the dialog is first opened, then again for each search or page
-const { data, status, error, refresh } = useFetch<ApiSuccess<PagedResult<ProductListItem>>>("/api/products", {
-  query: computed(() => ({ q: debouncedSearch.value || undefined, page: page.value, pageSize: PAGE_SIZE })),
-  immediate: false,
-  watch: false,
+// Loads once the dialog is first opened, and again from page 1 for each search
+const { items, loading, error, hasMore, loadNext } = useInfiniteList<ProductListItem>("/api/products", {
+  pageSize: PAGE_SIZE,
+  query: () => ({ q: debouncedSearch.value || undefined }),
+  enabled: open,
 });
 
-watch(
-  [open, debouncedSearch, page],
-  () => {
-    if (open.value) refresh();
-  },
-  { immediate: true }
-);
-
-const items = computed(() => data.value?.data.items ?? []);
-const total = computed(() => data.value?.data.total ?? 0);
+const scroller = useTemplateRef("scroller");
+useInfiniteScroll(scroller, loadNext, { distance: 100, canLoadMore: () => hasMore.value && !loading.value });
 
 const isAdded = (product: ProductListItem) => addedIds.includes(product.id);
 
@@ -168,6 +165,5 @@ watch(open, isOpen => {
   selected.value = new Map();
   search.value = "";
   debouncedSearch.value = "";
-  page.value = 1;
 });
 </script>

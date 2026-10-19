@@ -35,6 +35,12 @@ Use the core component wherever one exists:
 
 Add a row here when you add a core component.
 
+## Paginated lists
+
+Small paginated lists (in modals, popovers, side panels and pickers) use infinite scroll that loads the next page automatically as you near the end, not page controls or a load-more button. Full-page lists keep their pagination or Load more button.
+
+For a small list, use `useInfiniteList(url, { pageSize, query, enabled })` from `app/composables/infiniteList.ts` with VueUse's `useInfiniteScroll` on the list's scroll container: `useInfiniteScroll(scroller, loadNext, { canLoadMore: () => hasMore.value && !loading.value })`. It starts again from page 1 when `query` changes, never fetches a page twice and stops at the last page. Show a `role="status"` spinner while `loading`. `CollectionProductPicker` is the example.
+
 ## Component folders
 
 Every component lives in its own folder named after it, with its test beside it: `core/alert/Alert.vue` and `core/alert/Alert.test.ts`. Nuxt drops the repeated name, so that's still `<CoreAlert>`. Core components also need a story, `core/alert/Alert.stories.ts`, so they show up in Storybook (`pnpm storybook`). `test/unit/component-coverage.test.ts` fails when any of these is missing.
