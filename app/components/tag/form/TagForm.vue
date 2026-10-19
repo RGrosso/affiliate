@@ -78,6 +78,16 @@
             label="Show on product cards"
           />
         </UFormField>
+
+        <UFormField
+          name="showInFilter"
+          help="Lets visitors narrow a collection by this tag. It only appears when a product in the collection has the tag."
+        >
+          <USwitch
+            v-model="state.showInFilter"
+            label="Show in filter"
+          />
+        </UFormField>
       </div>
     </UCard>
 
@@ -132,6 +142,7 @@ const toState = (tag?: Tag) => ({
   icon: tag?.icon ?? null,
   priority: tag?.priority ?? null,
   showOnCards: tag?.showOnCards ?? false,
+  showInFilter: tag?.showInFilter ?? false,
 });
 
 const state = reactive(toState(tag));

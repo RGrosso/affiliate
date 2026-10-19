@@ -57,6 +57,21 @@ describe("create", () => {
   });
 });
 
+describe("findRetailers", () => {
+  it("lists each retailer once, sorted", async () => {
+    for (const [title, retailer] of [
+      ["A", "Etsy"],
+      ["B", "Amazon"],
+      ["C", "Etsy"],
+      ["D", null],
+    ] as const) {
+      await service.create({ title, retailer, tagIds: [], images: [] }, authorId);
+    }
+
+    expect(await service.findRetailers()).toEqual(["Amazon", "Etsy"]);
+  });
+});
+
 describe("get", () => {
   it("throws a 404 for an unknown product", async () => {
     const error = await rejection(service.get(unknownId));

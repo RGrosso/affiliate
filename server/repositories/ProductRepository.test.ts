@@ -1,6 +1,16 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { tags, productTags } from "hub:db:schema";
+import { collectionProducts, collections, tags, productTags } from "hub:db:schema";
+import { ProductSort } from "#shared/types/collection";
+import { StoredCollectionType } from "../utils/storedCollection";
 import { createTestDb, insertTestUser, resetDb, type TestDb } from "../../test/setup/db";
+import {
+  STORED_RULES_VERSION,
+  StoredRetailerOperator,
+  StoredRuleMatch,
+  StoredRuleType,
+  StoredTagOperator,
+  type StoredCollectionRules,
+} from "../utils/storedCollectionRules";
 import { ProductRepository, type NewProduct } from "./ProductRepository";
 
 let db: TestDb;
@@ -9,6 +19,12 @@ let repo: ProductRepository;
 let authorId: string;
 
 const unknownId = "00000000-0000-4000-8000-000000000000";
+
+const etsyOnly: StoredCollectionRules = {
+  version: STORED_RULES_VERSION,
+  match: StoredRuleMatch.All,
+  rules: [{ type: StoredRuleType.Retailer, operator: StoredRetailerOperator.Is, retailer: "Etsy" }],
+};
 
 const product = (title: string, extra: Partial<NewProduct> = {}): NewProduct => ({
   title,
@@ -111,6 +127,233 @@ describe("findPage tag filter", () => {
   });
 });
 
+describe("findPage sorting", () => {
+  const titles = async (sort: ProductSort) => (await repo.findPage({ page: 1, pageSize: 20 }, { sort })).items.map(item => item.title);
+
+  const seed = async () => {
+    await repo.insert(product("Cheap", { pricePence: 500, createdAt: new Date(2026, 0, 2) }));
+    await repo.insert(product("Dear", { pricePence: 9000, createdAt: new Date(2026, 0, 4) }));
+    await repo.insert(product("Free sample", { pricePence: null, createdAt: new Date(2026, 0, 1) }));
+    await repo.insert(product("apple", { pricePence: 700, createdAt: new Date(2026, 0, 3) }));
+  };
+
+  it("sorts newest and oldest by creation date", async () => {
+    await seed();
+
+    expect(await titles(ProductSort.Newest)).toEqual(["Dear", "apple", "Cheap", "Free sample"]);
+    expect(await titles(ProductSort.Oldest)).toEqual(["Free sample", "Cheap", "apple", "Dear"]);
+  });
+
+  it("sorts by price with unpriced products last either way", async () => {
+    await seed();
+
+    expect(await titles(ProductSort.PriceAsc)).toEqual(["Cheap", "apple", "Dear", "Free sample"]);
+    expect(await titles(ProductSort.PriceDesc)).toEqual(["Dear", "apple", "Cheap", "Free sample"]);
+  });
+
+  it("breaks price ties by title", async () => {
+    await repo.insert(product("B tie", { pricePence: 500 }));
+    await repo.insert(product("A tie", { pricePence: 500 }));
+
+    expect(await titles(ProductSort.PriceAsc)).toEqual(["A tie", "B tie"]);
+    expect(await titles(ProductSort.PriceDesc)).toEqual(["A tie", "B tie"]);
+  });
+
+  it("sorts by title ignoring case", async () => {
+    await seed();
+
+    expect(await titles(ProductSort.TitleAsc)).toEqual(["apple", "Cheap", "Dear", "Free sample"]);
+    expect(await titles(ProductSort.TitleDesc)).toEqual(["Free sample", "Dear", "Cheap", "apple"]);
+  });
+
+  it("breaks full ties by id in every sort", async () => {
+    const createdAt = new Date("2026-01-01T00:00:00Z");
+    const a = await repo.insert(product("Same", { handle: "same-1", createdAt, pricePence: 100 }));
+    const b = await repo.insert(product("Same", { handle: "same-2", createdAt, pricePence: 100 }));
+    const expected = [a.id, b.id].sort();
+
+    for (const sort of Object.values(ProductSort).filter(value => value !== ProductSort.Manual)) {
+      const { items } = await repo.findPage({ page: 1, pageSize: 10 }, { sort });
+      expect(
+        items.map(item => item.id),
+        sort
+      ).toEqual(expected);
+    }
+  });
+
+  it("can't sort by manual order without a collection", async () => {
+    await expect(repo.findPage({ page: 1, pageSize: 10 }, { sort: ProductSort.Manual })).rejects.toThrow("Manual order needs a collection");
+  });
+});
+
+describe("collection scope", () => {
+  const manualCollection = async (productIds: string[]) => {
+    const [collection] = await db
+      .insert(collections)
+      .values({
+        title: "Hand picked",
+        handle: "hand-picked",
+        type: StoredCollectionType.Manual,
+      })
+      .returning();
+    if (productIds.length)
+      await db.insert(collectionProducts).values(productIds.map((productId, position) => ({ collectionId: collection!.id, productId, position })));
+    return collection!.id;
+  };
+
+  it("lists only a manual collection's products, in the order they were added", async () => {
+    const a = await repo.insert(product("A", { createdAt: new Date(2026, 0, 3) }));
+    const b = await repo.insert(product("B", { createdAt: new Date(2026, 0, 2) }));
+    const c = await repo.insert(product("C", { createdAt: new Date(2026, 0, 1) }));
+    await repo.insert(product("Left out"));
+    const collectionId = await manualCollection([c.id, a.id, b.id]);
+
+    const manual = await repo.findPage({ page: 1, pageSize: 10 }, { collectionId, sort: ProductSort.Manual });
+    expect(manual.items.map(item => item.title)).toEqual(["C", "A", "B"]);
+    expect(manual.total).toBe(3);
+
+    const newest = await repo.findPage({ page: 1, pageSize: 10 }, { collectionId });
+    expect(newest.items.map(item => item.title)).toEqual(["A", "B", "C"]);
+    expect(await repo.countMatching({ collectionId })).toBe(3);
+  });
+
+  it("pages a manual collection and combines it with a tag filter", async () => {
+    const [deals] = await db.insert(tags).values({ name: "Deals", slug: "deals" }).returning();
+    const a = await repo.insert(product("A"));
+    const b = await repo.insert(product("B"));
+    const outside = await repo.insert(product("Outside"));
+    await db.insert(productTags).values([
+      { productId: b.id, tagId: deals!.id },
+      { productId: outside.id, tagId: deals!.id },
+    ]);
+    const collectionId = await manualCollection([a.id, b.id]);
+
+    const second = await repo.findPage({ page: 2, pageSize: 1 }, { collectionId, sort: ProductSort.Manual });
+    expect(second.items.map(item => item.title)).toEqual(["B"]);
+
+    const filtered = await repo.findPage({ page: 1, pageSize: 10, tag: ["deals"] }, { collectionId });
+    expect(filtered.items.map(item => item.title)).toEqual(["B"]);
+    expect(filtered.total).toBe(1);
+  });
+
+  it("is empty for a collection with no products", async () => {
+    await repo.insert(product("A"));
+    const collectionId = await manualCollection([]);
+
+    expect(await repo.findPage({ page: 1, pageSize: 10 }, { collectionId })).toEqual({ items: [], total: 0 });
+  });
+});
+
+describe("countMatching", () => {
+  it("counts every product without rules and only the matches with them", async () => {
+    await repo.insert(product("A", { retailer: "Etsy" }));
+    await repo.insert(product("B", { retailer: "Amazon" }));
+
+    expect(await repo.countMatching({})).toBe(2);
+    expect(await repo.countMatching({ rules: null })).toBe(2);
+    expect(await repo.countMatching({ rules: etsyOnly })).toBe(1);
+  });
+});
+
+describe("findPage with rules and sorting", () => {
+  it("applies the rules and the sort together", async () => {
+    await repo.insert(product("Dear", { retailer: "Etsy", pricePence: 900 }));
+    await repo.insert(product("Cheap", { retailer: "Etsy", pricePence: 100 }));
+    await repo.insert(product("Other", { retailer: "Amazon", pricePence: 1 }));
+
+    const { items, total } = await repo.findPage({ page: 1, pageSize: 10 }, { rules: etsyOnly, sort: ProductSort.PriceAsc });
+    expect(items.map(item => item.title)).toEqual(["Cheap", "Dear"]);
+    expect(total).toBe(2);
+  });
+});
+
+describe("findTagFacets", () => {
+  const seedFacets = async () => {
+    const [deals, gifts, hidden, unused] = await db
+      .insert(tags)
+      .values([
+        { name: "Deals", slug: "deals", showInFilter: true, priority: 1 },
+        { name: "Gifts", slug: "gifts", showInFilter: true, priority: 5 },
+        { name: "Hidden", slug: "hidden", showInFilter: false },
+        { name: "Unused", slug: "unused", showInFilter: true },
+      ])
+      .returning();
+    const a = await repo.insert(product("A", { retailer: "Etsy" }));
+    const b = await repo.insert(product("B", { retailer: "Etsy" }));
+    const c = await repo.insert(product("C", { retailer: "Amazon" }));
+    await db.insert(productTags).values([
+      { productId: a.id, tagId: deals!.id },
+      { productId: b.id, tagId: deals!.id },
+      { productId: c.id, tagId: deals!.id },
+      { productId: a.id, tagId: gifts!.id },
+      { productId: a.id, tagId: hidden!.id },
+    ]);
+    return { a, b, c, unused: unused! };
+  };
+
+  it("counts the filterable tags on the collection's products, highest priority first", async () => {
+    await seedFacets();
+
+    const facets = await repo.findTagFacets({});
+    expect(facets).toEqual([
+      { id: expect.any(String), name: "Gifts", slug: "gifts", icon: null, tooltip: null, count: 1 },
+      { id: expect.any(String), name: "Deals", slug: "deals", icon: null, tooltip: null, count: 3 },
+    ]);
+  });
+
+  it("only counts products matching the rules", async () => {
+    await seedFacets();
+
+    const facets = await repo.findTagFacets({ rules: etsyOnly });
+    expect(facets.map(facet => [facet.slug, facet.count])).toEqual([
+      ["gifts", 1],
+      ["deals", 2],
+    ]);
+  });
+
+  it("only counts a manual collection's products", async () => {
+    const { b } = await seedFacets();
+    const [collection] = await db.insert(collections).values({ title: "Picks", handle: "picks", type: StoredCollectionType.Manual }).returning();
+    await db.insert(collectionProducts).values({ collectionId: collection!.id, productId: b.id, position: 0 });
+
+    const facets = await repo.findTagFacets({ collectionId: collection!.id });
+    expect(facets.map(facet => [facet.slug, facet.count])).toEqual([["deals", 1]]);
+  });
+
+  it("is empty when no tag is filterable or the collection is empty", async () => {
+    expect(await repo.findTagFacets({})).toEqual([]);
+
+    await seedFacets();
+    const [empty] = await db.insert(collections).values({ title: "Empty", handle: "empty", type: StoredCollectionType.Manual }).returning();
+    expect(await repo.findTagFacets({ collectionId: empty!.id })).toEqual([]);
+  });
+});
+
+describe("findRetailers", () => {
+  it("lists each retailer once, sorted, skipping missing and blank ones", async () => {
+    await repo.insert(product("A", { retailer: "Etsy" }));
+    await repo.insert(product("B", { retailer: "Amazon" }));
+    await repo.insert(product("C", { retailer: "Etsy" }));
+    await repo.insert(product("D", { retailer: null }));
+    await repo.insert(product("E", { retailer: "" }));
+
+    expect(await repo.findRetailers()).toEqual(["Amazon", "Etsy"]);
+  });
+
+  it("is empty without products", async () => {
+    expect(await repo.findRetailers()).toEqual([]);
+  });
+});
+
+describe("findExistingIds", () => {
+  it("returns only the ids that are products", async () => {
+    const a = await repo.insert(product("A"));
+
+    expect(await repo.findExistingIds([a.id, unknownId])).toEqual([a.id]);
+    expect(await repo.findExistingIds([])).toEqual([]);
+  });
+});
+
 describe("findFeaturedImages", () => {
   it("picks the image at the lowest position", async () => {
     const withImages = await repo.insert(product("With images"));
@@ -127,6 +370,64 @@ describe("findFeaturedImages", () => {
 
   it("returns an empty map for no ids", async () => {
     expect((await repo.findFeaturedImages([])).size).toBe(0);
+  });
+});
+
+describe("findPage with rules", () => {
+  // A: Etsy, gifts. B: Amazon, gifts. C: Etsy, no tags.
+  const catalogue = async () => {
+    const [gifts] = await db
+      .insert(tags)
+      .values([{ name: "Gifts", slug: "gifts" }])
+      .returning();
+    const a = await repo.insert(product("A", { retailer: "Etsy", createdAt: new Date(2026, 0, 3) }));
+    const b = await repo.insert(product("B", { retailer: "Amazon", createdAt: new Date(2026, 0, 2) }));
+    await repo.insert(product("C", { retailer: "Etsy", createdAt: new Date(2026, 0, 1) }));
+    await db.insert(productTags).values([
+      { productId: a.id, tagId: gifts!.id },
+      { productId: b.id, tagId: gifts!.id },
+    ]);
+    return gifts!.id;
+  };
+
+  const rules = (...items: StoredCollectionRules["rules"]): StoredCollectionRules => ({
+    version: STORED_RULES_VERSION,
+    match: StoredRuleMatch.All,
+    rules: items,
+  });
+  const retailerIs = (retailer: string) => ({ type: StoredRuleType.Retailer, operator: StoredRetailerOperator.Is, retailer });
+  const hasTag = (tagId: string) => ({ type: StoredRuleType.Tag, operator: StoredTagOperator.Has, tagId });
+
+  const titles = (page: { items: { title: string }[] }) => page.items.map(item => item.title);
+
+  it("combines rules with the tag filter", async () => {
+    await catalogue();
+
+    const result = await repo.findPage({ page: 1, pageSize: 10, tag: ["gifts"] }, { rules: rules(retailerIs("Etsy")) });
+    expect(titles(result)).toEqual(["A"]);
+    expect(result.total).toBe(1);
+  });
+
+  it("reports a total that ignores pagination but respects the rules", async () => {
+    const gifts = await catalogue();
+
+    const first = await repo.findPage({ page: 1, pageSize: 1 }, { rules: rules(hasTag(gifts)) });
+    const second = await repo.findPage({ page: 2, pageSize: 1 }, { rules: rules(hasTag(gifts)) });
+    expect(titles(first)).toEqual(["A"]);
+    expect(titles(second)).toEqual(["B"]);
+    expect([first.total, second.total]).toEqual([2, 2]);
+  });
+
+  it("returns an empty page when nothing matches", async () => {
+    await catalogue();
+
+    expect(await repo.findPage({ page: 1, pageSize: 10 }, { rules: rules(retailerIs("Argos")) })).toEqual({ items: [], total: 0 });
+  });
+
+  it("treats null rules like no rules", async () => {
+    await catalogue();
+
+    expect((await repo.findPage({ page: 1, pageSize: 10 }, { rules: null })).total).toBe(3);
   });
 });
 

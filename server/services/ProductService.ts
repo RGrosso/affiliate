@@ -18,16 +18,25 @@ export class ProductService {
   /** Public lists carry only the badges a card shows; admins get every tag. */
   async list(query: ProductListQuery, { forAdmin = false }: { forAdmin?: boolean } = {}) {
     const { items, total } = await this.products.findPage(query);
+    const listItems = await this.toListItems(items, { forAdmin });
+
+    return toPagedResult(listItems, total, query);
+  }
+
+  /** Adds each product's featured image and tags to the rows a list query returns. */
+  async toListItems(items: Awaited<ReturnType<ProductRepository["findPage"]>>["items"], { forAdmin = false }: { forAdmin?: boolean } = {}) {
     const ids = items.map(item => item.id);
     const [featured, tags] = await Promise.all([this.products.findFeaturedImages(ids), this.tags.findForProducts(ids)]);
 
-    const listItems: ProductListItem[] = items.map(item => ({
+    return items.map((item): ProductListItem => ({
       ...item,
       image: featured.get(item.id) ?? null,
       tags: forAdmin ? sortTagsByPriority(tags.get(item.id) ?? []).map(toTagBadge) : pickCardTags(tags.get(item.id) ?? []),
     }));
+  }
 
-    return toPagedResult(listItems, total, query);
+  findRetailers() {
+    return this.products.findRetailers();
   }
 
   async get(id: string) {

@@ -13,6 +13,7 @@ function makeTag(name: string, overrides: Partial<Tag> = {}): Tag {
     icon: null,
     priority: 0,
     showOnCards: true,
+    showInFilter: false,
     ...overrides,
   };
 }

@@ -14,7 +14,7 @@ describe("createTagSchema", () => {
   });
 
   it("accepts every detail and validates them like an update", () => {
-    const details = { description: "Cheap", tooltip: "Reduced", icon: "flame", priority: 3, showOnCards: true };
+    const details = { description: "Cheap", tooltip: "Reduced", icon: "flame", priority: 3, showOnCards: true, showInFilter: true };
     expect(createTagSchema.parse({ name: "Deals", ...details })).toEqual({ name: "Deals", ...details });
     expect(createTagSchema.parse({ name: "Deals", description: "", tooltip: "" })).toMatchObject({ description: null, tooltip: null });
     expect(fieldErrors(createTagSchema, { name: "Deals", icon: "rocket" }).icon).toEqual(["Please choose one of the icons"]);

@@ -13,11 +13,14 @@ export type Tag = {
   /** Higher shows first. `null` counts as 0. */
   priority: number | null;
   showOnCards: boolean;
+  showInFilter: boolean;
 };
 
 /** Just what a badge needs, so public responses don't carry admin-only details. */
 export type TagBadge = Pick<Tag, "id" | "name" | "slug" | "icon" | "tooltip">;
 
 export type AdminTag = Tag & {
+  /** The collections whose rules use this tag, which stop it being deleted. */
+  collections: { id: string; title: string }[];
   productCount: number;
 };

@@ -32,7 +32,9 @@ const tag = (id: string, name: string) => ({
   icon: null,
   priority: null,
   showOnCards: true,
+  showInFilter: false,
   productCount: 0,
+  collections: [],
 });
 
 const patches = vi.hoisted(() => [] as { tagIds?: string[] }[]);

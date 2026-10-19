@@ -12,6 +12,7 @@ const tag = (name: string, icon: Tag["icon"] = null): Tag => ({
   icon,
   priority: null,
   showOnCards: true,
+  showInFilter: false,
 });
 
 const tags = [

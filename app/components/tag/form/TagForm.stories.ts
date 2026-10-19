@@ -22,6 +22,7 @@ export const Edit: Story = {
       icon: null,
       priority: null,
       showOnCards: false,
+      showInFilter: false,
     },
   },
 };
@@ -37,6 +38,7 @@ export const Filled: Story = {
       icon: "flame",
       priority: 10,
       showOnCards: true,
+      showInFilter: false,
     },
   },
 };
