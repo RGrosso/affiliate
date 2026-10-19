@@ -454,6 +454,14 @@ describe("getByHandle", () => {
     expect(await service.getByHandle("all")).toMatchObject({ id: ALL_COLLECTION_ID, title: "All products", isDraft: false });
   });
 
+  it("says whether the collection is manual or automated", async () => {
+    await create({ type: "manual", title: "Picked", status: "published" });
+    await create({ type: "automated", title: "Ruled", status: "published", rules: rulesOf(hasTag((await addTag("Rule tag")).id)) });
+
+    expect((await service.getByHandle("picked")).type).toBe("manual");
+    expect((await service.getByHandle("ruled")).type).toBe("automated");
+  });
+
   it("hides a draft from visitors but shows it to admins, flagged", async () => {
     await create({ type: "manual", title: "Secret" });
 

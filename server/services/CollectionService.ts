@@ -226,6 +226,7 @@ export class CollectionService {
       id: row.id,
       title: row.title,
       handle: row.handle,
+      type: typeFromStored[row.type],
       description: row.description,
       imageUrl: row.imageUrl,
       imageAlt: row.imageAlt,

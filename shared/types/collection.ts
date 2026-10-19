@@ -66,6 +66,8 @@ export type PublicCollection = {
   id: string;
   title: string;
   handle: string;
+  /** Only a manual collection can be sorted by the order products were added. */
+  type: CollectionType;
   description: string | null;
   imageUrl: string | null;
   imageAlt: string | null;
