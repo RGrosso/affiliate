@@ -8,10 +8,11 @@ Read `app/APP.md` before building or styling UI: it covers the site name, theme 
 
 ## Workflow
 
-- Package manager is `pnpm`.
-- `pnpm lint` runs Oxlint with `--fix` and then the Oxfmt formatter (`vp lint --fix && vp fmt`), so it rewrites files. Run it after every change and review what it changed. CI runs `pnpm lint:check` (`vp lint && vp fmt --check`), which only reports.
+- Package manager is `pnpm`, but run checks with the Vite+ CLI (`vp`, on your PATH) directly, not through the `pnpm` scripts. Use `vpr <script>` when you need a package script.
+- Run `vp lint --fix` then `vp fmt` after every change. They rewrite files, so review what they changed. CI runs `vp lint` and `vp fmt --check`, which only report.
 - Style is enforced by the formatter, not lint rules: double quotes, semicolons, 2-space indent, 160-character lines. Lint, format and Vitest config all live in `vite.config.ts`; there is no ESLint or Prettier.
-- Run `pnpm test` (unit and component tests) and `pnpm test:types` after every change, and `pnpm test:e2e` when you change a page, API route or user journey. CI runs all three plus a Storybook build.
+- Run `vp test` (unit and component tests) and `pnpm test:types` after every change, and `pnpm test:e2e` when you change a page, API route or user journey. `vp` has no typecheck or Playwright command, so those two stay as scripts. CI runs all three plus a Storybook build.
+- `vp test --project unit-server` runs only the server tests. If server test files fail with a PGlite "Hook timed out", the machine is busy: re-run them with `--maxWorkers 2`. If newly added server classes are "not defined" in tests, delete the stale `node_modules/.vitest-cache`.
 - Unit tests sit beside the file they test as `*.test.ts`; end-to-end tests live in `test/e2e/`. Component rules (own folder, test, story) are in `app/APP.md`.
 - Dev data lives in `.data/` (embedded PGlite and blob files). `pnpm dev:reset` (dev server stopped first) deletes it, so the next `pnpm dev` starts from first run: the dev admin is re-seeded with no password and sample products come back on next admin login.
 - When behaviour described in `README.md` changes, update the README in the same change.

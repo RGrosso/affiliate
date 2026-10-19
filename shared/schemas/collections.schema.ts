@@ -1,4 +1,4 @@
-import { ALL_COLLECTION_HANDLE, CollectionStatus, CollectionType, ProductSort } from "../types/collection";
+import { ALL_COLLECTION_HANDLE, NEW_COLLECTION_HANDLE, CollectionStatus, CollectionType, ProductSort } from "../types/collection";
 import { collectionRulesSchema } from "./collectionRules.schema";
 import { pageQuerySchema } from "./pagination.schema";
 import { HANDLE_PATTERN } from "./products.schema";
@@ -6,6 +6,15 @@ import { z } from "./zod";
 
 export const MAX_COLLECTION_PRODUCTS = 500;
 export const RESERVED_HANDLE_MESSAGE = "This URL is reserved for the all products page";
+export const NEW_RESERVED_HANDLE_MESSAGE = "This URL is reserved for the add collection page";
+
+const reservedHandleMessages = new Map([
+  [ALL_COLLECTION_HANDLE, RESERVED_HANDLE_MESSAGE],
+  [NEW_COLLECTION_HANDLE, NEW_RESERVED_HANDLE_MESSAGE],
+]);
+
+/** The message for a handle no collection can use, or `undefined` when it is free to use. */
+export const reservedHandleMessage = (handle: string) => reservedHandleMessages.get(handle);
 export const MANUAL_SORT_MESSAGE = "Manual order is only available for collections where you pick the products";
 
 const emptyToUndefined = (value: unknown) => (value === "" || value === null ? undefined : value);
@@ -34,7 +43,10 @@ const fields = {
       .string()
       .max(100, "The URL handle can be at most 100 characters")
       .regex(HANDLE_PATTERN, "Use lowercase letters, numbers and hyphens only")
-      .refine(handle => handle !== ALL_COLLECTION_HANDLE, RESERVED_HANDLE_MESSAGE)
+      .superRefine((handle, ctx) => {
+        const message = reservedHandleMessage(handle);
+        if (message) ctx.addIssue({ code: "custom", message });
+      })
       .optional()
   ),
   description: optionalText("The description can be at most 500 characters", 500),

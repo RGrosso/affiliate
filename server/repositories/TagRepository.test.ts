@@ -127,6 +127,38 @@ describe("update and delete", () => {
   });
 });
 
+describe("insertIfMissing and findBySlugs", () => {
+  it("adds new tags and leaves one with a taken slug untouched", async () => {
+    const existing = await repo.insert(tag("Kitchen", { description: "Mine" }));
+
+    await repo.insertIfMissing([tag("Kitchen", { description: "Sample" }), tag("Outdoors")]);
+
+    const found = await repo.findBySlugs(["kitchen", "outdoors", "unknown"]);
+    expect(found.map(item => item.name).sort()).toEqual(["Kitchen", "Outdoors"]);
+    expect(found.find(item => item.slug === "kitchen")).toMatchObject({ id: existing.id, description: "Mine" });
+  });
+
+  it("does nothing for no tags or slugs", async () => {
+    await repo.insertIfMissing([]);
+
+    expect(await repo.findBySlugs([])).toEqual([]);
+    expect(await repo.findAll()).toEqual([]);
+  });
+});
+
+describe("addToProducts", () => {
+  it("links tags to products and keeps links that already exist", async () => {
+    const a = await repo.insert(tag("A"));
+    const product = await addProduct("One");
+    await repo.replaceForProduct(product.id, [a.id]);
+
+    await repo.addToProducts([{ productId: product.id, tagId: a.id }]);
+    await repo.addToProducts([]);
+
+    expect(await links()).toEqual([{ productId: product.id, tagId: a.id }]);
+  });
+});
+
 describe("replaceForProduct", () => {
   it("replaces the product's tags and ignores duplicate ids", async () => {
     const [a, b] = [await repo.insert(tag("A")), await repo.insert(tag("B"))];

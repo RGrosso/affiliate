@@ -59,6 +59,16 @@ export const productListQuerySchema = pageQuerySchema.extend({
       .max(20, "You can filter by up to 20 tags")
       .optional()
   ),
+  /** Matches products whose title contains this text, ignoring case. */
+  q: z.preprocess(
+    value => (value === "" ? undefined : value),
+    z
+      .string({ error: "Please enter some text to search for" })
+      .trim()
+      .min(1, "Please enter some text to search for")
+      .max(100, "The search can be at most 100 characters")
+      .optional()
+  ),
   /** Admin only: every tag on each product, not just the ones shown on cards. */
   allTags: z.stringbool({ error: "allTags must be true or false" }).optional(),
 });

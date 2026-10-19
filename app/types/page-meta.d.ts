@@ -4,6 +4,8 @@ declare module "#app" {
     minimalHeader?: boolean;
     /** No site footer, e.g. on login and setup. Child routes inherit it, e.g. all of /admin. */
     hideFooter?: boolean;
+    /** The page is exactly the viewport height below the header and scrolls inside itself, so the document never scrolls. */
+    fillViewport?: boolean;
   }
 }
 

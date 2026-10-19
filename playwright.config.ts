@@ -31,14 +31,15 @@ export default defineConfig<ConfigOptions>({
     { name: "setup", testMatch: /setup\.ts$/, use: { ...devices["Desktop Chrome"] } },
     {
       name: "public",
-      testMatch: /(home|product|auth|api)\.spec\.ts$/,
+      // Anchored to the file name, so admin-collections.spec.ts doesn't also match "collections"
+      testMatch: /(?:^|[/])(home|product|auth|api|collections)\.spec\.ts$/,
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"] },
     },
     // Runs last because it changes the shared product data
     {
       name: "admin",
-      testMatch: /(admin|tags)\.spec\.ts$/,
+      testMatch: /(?:^|[/])(admin|admin-collections|tags)\.spec\.ts$/,
       dependencies: ["public"],
       use: { ...devices["Desktop Chrome"], storageState: ADMIN_STATE },
     },

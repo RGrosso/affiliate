@@ -1,6 +1,7 @@
 <template>
-  <div class="flex h-screen bg-default text-default overflow-hidden">
-    <aside class="w-60 border-r border-default bg-muted flex flex-col justify-between p-3 select-none shrink-0">
+  <!-- relative, so absolutely positioned content such as sr-only file inputs is clipped here instead of stretching the document -->
+  <div class="relative flex h-full bg-default text-default overflow-hidden">
+    <aside class="w-60 border-r border-default bg-muted flex flex-col justify-between p-3 select-none shrink-0 overflow-y-auto">
       <div class="space-y-4">
         <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-elevated">
           <div class="h-6 w-6 rounded bg-secondary flex items-center justify-center text-inverted font-bold text-xs">
@@ -36,6 +37,7 @@ definePageMeta({
   middleware: ["admin-role"],
   minimalHeader: true,
   hideFooter: true,
+  fillViewport: true,
 });
 
 const route = useRoute();
@@ -58,6 +60,12 @@ const navigationItems = computed<NavigationMenuItem[]>(() => [
     icon: "i-lucide-tags",
     to: "/admin/tags",
     active: route.path.startsWith("/admin/tags"),
+  },
+  {
+    label: "Collections",
+    icon: "i-lucide-layout-grid",
+    to: "/admin/collections",
+    active: route.path.startsWith("/admin/collections"),
   },
   {
     label: "Add product",

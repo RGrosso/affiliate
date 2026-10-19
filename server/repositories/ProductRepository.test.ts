@@ -127,6 +127,45 @@ describe("findPage tag filter", () => {
   });
 });
 
+describe("findPage title search", () => {
+  const search = async (q: string) => (await repo.findPage({ page: 1, pageSize: 10, q })).items.map(item => item.title);
+
+  beforeEach(async () => {
+    await repo.insert(product("Moon Lamp", { createdAt: new Date(2026, 0, 3) }));
+    await repo.insert(product("Desk lamp", { createdAt: new Date(2026, 0, 2) }));
+    await repo.insert(product("50% Off Mug", { createdAt: new Date(2026, 0, 1) }));
+    await repo.insert(product("Plain_Pot", { createdAt: new Date(2025, 0, 1) }));
+  });
+
+  it("matches part of the title, ignoring case", async () => {
+    expect(await search("LAMP")).toEqual(["Moon Lamp", "Desk lamp"]);
+    expect(await search("on la")).toEqual(["Moon Lamp"]);
+  });
+
+  it("reports the total of the matches", async () => {
+    expect((await repo.findPage({ page: 1, pageSize: 1, q: "lamp" })).total).toBe(2);
+  });
+
+  it("finds nothing when no title matches", async () => {
+    expect(await search("kettle")).toEqual([]);
+  });
+
+  it("treats % and _ as plain characters", async () => {
+    expect(await search("%")).toEqual(["50% Off Mug"]);
+    expect(await search("a_n")).toEqual([]);
+    expect(await search("_")).toEqual(["Plain_Pot"]);
+  });
+
+  it("combines with the tag filter", async () => {
+    const [sale] = await db.insert(tags).values({ name: "Sale", slug: "sale" }).returning();
+    const [mug] = (await repo.findPage({ page: 1, pageSize: 10, q: "mug" })).items;
+    await db.insert(productTags).values({ productId: mug!.id, tagId: sale!.id });
+
+    expect(await repo.findPage({ page: 1, pageSize: 10, q: "lamp", tag: ["sale"] })).toEqual({ items: [], total: 0 });
+    expect((await repo.findPage({ page: 1, pageSize: 10, q: "mug", tag: ["sale"] })).total).toBe(1);
+  });
+});
+
 describe("findPage sorting", () => {
   const titles = async (sort: ProductSort) => (await repo.findPage({ page: 1, pageSize: 20 }, { sort })).items.map(item => item.title);
 

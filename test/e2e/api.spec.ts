@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { ADMIN_STATE } from "./config";
 
+const PIXEL = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==", "base64");
+const image = { name: "cover.png", mimeType: "image/png", buffer: PIXEL };
+
 test.describe("API", () => {
   test("rejects product changes from logged-out requests with an ApiError", async ({ request }) => {
     const response = await request.post("/api/products", { data: { title: "Sneaky" } });
@@ -97,12 +100,20 @@ test.describe("API", () => {
     });
   });
 
+  test("rejects image uploads from logged-out requests", async ({ request }) => {
+    const response = await request.post("/api/products/images", { multipart: { file: image, prefix: "collections" } });
+
+    expect(response.status()).toBe(401);
+    expect(await response.json()).toMatchObject({ success: false, code: "UNAUTHORIZED" });
+  });
+
   test("rejects every admin collection route for logged-out requests", async ({ request }) => {
     const id = "00000000-0000-4000-8000-000000000000";
     const calls = [
       request.get("/api/collections"),
       request.post("/api/collections", { data: { type: "manual", title: "Sneaky" } }),
       request.get(`/api/collections/${id}`),
+      request.get("/api/collections/by-handle/all"),
       request.patch(`/api/collections/${id}`, { data: { title: "Sneaky" } }),
       request.delete(`/api/collections/${id}`),
       request.post("/api/collections/preview", { data: {} }),
@@ -207,6 +218,35 @@ test.describe("API", () => {
       }
     });
 
+    test("loads a collection for editing by its handle, drafts included", async ({ request }) => {
+      const handle = `by-handle-e2e-${Date.now()}`;
+      const created = await request.post("/api/collections", { data: { type: "manual", title: "By handle e2e", handle } });
+      const { id } = (await created.json()).data;
+
+      try {
+        const byHandle = await request.get(`/api/collections/by-handle/${handle}`);
+        expect(byHandle.status()).toBe(200);
+        const byId = await request.get(`/api/collections/${id}`);
+        expect((await byHandle.json()).data).toEqual((await byId.json()).data);
+        expect((await byHandle.json()).data).toMatchObject({ id, handle, status: "draft" });
+
+        for (const missing of ["no-such-collection", "Not%20A%20Handle"]) {
+          const response = await request.get(`/api/collections/by-handle/${missing}`);
+          expect(response.status(), missing).toBe(404);
+          expect(await response.json()).toMatchObject({ success: false, code: "NOT_FOUND" });
+        }
+      } finally {
+        await request.delete(`/api/collections/${id}`);
+      }
+    });
+
+    test("rejects the reserved new handle", async ({ request }) => {
+      const response = await request.post("/api/collections", { data: { type: "manual", title: "Reserved", handle: "new" } });
+
+      expect(response.status()).toBe(400);
+      expect(await response.json()).toMatchObject({ fieldErrors: { handle: ["This URL is reserved for the add collection page"] } });
+    });
+
     test("won't delete the all products collection", async ({ request }) => {
       const list = await request.get("/api/collections");
       const all = (await list.json()).data.find((collection: { locked: boolean }) => collection.locked);
@@ -236,6 +276,36 @@ test.describe("API", () => {
         await request.delete(`/api/collections/${collection.id}`);
         expect((await request.delete(`/api/tags/${tag.id}`)).status()).toBe(200);
       }
+    });
+
+    test("stores uploaded images under the product or collection prefix", async ({ request }) => {
+      const upload = async (fields: Record<string, string>) => request.post("/api/products/images", { multipart: { file: image, ...fields } });
+
+      expect((await (await upload({})).json()).data.url).toMatch(/^\/images\/products\//);
+      expect((await (await upload({ prefix: "products" })).json()).data.url).toMatch(/^\/images\/products\//);
+      expect((await (await upload({ prefix: "collections" })).json()).data.url).toMatch(/^\/images\/collections\//);
+    });
+
+    test("rejects an unknown image prefix", async ({ request }) => {
+      const response = await request.post("/api/products/images", { multipart: { file: image, prefix: "../secrets" } });
+
+      expect(response.status()).toBe(400);
+      expect(await response.json()).toMatchObject({ success: false, code: "BAD_REQUEST", message: "Please choose where the image belongs" });
+    });
+
+    test("searches the product list by title, ignoring case", async ({ request }) => {
+      const found = await request.get("/api/products?q=pour-OVER%20coffee");
+      expect((await found.json()).data.items.map((item: { title: string }) => item.title)).toEqual(["Pour-Over Coffee Kit"]);
+
+      const none = await request.get("/api/products?q=no-such-product-title");
+      expect((await none.json()).data).toMatchObject({ items: [], total: 0 });
+    });
+
+    test("rejects a product search that is too long", async ({ request }) => {
+      const response = await request.get(`/api/products?q=${"x".repeat(101)}`);
+
+      expect(response.status()).toBe(400);
+      expect(await response.json()).toMatchObject({ code: "VALIDATION_ERROR", fieldErrors: { q: ["The search can be at most 100 characters"] } });
     });
 
     test("lists the retailers for the rule dropdown", async ({ request }) => {

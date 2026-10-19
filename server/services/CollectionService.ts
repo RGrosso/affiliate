@@ -72,7 +72,15 @@ export class CollectionService {
   }
 
   async get(id: string): Promise<AdminCollection> {
-    const row = await this.collections.findById(id);
+    return this.toAdminCollection(await this.collections.findById(id));
+  }
+
+  /** The same shape as `get`, found by handle for the admin edit URL. Drafts are included. */
+  async getByHandleForAdmin(handle: string): Promise<AdminCollection> {
+    return this.toAdminCollection(await this.collections.findByHandle(handle));
+  }
+
+  private async toAdminCollection(row: Awaited<ReturnType<CollectionRepository["findById"]>>): Promise<AdminCollection> {
     if (!row) {
       throw collectionNotFound();
     }
@@ -226,6 +234,7 @@ export class CollectionService {
       id: row.id,
       title: row.title,
       handle: row.handle,
+      type: typeFromStored[row.type],
       description: row.description,
       imageUrl: row.imageUrl,
       imageAlt: row.imageAlt,

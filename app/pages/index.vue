@@ -11,7 +11,7 @@
           <h1 class="text-4xl sm:text-6xl leading-[0.98]">Gifts for people (and pets) who are impossible to buy for</h1>
           <p class="text-lg text-band-muted max-w-xl">Silly, clever and genuinely good presents, hand-picked from shops across the internet.</p>
           <UButton
-            to="/products"
+            to="/collections/all"
             label="Browse"
             color="action"
             size="xl"
@@ -68,10 +68,15 @@
 </template>
 
 <script setup lang="ts">
+import { ALL_COLLECTION_HANDLE } from "#shared/types/collection";
 import type { ProductListItem } from "#shared/types/product";
 
-// Collections don't exist yet; this placeholder is where "View all" will lead
-const VIEW_ALL = "/collections/all";
+const VIEW_ALL = `/collections/${ALL_COLLECTION_HANDLE}`;
 
-const { items, status, error, loadingMore, canLoadMore, loadMore } = await useLoadMore<ProductListItem>("/api/products", { pageSize: 10 });
+const { items, status, error, loadingMore, canLoadMore, loadMore } = await useLoadMore<ProductListItem>(
+  `/api/collections/handle/${ALL_COLLECTION_HANDLE}/products`,
+  {
+    pageSize: 10,
+  }
+);
 </script>

@@ -27,6 +27,9 @@ export default defineNuxtConfig({
     // Turned off for production builds below; NUXT_SEED_SAMPLES=true or false overrides it
     seedSamples: true,
   },
+  routeRules: {
+    "/products": { redirect: { to: "/collections/all", statusCode: 301 } },
+  },
   compatibilityDate: "2025-07-15",
   nitro: {
     imports: {

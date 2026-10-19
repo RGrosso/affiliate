@@ -6,7 +6,7 @@ test.describe("homepage", () => {
     await goto("/", { waitUntil: "hydration" });
 
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(/impossible to buy for/);
-    await expect(page.getByRole("link", { name: "Browse" })).toHaveAttribute("href", "/products");
+    await expect(page.getByRole("link", { name: "Browse" })).toHaveAttribute("href", "/collections/all");
 
     const row = page.getByRole("list", { name: "Trending right now" });
     await expect(row.locator("h3")).toHaveCount(10);
@@ -45,7 +45,7 @@ test.describe("homepage", () => {
       await expect(row.getByRole("link", { name: "View all" })).toBeVisible({ timeout: 1000 });
     }).toPass();
     await expect(row.getByRole("link", { name: "View all" })).toHaveAttribute("href", "/collections/all");
-    const { total } = (await (await page.request.get("/api/products?pageSize=1")).json()).data;
+    const { total } = (await (await page.request.get("/api/collections/handle/all/products?pageSize=1")).json()).data;
     await expect(row.locator("h3")).toHaveCount(total);
   });
 

@@ -31,8 +31,15 @@ Use the core component wherever one exists:
 | `<CoreButtonBar :show="dirty">`                                               | (custom)      | The light blue (`info`) "Unsaved changes" bar fixed to the bottom of the viewport. It slides up when `show` is true and is removed when false, and renders a spacer so page content isn't hidden under it. Buttons go in the default slot.                                                           |
 | `<CoreConfirmDialog title="…" />`                                             | `UModal`      | A yes/no dialog with optional `description`, closing `question`, `confirmLabel`, `cancelLabel` and `color`. Don't mount it by hand: call `useConfirmDialog().confirm({ ... })`, which resolves `true` only when confirmed.                                                                           |
 | `<CorePagination v-model:page="page" :total="total" :page-size="pageSize" />` | `UPagination` | Page controls under a paginated list. Renders nothing when there is only one page.                                                                                                                                                                                                                   |
+| `<CoreRibbon label="Preview" />`                                              | (custom)      | A diagonal ribbon across the top-left corner of its `relative` parent, for flagging something as not live, like an admin previewing a draft collection. It ignores clicks, so what is underneath stays usable.                                                                                       |
 
 Add a row here when you add a core component.
+
+## Paginated lists
+
+Small paginated lists (in modals, popovers, side panels and pickers) use infinite scroll that loads the next page automatically as you near the end, not page controls or a load-more button. Full-page lists keep their pagination or Load more button.
+
+For a small list, use `useInfiniteList(url, { pageSize, query, enabled })` from `app/composables/infiniteList.ts` with VueUse's `useInfiniteScroll` on the list's scroll container: `useInfiniteScroll(scroller, loadNext, { canLoadMore: () => hasMore.value && !loading.value })`. It starts again from page 1 when `query` changes, never fetches a page twice and stops at the last page. Show a `role="status"` spinner while `loading`. `CollectionProductPicker` is the example.
 
 ## Component folders
 
