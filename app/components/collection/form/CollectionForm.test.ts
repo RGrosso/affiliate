@@ -8,7 +8,7 @@ import { RuleMatch, RuleType, TagOperator } from "#shared/types/collectionRules"
 import type { ProductListItem } from "#shared/types/product";
 import { expectAccessible } from "~~/test/nuxt/axe";
 import { readJsonBody } from "~~/test/nuxt/body";
-import { choose } from "~~/test/nuxt/select";
+import { choose, openMenu, pick } from "~~/test/nuxt/select";
 
 const LAMP_ID = "7d3f1b52-9c6e-4a08-b5d4-1e2f3a4b5c6d";
 const SALE_ID = "0b6e2f1c-8a4d-4f7e-9c1a-3d5b7e9f1a2b";
@@ -257,6 +257,70 @@ describe("CollectionForm", () => {
     });
   });
 
+  describe("setting up a condition", () => {
+    // A MutationObserver sees a message even if it is gone again before the next tick
+    function watchForErrors(wrapper: VueWrapper) {
+      const seen: string[] = [];
+      const observer = new MutationObserver(() => {
+        const text = wrapper.text();
+        for (const message of ["Please choose a retailer", "Please choose a tag from the list"]) if (text.includes(message)) seen.push(message);
+      });
+      observer.observe(wrapper.element, { subtree: true, childList: true, characterData: true });
+      return { seen, stop: () => observer.disconnect() };
+    }
+
+    it("shows no error while a retailer is chosen after switching the type", async () => {
+      const wrapper = await mountForm();
+      await radio(wrapper, "Automatic").trigger("click");
+      await vi.waitFor(() => expect(wrapper.find("[aria-label='Condition 1 tag']").exists()).toBe(true));
+      const errors = watchForErrors(wrapper);
+
+      await choose(wrapper, "Condition 1 type", "Retailer");
+      await vi.waitFor(() => expect(wrapper.find("[aria-label='Condition 1 retailer']").exists()).toBe(true));
+      await nextTick();
+      expect(errors.seen).toEqual([]);
+
+      await openMenu(wrapper, "Condition 1 retailer");
+      await nextTick();
+      expect(errors.seen).toEqual([]);
+      await pick("Amazon");
+      await nextTick();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      errors.stop();
+
+      expect(errors.seen).toEqual([]);
+      expect(wrapper.get("[aria-label='Condition 1 retailer']").text()).toContain("Amazon");
+    });
+
+    it("shows no error while a tag is chosen, or the operator changed", async () => {
+      const wrapper = await mountForm();
+      await radio(wrapper, "Automatic").trigger("click");
+      await vi.waitFor(() => expect(wrapper.find("[aria-label='Condition 1 tag']").exists()).toBe(true));
+      const errors = watchForErrors(wrapper);
+
+      await choose(wrapper, "Condition 1 operator", "doesn't have");
+      await openMenu(wrapper, "Condition 1 tag");
+      await nextTick();
+      await pick("Sale");
+      await nextTick();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      errors.stop();
+
+      expect(errors.seen).toEqual([]);
+    });
+
+    it("shows the error once the form is saved with the condition unfinished", async () => {
+      const wrapper = await mountForm();
+      await radio(wrapper, "Automatic").trigger("click");
+      await vi.waitFor(() => expect(wrapper.find("[aria-label='Condition 1 tag']").exists()).toBe(true));
+      await choose(wrapper, "Condition 1 type", "Retailer");
+
+      await wrapper.get("form").trigger("submit");
+
+      await vi.waitFor(() => expect(wrapper.text()).toContain("Please choose a retailer"));
+    });
+  });
+
   describe("editing", () => {
     it("fills the fields and shows the type as read-only", async () => {
       const wrapper = await mountForm({ collection: manual, products: [lamp] });
@@ -307,7 +371,12 @@ describe("CollectionForm", () => {
     it("lets the status and sort be changed", async () => {
       const wrapper = await mountForm({ collection: automatic });
 
-      await radio(wrapper, "Live").trigger("click");
+      const live = wrapper.get("button[role=switch]");
+      expect(live.attributes("aria-checked")).toBe("false");
+      expect(wrapper.text()).toContain("Only you can see it");
+      await live.trigger("click");
+      expect(live.attributes("aria-checked")).toBe("true");
+      expect(wrapper.text()).toContain("Visible to everyone");
       await choose(wrapper, "Default sort", "Price: low to high");
       await wrapper.get("form").trigger("submit");
 
@@ -332,8 +401,7 @@ describe("CollectionForm", () => {
       expect(field(wrapper, "URL handle").element.disabled).toBe(true);
       expect(field(wrapper, "Title").element.disabled).toBe(false);
       expect(wrapper.get("[aria-label='Default sort']").attributes("disabled")).toBeDefined();
-      expect(wrapper.findAll("[role=radio]")).toHaveLength(0);
-      expect(wrapper.text()).toContain("Live. The status of this collection can't be changed.");
+      expect(wrapper.find("[role=switch]").exists()).toBe(false);
     });
 
     it("sends only the editable fields", async () => {

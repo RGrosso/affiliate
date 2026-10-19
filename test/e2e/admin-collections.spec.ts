@@ -42,6 +42,49 @@ test.describe("managing collections", () => {
     await expect(row.getByRole("link", { name: "View All products on the site" })).toHaveAttribute("href", "/collections/all");
   });
 
+  test("makes a collection live with the switch under the description", async ({ page, goto }) => {
+    await goto("/admin/collections/new", { waitUntil: "hydration" });
+
+    const live = page.getByRole("switch", { name: "Live" });
+    await expect(live).not.toBeChecked();
+    await expect(page.getByText("Only you can see it")).toBeVisible();
+    // With the title still empty, the click moves focus out of it and its error pushes the switch down mid-click
+    await page.getByLabel("Title", { exact: true }).fill("E2E Live switch");
+    await live.click();
+    await expect(live).toBeChecked();
+    await expect(page.getByText("Visible to everyone")).toBeVisible();
+
+    await goto("/admin/collections/all", { waitUntil: "hydration" });
+    await expect(page.getByRole("switch")).toHaveCount(0);
+  });
+
+  test("fills the viewport below the header, so only the main panel scrolls", async ({ page, goto }) => {
+    const documentOverflow = () => page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+
+    for (const size of [
+      { width: 1280, height: 720 },
+      { width: 375, height: 667 },
+    ]) {
+      await page.setViewportSize(size);
+      for (const path of ["/admin/collections", "/admin/collections/new"]) {
+        await goto(path, { waitUntil: "hydration" });
+        expect(await documentOverflow(), `${path} at ${size.width}px`).toBeLessThanOrEqual(0);
+      }
+    }
+
+    await page.setViewportSize({ width: 1280, height: 500 });
+    await goto("/admin/collections/new", { waitUntil: "hydration" });
+    const main = page.locator("main");
+    expect(await main.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
+    await main.evaluate(el => el.scrollTo(0, el.scrollHeight));
+    expect(await documentOverflow()).toBeLessThanOrEqual(0);
+    const aside = await page.locator("aside").boundingBox();
+    const mainBox = await main.boundingBox();
+    expect(aside?.y).toBe(mainBox?.y);
+    expect(aside?.height).toBe(mainBox?.height);
+    expect((mainBox?.y ?? 0) + (mainBox?.height ?? 0)).toBe(500);
+  });
+
   test("creates an automatic collection and previews the products that match", async ({ page, goto }) => {
     await goto("/admin/collections", { waitUntil: "hydration" });
     await page.getByRole("link", { name: "Add collection" }).first().click();
@@ -172,6 +215,44 @@ test.describe("managing collections", () => {
     await title.fill("All products");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(toasts(page).last()).toContainText("Collection saved");
+  });
+
+  test("rejects the reserved new handle with a message on the field", async ({ page, goto }) => {
+    await goto("/admin/collections/new", { waitUntil: "hydration" });
+
+    await page.getByLabel("Title", { exact: true }).fill("E2E Reserved New");
+    await page.getByRole("button", { name: "Edit" }).click();
+    await page.getByLabel("URL handle").fill("new");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+
+    await expect(page.getByText("This URL is reserved for the add collection page")).toBeVisible();
+    await expect(page).toHaveURL(/\/admin\/collections\/new$/);
+  });
+
+  test("opens a collection by its handle and follows a renamed handle without asking about unsaved changes", async ({ page, goto }) => {
+    await goto("/admin/collections", { waitUntil: "hydration" });
+    await page.getByRole("link", { name: "E2E Tagged", exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/collections\/e2e-tagged$/);
+    await expect(page.getByLabel("Title", { exact: true })).toHaveValue("E2E Tagged");
+
+    await page.getByRole("button", { name: "Edit" }).click();
+    await page.getByLabel("URL handle").fill("e2e-renamed");
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+
+    await expect(toasts(page)).toContainText("Collection saved");
+    await expect(page).toHaveURL(/\/admin\/collections\/e2e-renamed$/);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByLabel("Title", { exact: true })).toHaveValue("E2E Tagged");
+
+    await goto("/admin/collections/e2e-renamed", { waitUntil: "hydration" });
+    await expect(page.getByLabel("Title", { exact: true })).toHaveValue("E2E Tagged");
+  });
+
+  test("says when no collection has the handle", async ({ page, goto }) => {
+    await goto("/admin/collections/no-such-collection", { waitUntil: "hydration" });
+
+    await expect(page.getByText("Couldn't load this collection")).toBeVisible();
+    await expect(page.getByText("We couldn't find that collection")).toBeVisible();
   });
 
   test("deletes a collection through the confirm dialog", async ({ page, goto }) => {

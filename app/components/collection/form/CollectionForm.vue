@@ -3,6 +3,7 @@
     ref="form"
     :schema="schema"
     :state="validated"
+    :validate="settle"
     class="space-y-4 [&_input::placeholder]:text-muted [&_textarea::placeholder]:text-muted"
     @submit="onSubmit"
     @error="onError"
@@ -53,6 +54,18 @@
                 :rows="3"
                 autoresize
                 class="w-full"
+              />
+            </UFormField>
+
+            <UFormField
+              v-if="!locked"
+              name="status"
+              :help="isLive ? 'Visible to everyone' : 'Only you can see it'"
+            >
+              <USwitch
+                v-model="isLive"
+                label="Live"
+                :color="isLive ? 'success' : 'neutral'"
               />
             </UFormField>
           </div>
@@ -265,23 +278,6 @@
             />
           </UFormField>
         </UCard>
-
-        <UCard>
-          <div v-if="locked">
-            <p class="text-sm font-medium text-highlighted">Status</p>
-            <p class="text-sm text-muted">{{ collectionStatusLabels[state.status] }}. The status of this collection can't be changed.</p>
-          </div>
-          <UFormField
-            v-else
-            name="status"
-          >
-            <URadioGroup
-              v-model="state.status"
-              legend="Status"
-              :items="statusItems"
-            />
-          </UFormField>
-        </UCard>
       </div>
     </div>
 
@@ -311,7 +307,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FormErrorEvent } from "@nuxt/ui";
+import type { FormError, FormErrorEvent } from "@nuxt/ui";
 import { createCollectionSchema, updateCollectionSchema } from "#shared/schemas/collections.schema";
 import { collectionRulesSchema } from "#shared/schemas/collectionRules.schema";
 import type { ApiSuccess } from "#shared/types/api";
@@ -351,10 +347,12 @@ const typeItems = [
     value: CollectionType.Automated,
   },
 ];
-const statusItems = [
-  { label: collectionStatusLabels[CollectionStatus.Draft], description: "Only you can see it", value: CollectionStatus.Draft },
-  { label: collectionStatusLabels[CollectionStatus.Published], description: "Visible to everyone", value: CollectionStatus.Published },
-];
+const isLive = computed({
+  get: () => state.status === CollectionStatus.Published,
+  set: live => {
+    state.status = live ? CollectionStatus.Published : CollectionStatus.Draft;
+  },
+});
 
 const toState = (source?: AdminCollection, sourceProducts: ProductListItem[] = []) => ({
   type: source?.type ?? CollectionType.Manual,
@@ -418,6 +416,10 @@ function buildBody() {
 }
 
 const validated = computed(buildBody);
+
+// A select menu blurs the field as it closes, just before it commits the chosen value. UForm reads the state again after
+// awaiting this, so the value has landed by then. Without it the old empty value flashes an error that the change then clears.
+const settle = async (): Promise<FormError[]> => [];
 const schema = computed(() => (locked.value ? updateCollectionSchema : createCollectionSchema));
 
 const validRules = computed(() => {

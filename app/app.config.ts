@@ -39,6 +39,14 @@ export default defineAppConfig({
         },
       ],
     },
+    // The global `p` rule in main.css restyles these labels and descriptions (they render as <p>) to 16px / 26px, which pushes the
+    // control off-centre against the first line. Pin them to the size and line height the control's own row height is built for.
+    radioGroup: {
+      slots: { label: "text-sm leading-5", description: "text-sm leading-5" },
+    },
+    checkbox: {
+      slots: { label: "text-sm leading-5", description: "text-sm leading-5" },
+    },
     alert: {
       compoundVariants: [
         { color: "warning", variant: "subtle", class: { root: SUBTLE_WARNING } },
