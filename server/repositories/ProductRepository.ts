@@ -65,7 +65,7 @@ export class ProductRepository {
             .where(and(eq(productTags.productId, products.id), inArray(tags.slug, query.tag)))
         )
       : undefined;
-    const filter = and(tagFilter, compileRules(rules ?? null));
+    const filter = and(tagFilter, compileRules(this.db, rules ?? null));
 
     const [items, [totals]] = await Promise.all([
       this.db

@@ -88,7 +88,7 @@ beforeEach(async () => {
 
 describe("compileRules", () => {
   it("returns no condition for null rules", () => {
-    expect(compileRules(null)).toBeUndefined();
+    expect(compileRules(db, null)).toBeUndefined();
   });
 
   it("matches every product for null rules", async () => {
