@@ -69,6 +69,22 @@ export class TagRepository {
     return tag!;
   }
 
+  /** Leaves a tag alone when its slug is already taken. */
+  async insertIfMissing(values: NewTag[]) {
+    if (values.length) await this.db.insert(tags).values(values).onConflictDoNothing({ target: tags.slug });
+  }
+
+  async findBySlugs(slugs: string[]): Promise<Tag[]> {
+    if (!slugs.length) return [];
+
+    return this.db.select(tagColumns).from(tags).where(inArray(tags.slug, slugs));
+  }
+
+  /** Keeps links that already exist. */
+  async addToProducts(links: { productId: string; tagId: string }[]) {
+    if (links.length) await this.db.insert(productTags).values(links).onConflictDoNothing();
+  }
+
   async update(id: string, values: Partial<NewTag>): Promise<Tag | undefined> {
     const [tag] = await this.db.update(tags).set(values).where(eq(tags.id, id)).returning(tagColumns);
 

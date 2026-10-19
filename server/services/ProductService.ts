@@ -175,6 +175,16 @@ export class ProductService {
         })
       );
 
+      // Tags may already exist (their slugs are unique), so they are looked up again to link by id
+      const tagRepo = new TagRepository(tx);
+      await tagRepo.insertIfMissing(sampleTags);
+      const tagIds = new Map((await tagRepo.findBySlugs(sampleTags.map(tag => tag.slug))).map(tag => [tag.slug, tag.id]));
+      await tagRepo.addToProducts(
+        inserted.flatMap(({ id, handle }) =>
+          (sampleProductTags[handle] ?? []).flatMap(slug => (tagIds.has(slug) ? [{ productId: id, tagId: tagIds.get(slug)! }] : []))
+        )
+      );
+
       await settings.setIfMissing(SEEDED_KEY, new Date().toISOString());
     });
   }

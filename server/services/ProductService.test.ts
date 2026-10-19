@@ -2,7 +2,9 @@ import type { H3Error } from "h3";
 import type { ApiError } from "#shared/types/api";
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { productImages, products, settings } from "../db/schema";
+import { productImages, productTags, products, settings, tags } from "../db/schema";
+import { TagRepository } from "../repositories/TagRepository";
+import { sampleProductTags, sampleTags } from "../utils/sampleTags";
 import { createTestDb, insertTestUser, resetDb, type TestDb } from "../../test/setup/db";
 import { sampleProducts } from "../utils/sampleProducts";
 import { ProductService } from "./ProductService";
@@ -309,10 +311,44 @@ describe("seedSamplesOnce", () => {
     expect(await db.select().from(productImages)).toHaveLength(imageTotal);
   });
 
+  it("seeds the sample tags and attaches them to the products they fit", async () => {
+    await service.seedSamplesOnce(authorId);
+
+    expect((await db.select().from(tags)).map(tag => tag.slug).sort()).toEqual(sampleTags.map(tag => tag.slug).sort());
+    const linked = await db
+      .select({ handle: products.handle, slug: tags.slug })
+      .from(productTags)
+      .innerJoin(products, eq(products.id, productTags.productId))
+      .innerJoin(tags, eq(tags.id, productTags.tagId));
+    const expected = Object.entries(sampleProductTags).flatMap(([handle, slugs]) => slugs.map(slug => `${handle}:${slug}`));
+    expect(linked.map(link => `${link.handle}:${link.slug}`).sort()).toEqual(expected.sort());
+  });
+
+  it("keeps a tag that already exists with its own details and links the samples to it", async () => {
+    const mine = await new TagRepository(db).insert({ name: "Kitchen", slug: "kitchen", description: "Mine" });
+
+    await service.seedSamplesOnce(authorId);
+
+    const kitchen = await db.select().from(tags).where(eq(tags.slug, "kitchen"));
+    expect(kitchen).toHaveLength(1);
+    expect(kitchen[0]).toMatchObject({ id: mine.id, description: "Mine" });
+    const kitchenLinks = await db.select().from(productTags).where(eq(productTags.tagId, mine.id));
+    expect(kitchenLinks.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("does not add tags when the store already has products", async () => {
+    await service.create({ title: "Real", tagIds: [], images: [] }, authorId);
+
+    await service.seedSamplesOnce(authorId);
+
+    expect(await db.select().from(tags)).toHaveLength(0);
+  });
+
   it("does not duplicate the samples when run twice", async () => {
     await service.seedSamplesOnce(authorId);
     await service.seedSamplesOnce(authorId);
 
+    expect(await db.select().from(tags)).toHaveLength(sampleTags.length);
     expect(await allProducts()).toHaveLength(sampleProducts.length);
     expect(await db.select().from(productImages)).toHaveLength(imageTotal);
   });
