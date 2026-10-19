@@ -60,6 +60,12 @@ const navigationItems = computed<NavigationMenuItem[]>(() => [
     active: route.path.startsWith("/admin/tags"),
   },
   {
+    label: "Collections",
+    icon: "i-lucide-layout-grid",
+    to: "/admin/collections",
+    active: route.path.startsWith("/admin/collections"),
+  },
+  {
     label: "Add product",
     icon: "i-heroicons-plus-solid",
     to: "/admin/add-product",
