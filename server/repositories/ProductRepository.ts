@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, exists, inArray, isNotNull, ne, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, exists, ilike, inArray, isNotNull, ne, sql, type SQL } from "drizzle-orm";
 import { collectionProducts, productImages, productTags, products, tags } from "hub:db:schema";
 import { compileRules } from "./collectionRuleConditions";
 import { tagColumns } from "./TagRepository";
@@ -26,6 +26,9 @@ export type ProductScope = {
   rules?: StoredCollectionRules | null;
   collectionId?: string;
 };
+
+// Without escaping, a search for "50%" or "a_b" would treat the characters as wildcards
+const containsPattern = (text: string) => `%${text.replace(/[\\%_]/g, match => `\\${match}`)}%`;
 
 const lowerTitle = sql`lower(${products.title})`;
 // Postgres sorts nulls first when descending, so unpriced products are pushed last explicitly
@@ -106,7 +109,8 @@ export class ProductRepository {
             .where(and(eq(productTags.productId, products.id), inArray(tags.slug, query.tag)))
         )
       : undefined;
-    const filter = and(tagFilter, this.inScope(scope));
+    const titleFilter = query.q ? ilike(products.title, containsPattern(query.q)) : undefined;
+    const filter = and(tagFilter, titleFilter, this.inScope(scope));
 
     const [items, [totals]] = await Promise.all([
       this.db

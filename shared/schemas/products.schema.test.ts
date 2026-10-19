@@ -68,4 +68,11 @@ describe("productListQuerySchema", () => {
     expect(tagErrors("x".repeat(101))).toEqual(["The tag can be at most 100 characters"]);
     expect(tagErrors(Array.from({ length: 21 }, (_, i) => `t${i}`))).toEqual(["You can filter by up to 20 tags"]);
   });
+
+  it("trims the search, treats an empty one as not given and caps its length", () => {
+    expect(productListQuerySchema.parse({ q: "  lamp " }).q).toBe("lamp");
+    expect(productListQuerySchema.parse({ q: "" }).q).toBeUndefined();
+    expect(productListQuerySchema.safeParse({ q: "   " }).success).toBe(false);
+    expect(productListQuerySchema.safeParse({ q: "x".repeat(101) }).success).toBe(false);
+  });
 });
